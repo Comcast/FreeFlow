@@ -1,0 +1,21 @@
+<com.arpitonline.collectionviews.CollectionContainer xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   	android:padding="5dp"
+   	android:background="#33000000"
+    tools:context=".CollectionViewTest" >
+
+   <View android:layout_width="200dp" android:layout_height="200dp"
+       android:background="#2D849F" />
+   <TextView android:layout_width="200dp" android:layout_height="wrap_content"
+       android:background="#ffffff" android:text="Hello World"/>
+   <View android:layout_width="200dp" android:layout_height="200dp"
+       android:background="#2D849F" />
+   <View android:layout_width="200dp" android:layout_height="200dp"
+       android:background="#2D849F" />
+   <View android:layout_width="200dp" android:layout_height="200dp"
+       android:background="#2D849F" />
+
+   
+  </com.arpitonline.collectionviews.CollectionContainer>
