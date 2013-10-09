@@ -1,8 +1,8 @@
-package com.arpitonline.collectionviews;
+package org.freeflow;
 
 import java.util.ArrayList;
 
-import com.arpitonline.collectionviews.layouts.VLayout;
+import org.freeflow.layouts.VLayout;
 
 import android.content.Context;
 import android.util.AttributeSet;

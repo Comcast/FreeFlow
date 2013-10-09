@@ -1,4 +1,4 @@
-package com.arpitonline.collectionviews;
+package org.freeflow;
 
 import java.util.ArrayList;
 

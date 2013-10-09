@@ -1,7 +1,9 @@
 package com.example.collectionviewforandroid;
 
-import android.os.Bundle;
+import org.freeflow.R;
+
 import android.app.Activity;
+import android.os.Bundle;
 import android.view.Menu;
 
 public class CollectionViewTest extends Activity {
