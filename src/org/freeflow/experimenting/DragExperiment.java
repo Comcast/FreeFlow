@@ -25,7 +25,8 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 	private ArrayList<View> viewPool;
 
 	private DragAdapter adapter;
-	float deltaX = -1f;
+
+	private float deltaX = -1f;
 
 	private int maxSize = 0;
 
@@ -48,10 +49,19 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 	private void init() {
 		setBackgroundColor(Color.LTGRAY);
 		this.viewport = new Viewport();
+
 		viewPool = new ArrayList<View>();
 
 		adapter = new DragAdapter();
+		requestLayout(true);
 
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+
+		setMeasuredDimension(600, 500);
 		dataSetChanged();
 
 	}
@@ -152,7 +162,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 			int newLeftPos = getLeftmostViewPosition();
 			int newRightPos = getRightmostViewPosition();
 
-			while (oldLeftPos > newLeftPos) {
+			if (oldLeftPos > newLeftPos) {
 				oldLeftPos--;
 				View newView = adapter.getView(oldLeftPos, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
 
@@ -170,9 +180,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 				addView(newView, 0);
 				newView.layout(left, top, left + newView.getMeasuredWidth(), top + newView.getMeasuredHeight());
 
-			}
-
-			if (oldLeftPos < newLeftPos && getChildCount() > 0) {
+			} else if (oldLeftPos < newLeftPos && getChildCount() > 0) {
 				View child = getChildAt(0);
 				removeViewAt(0);
 				viewPool.add(child);
@@ -182,9 +190,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 				View child = getChildAt(getChildCount() - 1);
 				removeViewAt(getChildCount() - 1);
 				viewPool.add(child);
-			}
-
-			while (oldRightPos < newRightPos) {
+			} else if (oldRightPos < newRightPos) {
 				oldRightPos++;
 				View newView = adapter.getView(oldRightPos, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
 				int freespec = MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY);
@@ -210,18 +216,11 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 		for (int i = 0; i < getChildCount(); i++) {
 			View child = getChildAt(i);
+			float x = child.getTranslationX();
 			child.setTranslationX(0);
 
-			if (((int) viewport.getLeft()) + leftStart + child.getMeasuredWidth() > 0) {
-				child.layout(leftStart + (int) viewport.getLeft(), 100, leftStart + child.getMeasuredWidth()
-						+ (int) viewport.getLeft(), 100 + child.getMeasuredHeight());
-				// child.setVisibility(VISIBLE);
-			}
-			// else {
-			// Log.d(TAG, "skip");
-			//
-			// child.setVisibility(GONE);
-			// }
+			child.layout((int) (leftStart + x), 100, (int) (leftStart + child.getMeasuredWidth() + x),
+					100 + child.getMeasuredHeight());
 
 			leftStart += child.getMeasuredWidth();
 		}
@@ -249,14 +248,28 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 	}
 
 	private int getRightmostViewPosition() {
-		int pos = (int) (Math.abs((Math.round(viewport.getLeft())) - Math.abs(viewport.getLeft() % 100)
-				+ getMeasuredWidth()) / 100);
+
+		int left = Math.round(viewport.getLeft());
+		left = Math.abs(left);
+		left = left + (100 - left % 100);
+		int right = left + getMeasuredWidth();
+
+		int pos = right / 100;
+
+		Log.d(TAG, "R pos = : " + pos);
 
 		return pos;
 	}
 
 	private int getLeftmostViewPosition() {
-		int pos = (int) (Math.abs((Math.round(viewport.getLeft())) - Math.abs(viewport.getLeft() % 100)) / 100);
+
+		int left = Math.round(viewport.getLeft());
+		left = Math.abs(left);
+		left = left - (left % 100);
+
+		int pos = left / 100;
+
+		Log.d(TAG, "L pos = : " + pos);
 
 		return pos;
 	}
@@ -292,6 +305,16 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 	}
 
 	@Override
+	public void requestLayout() {
+		requestLayout(false);
+	}
+
+	public void requestLayout(boolean layout) {
+		if (layout)
+			super.requestLayout();
+	}
+
+	@Override
 	public void dataSetChanged() {
 		maxSize = adapter.getCount() * 100;
 
@@ -301,6 +324,8 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 			for (int i = getLeftmostViewPosition(); i < getRightmostViewPosition(); i++) {
 				View newView = adapter.getView(i, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
 				addView(newView);
+
+				requestLayout(true);
 			}
 		}
 
