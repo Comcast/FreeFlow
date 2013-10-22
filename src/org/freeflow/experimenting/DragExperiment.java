@@ -54,9 +54,6 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 		dataSetChanged();
 
-		for (int i = 0; i < 15; i++)
-			viewPool.add(new Button(this.getContext()));
-
 	}
 
 	public void setAdapter(DragAdapter adapter) {
@@ -137,6 +134,9 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 		float oldLeft = viewport.getLeft();
 
+		int oldLeftPos = getLeftmostViewPosition();
+		int oldRightPos = getRightmostViewPosition();
+
 		viewport.setLeft(viewport.getLeft() + (movement));
 
 		if ((maxSize - getMeasuredWidth()) + viewport.getLeft() < 0) {
@@ -148,9 +148,58 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 			for (int i = 0; i < getChildCount(); i++) {
 				View child = getChildAt(i);
 				child.setTranslationX(getChildAt(i).getTranslationX() + ((viewport.getLeft() - oldLeft)));
-				if (child.getX() + child.getMeasuredWidth() > 0 && child.getX() < getMeasuredWidth())
-					child.setVisibility(VISIBLE);
+			}
+			int newLeftPos = getLeftmostViewPosition();
+			int newRightPos = getRightmostViewPosition();
 
+			while (oldLeftPos > newLeftPos) {
+				oldLeftPos--;
+				View newView = adapter.getView(oldLeftPos, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
+
+				int freespec = MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY);
+				newView.measure(freespec, freespec);
+
+				int top = 100;
+				int left = 0;
+				if (getChildCount() > 0) {
+					View sibling = getChildAt(0);
+					left = sibling.getLeft() - newView.getMeasuredWidth();
+					top = sibling.getTop();
+				}
+
+				addView(newView, 0);
+				newView.layout(left, top, left + newView.getMeasuredWidth(), top + newView.getMeasuredHeight());
+
+			}
+
+			if (oldLeftPos < newLeftPos && getChildCount() > 0) {
+				View child = getChildAt(0);
+				removeViewAt(0);
+				viewPool.add(child);
+			}
+
+			if (oldRightPos > newRightPos && getChildCount() > 0) {
+				View child = getChildAt(getChildCount() - 1);
+				removeViewAt(getChildCount() - 1);
+				viewPool.add(child);
+			}
+
+			while (oldRightPos < newRightPos) {
+				oldRightPos++;
+				View newView = adapter.getView(oldRightPos, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
+				int freespec = MeasureSpec.makeMeasureSpec(100, MeasureSpec.EXACTLY);
+				newView.measure(freespec, freespec);
+
+				int left = 0;
+				int top = 100;
+				if (getChildCount() > 0) {
+					View sibling = getChildAt(getChildCount() - 1);
+					left = sibling.getLeft() + sibling.getMeasuredWidth();
+					top = sibling.getTop();
+				}
+
+				addView(newView);
+				newView.layout(left, top, left + newView.getMeasuredWidth(), top + newView.getMeasuredHeight());
 			}
 		}
 	}
@@ -166,12 +215,13 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 			if (((int) viewport.getLeft()) + leftStart + child.getMeasuredWidth() > 0) {
 				child.layout(leftStart + (int) viewport.getLeft(), 100, leftStart + child.getMeasuredWidth()
 						+ (int) viewport.getLeft(), 100 + child.getMeasuredHeight());
-				child.setVisibility(VISIBLE);
-			} else {
-				Log.d(TAG, "skip");
-
-				child.setVisibility(GONE);
+				// child.setVisibility(VISIBLE);
 			}
+			// else {
+			// Log.d(TAG, "skip");
+			//
+			// child.setVisibility(GONE);
+			// }
 
 			leftStart += child.getMeasuredWidth();
 		}
@@ -198,6 +248,19 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 		}
 	}
 
+	private int getRightmostViewPosition() {
+		int pos = (int) (Math.abs((Math.round(viewport.getLeft())) - Math.abs(viewport.getLeft() % 100)
+				+ getMeasuredWidth()) / 100);
+
+		return pos;
+	}
+
+	private int getLeftmostViewPosition() {
+		int pos = (int) (Math.abs((Math.round(viewport.getLeft())) - Math.abs(viewport.getLeft() % 100)) / 100);
+
+		return pos;
+	}
+
 	public class DragAdapter extends BaseAdapter {
 
 		@Override
@@ -221,7 +284,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 				convertView = new Button(DragExperiment.this.getContext());
 			}
 
-			((Button) convertView).setText("Button: " + position);
+			((Button) convertView).setText("" + position);
 
 			return convertView;
 		}
@@ -231,6 +294,16 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 	@Override
 	public void dataSetChanged() {
 		maxSize = adapter.getCount() * 100;
+
+		if (getChildCount() < getRightmostViewPosition() - getLeftmostViewPosition()) {
+			removeAllViews();
+
+			for (int i = getLeftmostViewPosition(); i < getRightmostViewPosition(); i++) {
+				View newView = adapter.getView(i, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
+				addView(newView);
+			}
+		}
+
 	}
 
 }
