@@ -5,6 +5,7 @@ import org.freeflow.layouts.HLayout;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -31,10 +32,12 @@ public class MainActivity extends Activity {
 		container.setAdapter(adapter);
 
 		frameLayout.addView(container);
+
 	}
 
 	class ImageAdapter extends BaseAdapter {
 
+		private static final String TAG = "ImageAdapter";
 		private String[] images;
 
 		public ImageAdapter(String[] images) {
@@ -60,11 +63,13 @@ public class MainActivity extends Activity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Button button = null;
 			if (convertView != null) {
+				Log.d(TAG, "Convert view not null");
 				button = (Button) convertView;
 			} else {
 				button = new Button(MainActivity.this);
 			}
 
+			// button.setFocusable(false);
 			button.setText("" + images[position]);
 
 			return button;

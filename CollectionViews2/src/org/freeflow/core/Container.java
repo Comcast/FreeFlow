@@ -6,19 +6,24 @@ import org.freeflow.layouts.LayoutController;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public class Container extends ViewGroup {
+public class Container extends ViewGroup implements OnKeyListener {
 
+	private static final String TAG = "Container";
 	private SparseArray<View> usedViews;
 	private ArrayList<View> viewpool;
 	private SparseArray<FrameDescriptor> frames = null;
 	private boolean inMeasure = false;
 	private BaseAdapter itemAdapter;
 	private LayoutController layoutController;
+	private int viewPortX = 0;
 
 	public Container(Context context) {
 		super(context);
@@ -38,6 +43,7 @@ public class Container extends ViewGroup {
 	private void init() {
 		usedViews = new SparseArray<View>();
 		viewpool = new ArrayList<View>();
+		setOnKeyListener(this);
 	}
 
 	@Override
@@ -49,7 +55,7 @@ public class Container extends ViewGroup {
 			inMeasure = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			SparseArray<FrameDescriptor> oldFrames = frames;
-			frames = layoutController.getFrameDescriptors(150, 0);
+			frames = layoutController.getFrameDescriptors(viewPortX, 0);
 
 			for (int i = 0; i < frames.size(); i++) {
 				FrameDescriptor frameDesc = frames.get(frames.keyAt(i));
@@ -58,15 +64,17 @@ public class Container extends ViewGroup {
 					oldFrames.remove(frameDesc.itemIndex);
 				}
 
-				View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null,
-						this);
-
-				int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-				int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
-
-				view.measure(widthSpec, heightSpec);
-
 				if (usedViews.get(frameDesc.itemIndex) == null) {
+					View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0)
+							: null, this);
+
+					view.setOnKeyListener(this);
+
+					int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+
+					view.measure(widthSpec, heightSpec);
+
 					usedViews.append(frameDesc.itemIndex, view);
 					addView(view);
 				}
@@ -77,6 +85,8 @@ public class Container extends ViewGroup {
 				viewpool.add(view);
 				usedViews.remove(oldFrames.keyAt(i));
 				removeView(view);
+
+				Log.d(TAG, "removing unused view");
 			}
 
 		}
@@ -118,6 +128,29 @@ public class Container extends ViewGroup {
 		if (layoutController != null) {
 			layoutController.setItems(adapter);
 		}
+	}
+
+	@Override
+	public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+		if (event.getAction() == KeyEvent.ACTION_UP) {
+
+			if (keyCode == KeyEvent.KEYCODE_D) {
+				Log.d(TAG, "D pressed");
+				viewPortX += 50;
+				viewPortX = viewPortX > 1000 ? 1000 : viewPortX;
+				requestLayout();
+				return true;
+			} else if (keyCode == KeyEvent.KEYCODE_A) {
+				Log.d(TAG, "A pressed");
+				viewPortX -= 50;
+				viewPortX = viewPortX < 0 ? 0 : viewPortX;
+				requestLayout();
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

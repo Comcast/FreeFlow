@@ -68,7 +68,6 @@ public class HLayout implements LayoutController {
 		SparseArray<FrameDescriptor> desc = new SparseArray<FrameDescriptor>();
 
 		for (int i = 0; i < frameDescriptors.size(); i++) {
-			Log.d(TAG, "Frame left = " + frameDescriptors.get(i).frame.left);
 
 			if (frameDescriptors.get(i).frame.left + itemWidth > viewPortLeft
 					&& frameDescriptors.get(i).frame.left < viewPortLeft + width) {
