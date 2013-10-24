@@ -1,9 +1,8 @@
 package org.freeflow.layouts;
 
-import java.util.ArrayList;
-
 import org.freeflow.core.FrameDescriptor;
 
+import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
 public interface LayoutController {
@@ -15,6 +14,7 @@ public interface LayoutController {
 	 */
 	public void setDimensions(int measuredWidth, int measuredHeight);
 	public void setItems(BaseAdapter adapter);
-	public ArrayList<FrameDescriptor> getFrameDescriptors();
+	
+	public SparseArray<FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
 }
