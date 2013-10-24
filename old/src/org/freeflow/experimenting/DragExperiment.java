@@ -28,7 +28,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 	private float deltaX = -1f;
 
-	private int maxSize = 0;
+	private int contentSize = 0;
 
 	public DragExperiment(Context context) {
 		super(context);
@@ -123,7 +123,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 						moveScreen(translateX);
 
 						if (animation.getAnimatedFraction() == 1f)
-							requestLayout();
+							requestLayout(true);
 					}
 				});
 
@@ -131,7 +131,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 				animator.start();
 
 			} else {
-				requestLayout();
+				requestLayout(true);
 			}
 			return true;
 		}
@@ -149,8 +149,8 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 		viewport.setLeft(viewport.getLeft() + (movement));
 
-		if ((maxSize - getMeasuredWidth()) + viewport.getLeft() < 0) {
-			viewport.setLeft(-(maxSize - getMeasuredWidth()));
+		if ((contentSize - getMeasuredWidth()) + viewport.getLeft() < 0) {
+			viewport.setLeft(-(contentSize - getMeasuredWidth()));
 		} else if (viewport.getLeft() > 0) {
 			viewport.setLeft(0);
 		} else {
@@ -316,7 +316,7 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 
 	@Override
 	public void dataSetChanged() {
-		maxSize = adapter.getCount() * 100;
+		contentSize = adapter.getCount() * 100;
 
 		if (getChildCount() < getRightmostViewPosition() - getLeftmostViewPosition()) {
 			removeAllViews();
@@ -324,9 +324,8 @@ public class DragExperiment extends ViewGroup implements AdapterChangeObserver {
 			for (int i = getLeftmostViewPosition(); i < getRightmostViewPosition(); i++) {
 				View newView = adapter.getView(i, (viewPool.size() > 0) ? viewPool.remove(0) : null, this);
 				addView(newView);
-
-				requestLayout(true);
 			}
+			requestLayout(true);
 		}
 
 	}
