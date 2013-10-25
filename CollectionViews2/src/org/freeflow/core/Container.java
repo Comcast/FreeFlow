@@ -133,17 +133,17 @@ public class Container extends ViewGroup implements OnKeyListener {
 	@Override
 	public boolean onKey(View v, int keyCode, KeyEvent event) {
 
-		if (event.getAction() == KeyEvent.ACTION_UP) {
+		if (event.getAction() == KeyEvent.ACTION_DOWN) {
 
 			if (keyCode == KeyEvent.KEYCODE_D) {
 				Log.d(TAG, "D pressed");
-				viewPortX += 50;
+				viewPortX += 5;
 				viewPortX = viewPortX > 1000 ? 1000 : viewPortX;
 				requestLayout();
 				return true;
 			} else if (keyCode == KeyEvent.KEYCODE_A) {
 				Log.d(TAG, "A pressed");
-				viewPortX -= 50;
+				viewPortX -= 5;
 				viewPortX = viewPortX < 0 ? 0 : viewPortX;
 				requestLayout();
 				return true;
