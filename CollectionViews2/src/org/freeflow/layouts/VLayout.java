@@ -9,17 +9,17 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
-public class HLayout implements LayoutController {
+public class VLayout implements LayoutController {
 
-	private static final String TAG = "HLayout";
-	private int itemWidth = -1;
+	private static final String TAG = "VLayout";
+	private int itemHeight = -1;
 	private int width = -1;
 	private int height = -1;
 	private BaseAdapter itemsAdapter;
 	private ArrayList<FrameDescriptor> frameDescriptors = new ArrayList<FrameDescriptor>();
 
-	public void setItemWidth(int i) {
-		this.itemWidth = i;
+	public void setItemHeight(int i) {
+		this.itemHeight = i;
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class HLayout implements LayoutController {
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	public void generateFrameDescriptors() {
-		if (itemWidth < 0) {
+		if (itemHeight < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
 		frameDescriptors.clear();
@@ -54,10 +54,10 @@ public class HLayout implements LayoutController {
 			FrameDescriptor descriptor = new FrameDescriptor();
 			Frame frame = new Frame();
 			descriptor.itemIndex = i;
-			frame.left = i * itemWidth;
-			frame.top = 0;
-			frame.width = itemWidth;
-			frame.height = height;
+			frame.left = 0;
+			frame.top = i * itemHeight;
+			frame.width = width;
+			frame.height = itemHeight;
 			descriptor.frame = frame;
 			frameDescriptors.add(descriptor);
 		}
@@ -72,8 +72,8 @@ public class HLayout implements LayoutController {
 
 		for (int i = 0; i < frameDescriptors.size(); i++) {
 
-			if (frameDescriptors.get(i).frame.left + itemWidth > viewPortLeft
-					&& frameDescriptors.get(i).frame.left < viewPortLeft + width) {
+			if (frameDescriptors.get(i).frame.top + itemHeight > viewPortTop
+					&& frameDescriptors.get(i).frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = new FrameDescriptor();
 				newDesc.itemIndex = frameDescriptors.get(i).itemIndex;
 				newDesc.frame = Frame.clone(frameDescriptors.get(i).frame);
@@ -83,7 +83,7 @@ public class HLayout implements LayoutController {
 		}
 
 		for (int i = 0; i < desc.size(); i++) {
-			desc.get(desc.keyAt(i)).frame.left -= viewPortLeft;
+			desc.get(desc.keyAt(i)).frame.top -= viewPortTop;
 		}
 
 		return desc;
@@ -92,13 +92,13 @@ public class HLayout implements LayoutController {
 	@Override
 	public Frame getViewportFrameForItemIndex(int index) {
 		Frame frame = new Frame();
-		frame.left = index * itemWidth;
-		frame.top = 0;
+		frame.left = 0;
+		frame.top = index * itemHeight;
 		frame.width = width;
 		frame.height = height;
 
-		if (frame.left > frameDescriptors.size() * itemWidth - width)
-			frame.left = frameDescriptors.size() * itemWidth - width;
+		if (frame.top > frameDescriptors.size() * itemHeight - height)
+			frame.top = frameDescriptors.size() * itemHeight - height;
 
 		return frame;
 	}

@@ -8,13 +8,11 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public class Container extends ViewGroup implements OnKeyListener {
+public class Container extends ViewGroup {
 
 	private static final String TAG = "Container";
 	private SparseArray<View> usedViews;
@@ -23,7 +21,8 @@ public class Container extends ViewGroup implements OnKeyListener {
 	private boolean inMeasure = false;
 	private BaseAdapter itemAdapter;
 	private LayoutController layoutController;
-	private int viewPortX = 0;
+	public int viewPortX = 0;
+	public int viewPortY = 0;
 
 	public Container(Context context) {
 		super(context);
@@ -43,7 +42,7 @@ public class Container extends ViewGroup implements OnKeyListener {
 	private void init() {
 		usedViews = new SparseArray<View>();
 		viewpool = new ArrayList<View>();
-		setOnKeyListener(this);
+
 	}
 
 	@Override
@@ -55,7 +54,7 @@ public class Container extends ViewGroup implements OnKeyListener {
 			inMeasure = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			SparseArray<FrameDescriptor> oldFrames = frames;
-			frames = layoutController.getFrameDescriptors(viewPortX, 0);
+			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
 			for (int i = 0; i < frames.size(); i++) {
 				FrameDescriptor frameDesc = frames.get(frames.keyAt(i));
@@ -68,8 +67,6 @@ public class Container extends ViewGroup implements OnKeyListener {
 					View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0)
 							: null, this);
 
-					view.setOnKeyListener(this);
-
 					int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 					int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 
@@ -80,18 +77,21 @@ public class Container extends ViewGroup implements OnKeyListener {
 				}
 			}
 
-			for (int i = 0; oldFrames != null && i < oldFrames.size(); i++) {
-				View view = usedViews.get(oldFrames.keyAt(i));
-				viewpool.add(view);
-				usedViews.remove(oldFrames.keyAt(i));
-				removeView(view);
-
-				Log.d(TAG, "removing unused view");
-			}
-
+			cleanupViews(oldFrames);
 		}
 
 		inMeasure = false;
+	}
+
+	private void cleanupViews(SparseArray<FrameDescriptor> oldFrames) {
+		for (int i = 0; oldFrames != null && i < oldFrames.size(); i++) {
+			View view = usedViews.get(oldFrames.keyAt(i));
+			viewpool.add(view);
+			usedViews.remove(oldFrames.keyAt(i));
+			removeView(view);
+
+			Log.d(TAG, "removing unused view");
+		}
 	}
 
 	@Override
@@ -111,7 +111,21 @@ public class Container extends ViewGroup implements OnKeyListener {
 	}
 
 	public void setLayout(LayoutController lc) {
+
 		layoutController = lc;
+
+		if (frames != null) {
+			int index = frames.get(frames.keyAt(0)).itemIndex;
+			Frame vpFrame = layoutController.getViewportFrameForItemIndex(index);
+
+			viewPortX = vpFrame.left;
+			viewPortY = vpFrame.top;
+		}
+
+		if (this.itemAdapter != null) {
+			layoutController.setItems(itemAdapter);
+		}
+
 		requestLayout();
 	}
 
@@ -128,29 +142,6 @@ public class Container extends ViewGroup implements OnKeyListener {
 		if (layoutController != null) {
 			layoutController.setItems(adapter);
 		}
-	}
-
-	@Override
-	public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-		if (event.getAction() == KeyEvent.ACTION_DOWN) {
-
-			if (keyCode == KeyEvent.KEYCODE_D) {
-				Log.d(TAG, "D pressed");
-				viewPortX += 5;
-				viewPortX = viewPortX > 1000 ? 1000 : viewPortX;
-				requestLayout();
-				return true;
-			} else if (keyCode == KeyEvent.KEYCODE_A) {
-				Log.d(TAG, "A pressed");
-				viewPortX -= 5;
-				viewPortX = viewPortX < 0 ? 0 : viewPortX;
-				requestLayout();
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 }
