@@ -97,7 +97,7 @@ public class VLayout implements LayoutController {
 		frame.width = width;
 		frame.height = height;
 
-		if (frame.top > frameDescriptors.size() * itemHeight - height)
+		if (itemHeight != -1 && height != -1 && frame.top > frameDescriptors.size() * itemHeight - height)
 			frame.top = frameDescriptors.size() * itemHeight - height;
 
 		return frame;

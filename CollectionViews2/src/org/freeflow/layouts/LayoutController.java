@@ -31,6 +31,7 @@ public interface LayoutController {
 	 */
 	public SparseArray<FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
+	
 	public Frame getViewportFrameForItemIndex(int index);
 
 }

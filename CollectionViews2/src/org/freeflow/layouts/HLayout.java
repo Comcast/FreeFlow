@@ -97,7 +97,7 @@ public class HLayout implements LayoutController {
 		frame.width = width;
 		frame.height = height;
 
-		if (frame.left > frameDescriptors.size() * itemWidth - width)
+		if (itemWidth != -1 && width != -1 && frame.left > frameDescriptors.size() * itemWidth - width)
 			frame.left = frameDescriptors.size() * itemWidth - width;
 
 		return frame;

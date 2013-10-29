@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.freeflow.layouts.LayoutController;
 
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -49,6 +51,10 @@ public class Container extends ViewGroup {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+		doMeasure();
+	}
+
+	private void doMeasure() {
 
 		if (layoutController != null) {
 			inMeasure = true;
@@ -74,6 +80,10 @@ public class Container extends ViewGroup {
 
 					usedViews.append(frameDesc.itemIndex, view);
 					addView(view);
+				} else {
+					int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+					usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
 				}
 			}
 
@@ -99,23 +109,33 @@ public class Container extends ViewGroup {
 		if (layoutController == null || frames == null)
 			return;
 
+		doLayout();
+
+	}
+
+	private void doLayout() {
 		for (int i = 0; i < usedViews.size(); i++) {
 			View v = usedViews.get(usedViews.keyAt(i));
 
 			if (v != null) {
 				Frame frame = frames.get(usedViews.keyAt(i)).frame;
 				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+
 			}
 		}
-
 	}
 
 	public void setLayout(LayoutController lc) {
 
 		layoutController = lc;
 
+		FrameDescriptor oldFrame = null;
+
+		SparseArray<FrameDescriptor> oldFrames = frames;
+
 		if (frames != null) {
-			int index = frames.get(frames.keyAt(0)).itemIndex;
+			oldFrame = frames.get(frames.keyAt(0));
+			int index = oldFrame.itemIndex;
 			Frame vpFrame = layoutController.getViewportFrameForItemIndex(index);
 
 			viewPortX = vpFrame.left;
@@ -126,11 +146,63 @@ public class Container extends ViewGroup {
 			layoutController.setItems(itemAdapter);
 		}
 
-		requestLayout();
+		if (frames != null && oldFrames != null) {
+			animateBetweenLayouts(oldFrames);
+		} else {
+			doMeasure();
+			doLayout();
+		}
+
+	}
+
+	private void animateBetweenLayouts(SparseArray<FrameDescriptor> oldFrames) {
+		layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+
+		for (int i = 0; i < oldFrames.size(); i++) {
+
+			final FrameDescriptor of = oldFrames.get(oldFrames.keyAt(i));
+
+			if (usedViews.get(of.itemIndex) != null) {
+
+				final FrameDescriptor nf = frames.get(of.itemIndex);
+
+				ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+				anim.setDuration(500);
+				anim.addUpdateListener(new AnimatorUpdateListener() {
+
+					@Override
+					public void onAnimationUpdate(ValueAnimator animation) {
+						View v = usedViews.get(of.itemIndex);
+						int itemWidth = of.frame.width
+								+ (int) ((nf.frame.width - of.frame.width) * animation.getAnimatedFraction());
+						int itemHeight = of.frame.height
+								+ (int) ((nf.frame.height - of.frame.height) * animation.getAnimatedFraction());
+						int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
+						int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
+
+						v.measure(widthSpec, heightSpec);
+
+						Frame frame = new Frame();
+						Frame nff = nf.frame;
+						Frame off = of.frame;
+						frame.left = (int) (off.left + (nff.left - off.left) * animation.getAnimatedFraction());
+						frame.top = (int) (off.top + (nff.top - off.top) * animation.getAnimatedFraction());
+						frame.width = (int) (off.width + (nff.width - off.width) * animation.getAnimatedFraction());
+						frame.height = (int) (off.height + (nff.height - off.height) * animation.getAnimatedFraction());
+						v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+					}
+				});
+
+				anim.start();
+			}
+
+		}
 	}
 
 	@Override
 	public void requestLayout() {
+
 		if (inMeasure)
 			return;
 
