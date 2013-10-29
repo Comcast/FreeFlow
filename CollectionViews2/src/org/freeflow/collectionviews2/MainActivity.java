@@ -23,7 +23,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 	Container container = null;
 	HLayout hLayout = null;
 	VLayout vLayout = null;
-	boolean hLayoutUsed = true;
+	boolean hLayoutUsed = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 		vLayout = new VLayout();
 		vLayout.setItemHeight(100);
 
-		container.setLayout(hLayout);
+		container.setLayout(vLayout);
 		container.setAdapter(adapter);
 
 		frameLayout.addView(container);
@@ -153,7 +153,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 				container.setLayout(hLayout);
 
 			hLayoutUsed = !hLayoutUsed;
-			return true;
+			
 		}
 
 		return false;

@@ -51,11 +51,6 @@ public class Container extends ViewGroup {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
-		doMeasure();
-	}
-
-	private void doMeasure() {
-
 		if (layoutController != null) {
 			inMeasure = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -69,28 +64,31 @@ public class Container extends ViewGroup {
 					oldFrames.remove(frameDesc.itemIndex);
 				}
 
-				if (usedViews.get(frameDesc.itemIndex) == null) {
-					View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0)
-							: null, this);
-
-					int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
-
-					view.measure(widthSpec, heightSpec);
-
-					usedViews.append(frameDesc.itemIndex, view);
-					addView(view);
-				} else {
-					int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
-					usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
-				}
+				doMeasure(frameDesc);
+				cleanupViews(oldFrames);
 			}
-
-			cleanupViews(oldFrames);
 		}
-
 		inMeasure = false;
+
+	}
+
+	private void doMeasure(FrameDescriptor frameDesc) {
+
+		if (usedViews.get(frameDesc.itemIndex) == null) {
+			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+
+			int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+			int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+
+			view.measure(widthSpec, heightSpec);
+
+			usedViews.append(frameDesc.itemIndex, view);
+			addView(view);
+		} else {
+			int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+			int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+			usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
+		}
 	}
 
 	private void cleanupViews(SparseArray<FrameDescriptor> oldFrames) {
@@ -108,21 +106,19 @@ public class Container extends ViewGroup {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		if (layoutController == null || frames == null)
 			return;
-
-		doLayout();
-
-	}
-
-	private void doLayout() {
 		for (int i = 0; i < usedViews.size(); i++) {
 			View v = usedViews.get(usedViews.keyAt(i));
 
 			if (v != null) {
 				Frame frame = frames.get(usedViews.keyAt(i)).frame;
-				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
-
+				doLayout(v, frame);
 			}
 		}
+
+	}
+
+	private void doLayout(View view, Frame frame) {
+		view.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 	}
 
 	public void setLayout(LayoutController lc) {
@@ -149,8 +145,7 @@ public class Container extends ViewGroup {
 		if (frames != null && oldFrames != null) {
 			animateBetweenLayouts(oldFrames);
 		} else {
-			doMeasure();
-			doLayout();
+			requestLayout();
 		}
 
 	}
@@ -159,45 +154,49 @@ public class Container extends ViewGroup {
 		layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
-		for (int i = 0; i < oldFrames.size(); i++) {
+		cleanupViews(oldFrames);
+		
+		for (int i = 0; i < frames.size(); i++) {
 
 			final FrameDescriptor of = oldFrames.get(oldFrames.keyAt(i));
+			final FrameDescriptor nf = frames.get(of.itemIndex);
 
-			if (usedViews.get(of.itemIndex) != null) {
-
-				final FrameDescriptor nf = frames.get(of.itemIndex);
-
-				ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-				anim.setDuration(500);
-				anim.addUpdateListener(new AnimatorUpdateListener() {
-
-					@Override
-					public void onAnimationUpdate(ValueAnimator animation) {
-						View v = usedViews.get(of.itemIndex);
-						int itemWidth = of.frame.width
-								+ (int) ((nf.frame.width - of.frame.width) * animation.getAnimatedFraction());
-						int itemHeight = of.frame.height
-								+ (int) ((nf.frame.height - of.frame.height) * animation.getAnimatedFraction());
-						int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
-						int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
-
-						v.measure(widthSpec, heightSpec);
-
-						Frame frame = new Frame();
-						Frame nff = nf.frame;
-						Frame off = of.frame;
-						frame.left = (int) (off.left + (nff.left - off.left) * animation.getAnimatedFraction());
-						frame.top = (int) (off.top + (nff.top - off.top) * animation.getAnimatedFraction());
-						frame.width = (int) (off.width + (nff.width - off.width) * animation.getAnimatedFraction());
-						frame.height = (int) (off.height + (nff.height - off.height) * animation.getAnimatedFraction());
-						v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
-					}
-				});
-
-				anim.start();
+			if (usedViews.get(nf.itemIndex) == null) {
+				doMeasure(nf);
 			}
 
+			ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+			anim.setDuration(500);
+			anim.addUpdateListener(new AnimatorUpdateListener() {
+
+				@Override
+				public void onAnimationUpdate(ValueAnimator animation) {
+					View v = usedViews.get(of.itemIndex);
+					int itemWidth = of.frame.width
+							+ (int) ((nf.frame.width - of.frame.width) * animation.getAnimatedFraction());
+					int itemHeight = of.frame.height
+							+ (int) ((nf.frame.height - of.frame.height) * animation.getAnimatedFraction());
+					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
+
+					v.measure(widthSpec, heightSpec);
+
+					Frame frame = new Frame();
+					Frame nff = nf.frame;
+					Frame off = of.frame;
+					frame.left = (int) (off.left + (nff.left - off.left) * animation.getAnimatedFraction());
+					frame.top = (int) (off.top + (nff.top - off.top) * animation.getAnimatedFraction());
+					frame.width = (int) (off.width + (nff.width - off.width) * animation.getAnimatedFraction());
+					frame.height = (int) (off.height + (nff.height - off.height) * animation.getAnimatedFraction());
+					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+				}
+			});
+			
+			
+
+			anim.start();
 		}
+
 	}
 
 	@Override
