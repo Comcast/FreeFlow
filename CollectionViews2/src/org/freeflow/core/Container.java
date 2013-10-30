@@ -8,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,8 +64,9 @@ public class Container extends ViewGroup {
 				}
 
 				doMeasure(frameDesc);
-				cleanupViews(oldFrames);
+
 			}
+			cleanupViews(oldFrames);
 		}
 		inMeasure = false;
 
@@ -95,7 +95,8 @@ public class Container extends ViewGroup {
 		for (int i = 0; oldFrames != null && i < oldFrames.size(); i++) {
 			View view = usedViews.get(oldFrames.keyAt(i));
 			viewpool.add(view);
-			usedViews.remove(oldFrames.keyAt(i));
+			FrameDescriptor oldFrame = oldFrames.get(oldFrames.keyAt(i));
+			usedViews.remove(oldFrame.itemIndex);
 			removeView(view);
 
 		}
@@ -124,13 +125,11 @@ public class Container extends ViewGroup {
 
 		layoutController = lc;
 
-		FrameDescriptor oldFrame = null;
-
 		SparseArray<FrameDescriptor> oldFrames = frames;
 
 		if (frames != null) {
-			oldFrame = frames.get(frames.keyAt(0));
-			int index = oldFrame.itemIndex;
+			int index = frames.keyAt(0);
+
 			Frame vpFrame = layoutController.getViewportFrameForItemIndex(index);
 
 			viewPortX = vpFrame.left;
@@ -153,7 +152,8 @@ public class Container extends ViewGroup {
 				int itemIndex = frames.keyAt(i);
 				final FrameDescriptor nf = frames.get(itemIndex);
 
-				animateBetweenLayouts(itemIndex, of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf);
+				getAnimationBetweenLayouts(itemIndex,
+						of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf).start();
 			}
 
 		} else {
@@ -162,19 +162,24 @@ public class Container extends ViewGroup {
 
 	}
 
-	private void animateBetweenLayouts(final int itemIndex, final Frame of, final FrameDescriptor nf) {
+	protected ValueAnimator getAnimationBetweenLayouts(final int itemIndex, final Frame of, final FrameDescriptor nf) {
 
 		if (usedViews.get(nf.itemIndex) == null) {
 			doMeasure(nf);
 		}
 
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-		anim.setDuration(500);
+		anim.setDuration(250);
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
 				View v = usedViews.get(itemIndex);
+				if (v == null) {
+					animation.cancel();
+					return;
+				}
+
 				int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
 				int itemHeight = of.height + (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
 				int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
@@ -189,11 +194,13 @@ public class Container extends ViewGroup {
 				frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
 				frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
 				frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
+
 				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 			}
 		});
 
-		anim.start();
+		return anim;
+
 	}
 
 	@Override
@@ -210,6 +217,10 @@ public class Container extends ViewGroup {
 		if (layoutController != null) {
 			layoutController.setItems(adapter);
 		}
+	}
+
+	public LayoutController getLayoutController() {
+		return layoutController;
 	}
 
 }

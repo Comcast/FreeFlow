@@ -2,6 +2,7 @@ package org.freeflow.collectionviews2;
 
 import org.freeflow.core.Container;
 import org.freeflow.layouts.HLayout;
+import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
 
 import android.app.Activity;
@@ -23,7 +24,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 	Container container = null;
 	HLayout hLayout = null;
 	VLayout vLayout = null;
-	boolean hLayoutUsed = false;
+	VGridLayout vGridLayout = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +33,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 
 		FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frameLayout);
 
-		String[] images = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
-				"14", "15", "16", "17", "18", "19" };
-		ImageAdapter adapter = new ImageAdapter(images);
+		ImageAdapter adapter = new ImageAdapter(null);
 
 		container = new Container(this);
 		container.setOnKeyListener(this);
@@ -47,7 +46,11 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 		vLayout = new VLayout();
 		vLayout.setItemHeight(100);
 
-		container.setLayout(vLayout);
+		vGridLayout = new VGridLayout();
+		vGridLayout.setItemHeight(200);
+		vGridLayout.setItemWidth(200);
+
+		container.setLayout(vGridLayout);
 		container.setAdapter(adapter);
 
 		frameLayout.addView(container);
@@ -65,12 +68,12 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 
 		@Override
 		public int getCount() {
-			return images.length;
+			return 100;
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return images[position];
+			return String.valueOf(position);
 		}
 
 		@Override
@@ -91,7 +94,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 			button.setFocusable(false);
 			button.setOnKeyListener(MainActivity.this);
 			button.setOnTouchListener(MainActivity.this);
-			button.setText("" + images[position]);
+			button.setText("" + position);
 
 			return button;
 		}
@@ -105,16 +108,17 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 
 			if (keyCode == KeyEvent.KEYCODE_SPACE) {
 				// Log.d(TAG, "Space pressed");
-				if (hLayoutUsed)
+				if (container.getLayoutController() == hLayout)
 					container.setLayout(vLayout);
+				else if (container.getLayoutController() == vLayout)
+					container.setLayout(vGridLayout);
 				else
 					container.setLayout(hLayout);
 
-				hLayoutUsed = !hLayoutUsed;
 				return true;
 			} else if (keyCode == KeyEvent.KEYCODE_D) {
 				// Log.d(TAG, "D pressed");
-				if (hLayoutUsed) {
+				if (container.getLayoutController() == hLayout) {
 					container.viewPortX += 5;
 					container.viewPortX = container.viewPortX > 1000 ? 1000 : container.viewPortX;
 					container.viewPortY = 0;
@@ -127,7 +131,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 				return true;
 			} else if (keyCode == KeyEvent.KEYCODE_A) {
 				// Log.d(TAG, "A pressed");
-				if (hLayoutUsed) {
+				if (container.getLayoutController() == hLayout) {
 					container.viewPortX -= 5;
 					container.viewPortX = container.viewPortX < 0 ? 0 : container.viewPortX;
 					container.viewPortY = 0;
@@ -147,13 +151,12 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (event.getAction() == MotionEvent.ACTION_UP) {
-			if (hLayoutUsed)
+			if (container.getLayoutController() == hLayout)
 				container.setLayout(vLayout);
+			else if (container.getLayoutController() == vLayout)
+				container.setLayout(vGridLayout);
 			else
 				container.setLayout(hLayout);
-
-			hLayoutUsed = !hLayoutUsed;
-
 		}
 
 		return false;
