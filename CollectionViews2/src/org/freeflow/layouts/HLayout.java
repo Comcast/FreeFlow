@@ -102,4 +102,15 @@ public class HLayout implements LayoutController {
 
 		return frame;
 	}
+
+	@Override
+	public Frame getOffScreenStartFrame() {
+		Frame frame = new Frame();
+		frame.height = height;
+		frame.width = itemWidth;
+		frame.left = width;
+		frame.top = 0;
+		
+		return frame;
+	}
 }

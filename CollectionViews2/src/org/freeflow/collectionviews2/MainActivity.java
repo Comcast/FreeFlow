@@ -82,7 +82,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Button button = null;
 			if (convertView != null) {
-				Log.d(TAG, "Convert view not null");
+				// Log.d(TAG, "Convert view not null");
 				button = (Button) convertView;
 			} else {
 				button = new Button(MainActivity.this);
@@ -153,7 +153,7 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 				container.setLayout(hLayout);
 
 			hLayoutUsed = !hLayoutUsed;
-			
+
 		}
 
 		return false;

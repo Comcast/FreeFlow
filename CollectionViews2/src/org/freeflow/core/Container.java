@@ -98,7 +98,6 @@ public class Container extends ViewGroup {
 			usedViews.remove(oldFrames.keyAt(i));
 			removeView(view);
 
-			Log.d(TAG, "removing unused view");
 		}
 	}
 
@@ -143,60 +142,58 @@ public class Container extends ViewGroup {
 		}
 
 		if (frames != null && oldFrames != null) {
-			animateBetweenLayouts(oldFrames);
+
+			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+			cleanupViews(oldFrames);
+
+			for (int i = 0; i < frames.size(); i++) {
+				FrameDescriptor of = oldFrames.get(frames.keyAt(i));
+
+				int itemIndex = frames.keyAt(i);
+				final FrameDescriptor nf = frames.get(itemIndex);
+
+				animateBetweenLayouts(itemIndex, of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf);
+			}
+
 		} else {
 			requestLayout();
 		}
 
 	}
 
-	private void animateBetweenLayouts(SparseArray<FrameDescriptor> oldFrames) {
-		layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+	private void animateBetweenLayouts(final int itemIndex, final Frame of, final FrameDescriptor nf) {
 
-		cleanupViews(oldFrames);
-		
-		for (int i = 0; i < frames.size(); i++) {
-
-			final FrameDescriptor of = oldFrames.get(oldFrames.keyAt(i));
-			final FrameDescriptor nf = frames.get(of.itemIndex);
-
-			if (usedViews.get(nf.itemIndex) == null) {
-				doMeasure(nf);
-			}
-
-			ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-			anim.setDuration(500);
-			anim.addUpdateListener(new AnimatorUpdateListener() {
-
-				@Override
-				public void onAnimationUpdate(ValueAnimator animation) {
-					View v = usedViews.get(of.itemIndex);
-					int itemWidth = of.frame.width
-							+ (int) ((nf.frame.width - of.frame.width) * animation.getAnimatedFraction());
-					int itemHeight = of.frame.height
-							+ (int) ((nf.frame.height - of.frame.height) * animation.getAnimatedFraction());
-					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
-
-					v.measure(widthSpec, heightSpec);
-
-					Frame frame = new Frame();
-					Frame nff = nf.frame;
-					Frame off = of.frame;
-					frame.left = (int) (off.left + (nff.left - off.left) * animation.getAnimatedFraction());
-					frame.top = (int) (off.top + (nff.top - off.top) * animation.getAnimatedFraction());
-					frame.width = (int) (off.width + (nff.width - off.width) * animation.getAnimatedFraction());
-					frame.height = (int) (off.height + (nff.height - off.height) * animation.getAnimatedFraction());
-					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
-				}
-			});
-			
-			
-
-			anim.start();
+		if (usedViews.get(nf.itemIndex) == null) {
+			doMeasure(nf);
 		}
 
+		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+		anim.setDuration(500);
+		anim.addUpdateListener(new AnimatorUpdateListener() {
+
+			@Override
+			public void onAnimationUpdate(ValueAnimator animation) {
+				View v = usedViews.get(itemIndex);
+				int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
+				int itemHeight = of.height + (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
+				int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
+				int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
+
+				v.measure(widthSpec, heightSpec);
+
+				Frame frame = new Frame();
+				Frame nff = nf.frame;
+
+				frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
+				frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
+				frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
+				frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
+				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+			}
+		});
+
+		anim.start();
 	}
 
 	@Override

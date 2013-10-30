@@ -33,5 +33,7 @@ public interface LayoutController {
 
 	
 	public Frame getViewportFrameForItemIndex(int index);
+	
+	public Frame getOffScreenStartFrame();
 
 }

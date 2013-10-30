@@ -102,4 +102,15 @@ public class VLayout implements LayoutController {
 
 		return frame;
 	}
+
+	@Override
+	public Frame getOffScreenStartFrame() {
+		Frame frame = new Frame();
+		frame.height = itemHeight;
+		frame.width = width;
+		frame.left = 0;
+		frame.top = height;
+
+		return frame;
+	}
 }
