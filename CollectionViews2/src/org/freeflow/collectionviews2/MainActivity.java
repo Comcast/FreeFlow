@@ -50,8 +50,8 @@ public class MainActivity extends Activity implements OnKeyListener, OnTouchList
 		vGridLayout.setItemHeight(200);
 		vGridLayout.setItemWidth(200);
 
-		container.setLayout(vGridLayout);
 		container.setAdapter(adapter);
+		container.setLayout(vGridLayout);
 
 		frameLayout.addView(container);
 

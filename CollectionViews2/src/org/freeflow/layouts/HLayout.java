@@ -9,7 +9,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
-public class HLayout implements LayoutController {
+public class HLayout extends LayoutController {
 
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
@@ -40,15 +40,26 @@ public class HLayout implements LayoutController {
 	@Override
 	public void setItems(BaseAdapter adapter) {
 		this.itemsAdapter = adapter;
+
+		if (width != -1 && height != -1) {
+			generateFrameDescriptors();
+		}
+
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
+	@Override
 	public void generateFrameDescriptors() {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
+
+		if (height < 0 || width < 0) {
+			throw new IllegalStateException("dimensions not set");
+		}
+
 		frameDescriptors.clear();
 		for (int i = 0; i < itemsAdapter.getCount(); i++) {
 			FrameDescriptor descriptor = new FrameDescriptor();
@@ -97,7 +108,8 @@ public class HLayout implements LayoutController {
 		frame.width = width;
 		frame.height = height;
 
-		if (itemWidth != -1 && width != -1 && frame.left > frameDescriptors.size() * itemWidth - width)
+		if (itemWidth != -1 && width != -1 && frameDescriptors.size() > 0
+				&& frame.left > frameDescriptors.size() * itemWidth - width)
 			frame.left = frameDescriptors.size() * itemWidth - width;
 
 		return frame;
@@ -110,7 +122,7 @@ public class HLayout implements LayoutController {
 		frame.width = itemWidth;
 		frame.left = width;
 		frame.top = 0;
-		
+
 		return frame;
 	}
 }

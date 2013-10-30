@@ -9,7 +9,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
-public class VGridLayout implements LayoutController {
+public class VGridLayout extends LayoutController {
 
 	private static final String TAG = "VLayout";
 	private int itemHeight = -1;
@@ -45,15 +45,27 @@ public class VGridLayout implements LayoutController {
 	@Override
 	public void setItems(BaseAdapter adapter) {
 		this.itemsAdapter = adapter;
+		if (width != -1 && height != -1 && itemWidth != -1 && itemHeight != -1) {
+			generateFrameDescriptors();
+		}
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
+	@Override
 	public void generateFrameDescriptors() {
 		if (itemHeight < 0) {
+			throw new IllegalStateException("itemHeight not set");
+		}
+
+		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
+
+		if (height < 0 || width < 0)
+			throw new IllegalStateException("dimensions not set");
+
 		frameDescriptors.clear();
 
 		int cols = width / itemWidth;
@@ -100,7 +112,6 @@ public class VGridLayout implements LayoutController {
 
 	@Override
 	public Frame getViewportFrameForItemIndex(int index) {
-		
 		int cols = width / itemWidth;
 		Frame frame = new Frame();
 		frame.left = 0;

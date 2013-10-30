@@ -74,19 +74,16 @@ public class Container extends ViewGroup {
 
 	private void doMeasure(FrameDescriptor frameDesc) {
 
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+
 		if (usedViews.get(frameDesc.itemIndex) == null) {
 			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
-
-			int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-			int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
-
 			view.measure(widthSpec, heightSpec);
-
 			usedViews.append(frameDesc.itemIndex, view);
 			addView(view);
+
 		} else {
-			int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-			int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 			usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
 		}
 	}
@@ -108,11 +105,9 @@ public class Container extends ViewGroup {
 			return;
 		for (int i = 0; i < usedViews.size(); i++) {
 			View v = usedViews.get(usedViews.keyAt(i));
+			Frame frame = frames.get(usedViews.keyAt(i)).frame;
+			doLayout(v, frame);
 
-			if (v != null) {
-				Frame frame = frames.get(usedViews.keyAt(i)).frame;
-				doLayout(v, frame);
-			}
 		}
 
 	}
@@ -127,6 +122,13 @@ public class Container extends ViewGroup {
 
 		SparseArray<FrameDescriptor> oldFrames = frames;
 
+		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
+			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+
+		if (this.itemAdapter != null) {
+			layoutController.setItems(itemAdapter);
+		}
+
 		if (frames != null) {
 			int index = frames.keyAt(0);
 
@@ -134,26 +136,22 @@ public class Container extends ViewGroup {
 
 			viewPortX = vpFrame.left;
 			viewPortY = vpFrame.top;
-		}
 
-		if (this.itemAdapter != null) {
-			layoutController.setItems(itemAdapter);
-		}
+			if (oldFrames != null) {
 
-		if (frames != null && oldFrames != null) {
+				frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+				cleanupViews(oldFrames);
 
-			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
-			cleanupViews(oldFrames);
+				for (int i = 0; i < frames.size(); i++) {
+					FrameDescriptor of = oldFrames.get(frames.keyAt(i));
 
-			for (int i = 0; i < frames.size(); i++) {
-				FrameDescriptor of = oldFrames.get(frames.keyAt(i));
+					int itemIndex = frames.keyAt(i);
+					final FrameDescriptor nf = frames.get(itemIndex);
 
-				int itemIndex = frames.keyAt(i);
-				final FrameDescriptor nf = frames.get(itemIndex);
+					getAnimationForLayoutTransition(itemIndex,
+							of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf).start();
+				}
 
-				getAnimationBetweenLayouts(itemIndex,
-						of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf).start();
 			}
 
 		} else {
@@ -162,44 +160,14 @@ public class Container extends ViewGroup {
 
 	}
 
-	protected ValueAnimator getAnimationBetweenLayouts(final int itemIndex, final Frame of, final FrameDescriptor nf) {
+	protected ValueAnimator getAnimationForLayoutTransition(final int itemIndex, final Frame of,
+			final FrameDescriptor nf) {
 
 		if (usedViews.get(nf.itemIndex) == null) {
 			doMeasure(nf);
 		}
 
-		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-		anim.setDuration(250);
-		anim.addUpdateListener(new AnimatorUpdateListener() {
-
-			@Override
-			public void onAnimationUpdate(ValueAnimator animation) {
-				View v = usedViews.get(itemIndex);
-				if (v == null) {
-					animation.cancel();
-					return;
-				}
-
-				int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
-				int itemHeight = of.height + (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
-				int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
-				int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
-
-				v.measure(widthSpec, heightSpec);
-
-				Frame frame = new Frame();
-				Frame nff = nf.frame;
-
-				frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
-				frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
-				frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
-				frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
-
-				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
-			}
-		});
-
-		return anim;
+		return layoutController.getAnimationForLayoutTransition(itemIndex, of, nf, usedViews.get(itemIndex));
 
 	}
 

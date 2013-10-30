@@ -9,7 +9,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
-public class VLayout implements LayoutController {
+public class VLayout extends LayoutController {
 
 	private static final String TAG = "VLayout";
 	private int itemHeight = -1;
@@ -40,15 +40,25 @@ public class VLayout implements LayoutController {
 	@Override
 	public void setItems(BaseAdapter adapter) {
 		this.itemsAdapter = adapter;
+
+		if (width != -1 && height != -1) {
+			generateFrameDescriptors();
+		}
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
+	@Override
 	public void generateFrameDescriptors() {
 		if (itemHeight < 0) {
-			throw new IllegalStateException("itemWidth not set");
+			throw new IllegalStateException("itemHeight not set");
 		}
+
+		if (height < 0 || width < 0) {
+			throw new IllegalStateException("dimensions not set");
+		}
+
 		frameDescriptors.clear();
 		for (int i = 0; i < itemsAdapter.getCount(); i++) {
 			FrameDescriptor descriptor = new FrameDescriptor();
