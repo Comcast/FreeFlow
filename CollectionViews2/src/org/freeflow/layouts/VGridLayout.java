@@ -135,4 +135,38 @@ public class VGridLayout extends LayoutController {
 
 		return frame;
 	}
+
+	@Override
+	public boolean horizontalDragEnabled() {
+		return false;
+	}
+
+	@Override
+	public boolean verticalDragEnabled() {
+		return true;
+	}
+
+	@Override
+	public int getMinimumViewPortX() {
+		return 0;
+	}
+
+	@Override
+	public int getMinimumViewPortY() {
+		return 0;
+	}
+
+	@Override
+	public int getMaximumViewPortX() {
+		return width;
+	}
+
+	@Override
+	public int getMaximumViewPortY() {
+		if(itemsAdapter == null)
+			return 0;
+		
+		return (itemHeight * itemsAdapter.getCount()) - height;
+	}
+
 }

@@ -1,5 +1,7 @@
 package org.freeflow.layouts;
 
+import java.util.ArrayList;
+
 import org.freeflow.core.Frame;
 import org.freeflow.core.FrameDescriptor;
 
@@ -11,6 +13,8 @@ import android.view.View.MeasureSpec;
 import android.widget.BaseAdapter;
 
 public abstract class LayoutController {
+
+	protected ArrayList<FrameDescriptor> newFrames = new ArrayList<FrameDescriptor>();
 
 	/**
 	 * Called whenever Container's onMeasure is triggered
@@ -43,7 +47,7 @@ public abstract class LayoutController {
 
 	public ValueAnimator getAnimationForLayoutTransition(final int itemIndex, final Frame of, final FrameDescriptor nf,
 			final View v) {
-	
+
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(500);
 		anim.addUpdateListener(new AnimatorUpdateListener() {
@@ -77,5 +81,17 @@ public abstract class LayoutController {
 
 		return anim;
 	}
+
+	public abstract boolean horizontalDragEnabled();
+
+	public abstract boolean verticalDragEnabled();
+
+	public abstract int getMinimumViewPortX();
+
+	public abstract int getMinimumViewPortY();
+
+	public abstract int getMaximumViewPortX();
+
+	public abstract int getMaximumViewPortY();
 
 }
