@@ -163,10 +163,12 @@ public class VGridLayout extends LayoutController {
 
 	@Override
 	public int getMaximumViewPortY() {
-		if(itemsAdapter == null)
+		if (itemsAdapter == null)
 			return 0;
-		
-		return (itemHeight * itemsAdapter.getCount()) - height;
+
+		int cols = width / itemWidth;
+
+		return (itemHeight * (itemsAdapter.getCount() / cols)) - height;
 	}
 
 }
