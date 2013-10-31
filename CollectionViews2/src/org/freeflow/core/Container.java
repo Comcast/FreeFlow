@@ -64,9 +64,7 @@ public class Container extends ViewGroup {
 
 			for (int i = 0; i < frames.size(); i++) {
 				FrameDescriptor frameDesc = frames.get(frames.keyAt(i));
-
-				doMeasure(frameDesc);
-
+				addAndMeasureViewIfNeeded(frameDesc);
 			}
 			cleanupViews();
 		}
@@ -74,19 +72,24 @@ public class Container extends ViewGroup {
 
 	}
 
+	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
+		if (usedViews.get(frameDesc.itemIndex) == null) {
+			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+			usedViews.append(frameDesc.itemIndex, view);
+			addView(view);
+			doMeasure(frameDesc);
+		} else {
+			doMeasure(frameDesc);
+		}
+	}
+
 	private void doMeasure(FrameDescriptor frameDesc) {
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 
-		if (usedViews.get(frameDesc.itemIndex) == null) {
-			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
-			view.measure(widthSpec, heightSpec);
-			usedViews.append(frameDesc.itemIndex, view);
-			addView(view);
-		} else {
-			usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
-		}
+		usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
+
 	}
 
 	private void cleanupViews() {
@@ -130,8 +133,6 @@ public class Container extends ViewGroup {
 	}
 
 	private void doLayout(View view, Frame frame) {
-		view.setTranslationX(0);
-		view.setTranslationY(0);
 		view.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 	}
 
@@ -183,7 +184,7 @@ public class Container extends ViewGroup {
 			final FrameDescriptor nf) {
 
 		if (usedViews.get(nf.itemIndex) == null) {
-			doMeasure(nf);
+			addAndMeasureViewIfNeeded(nf);
 		}
 
 		return layoutController.getAnimationForLayoutTransition(itemIndex, of, nf, usedViews.get(itemIndex));
@@ -280,11 +281,11 @@ public class Container extends ViewGroup {
 
 	private void moveScreen(float movementX, float movementY) {
 
-		int oldLeft = viewPortX;
-		int oldTop = viewPortY;
+		if (layoutController.horizontalDragEnabled())
+			viewPortX = (int) (viewPortX - movementX);
 
-		viewPortX = (int) (viewPortX - movementX);
-		viewPortY = (int) (viewPortY - movementY);
+		if (layoutController.verticalDragEnabled())
+			viewPortY = (int) (viewPortY - movementY);
 
 		if (viewPortX < layoutController.getMinimumViewPortX())
 			viewPortX = layoutController.getMinimumViewPortX();
@@ -300,8 +301,10 @@ public class Container extends ViewGroup {
 
 		for (int i = 0; i < frames.size(); i++) {
 			FrameDescriptor desc = frames.get(frames.keyAt(i));
-			frames.append(desc.itemIndex, desc);
-			doMeasure(desc);
+
+			if (usedViews.get(desc.itemIndex) == null)
+				addAndMeasureViewIfNeeded(desc);
+
 			View view = usedViews.get(desc.itemIndex);
 			doLayout(view, desc.frame);
 

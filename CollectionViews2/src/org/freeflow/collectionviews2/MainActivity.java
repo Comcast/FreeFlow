@@ -1,6 +1,7 @@
 package org.freeflow.collectionviews2;
 
 import org.freeflow.core.Container;
+import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
@@ -25,6 +26,7 @@ public class MainActivity extends Activity implements OnKeyListener {
 	VLayout vLayout = null;
 
 	VGridLayout vGridLayout = null;
+	HGridLayout hGridLayout = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +51,13 @@ public class MainActivity extends Activity implements OnKeyListener {
 		vGridLayout = new VGridLayout();
 		vGridLayout.setItemHeight(200);
 		vGridLayout.setItemWidth(200);
+		
+		hGridLayout = new HGridLayout();
+		hGridLayout.setItemHeight(200);
+		hGridLayout.setItemWidth(200);
 
 		container.setAdapter(adapter);
-		container.setLayout(vLayout);
+		container.setLayout(hGridLayout);
 
 		frameLayout.addView(container);
 
@@ -63,7 +69,9 @@ public class MainActivity extends Activity implements OnKeyListener {
 					container.setLayout(vLayout);
 				else if (container.getLayoutController() == vLayout)
 					container.setLayout(vGridLayout);
-				else
+				else if (container .getLayoutController() == vGridLayout)
+					container.setLayout(hGridLayout);
+				else 
 					container.setLayout(hLayout);
 			}
 		});

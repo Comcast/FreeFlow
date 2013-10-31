@@ -9,9 +9,9 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.BaseAdapter;
 
-public class VGridLayout extends LayoutController {
+public class HGridLayout extends LayoutController {
 
-	private static final String TAG = "VGridLayout";
+	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
 	private int width = -1;
@@ -68,14 +68,14 @@ public class VGridLayout extends LayoutController {
 
 		frameDescriptors.clear();
 
-		int cols = width / itemWidth;
+		int rows = height / itemHeight;
 
 		for (int i = 0; i < itemsAdapter.getCount(); i++) {
 			FrameDescriptor descriptor = new FrameDescriptor();
 			Frame frame = new Frame();
 			descriptor.itemIndex = i;
-			frame.left = (i % cols) * itemWidth;
-			frame.top = (i / cols) * itemHeight;
+			frame.left = (i / rows) * itemWidth;
+			frame.top = (i % rows) * itemHeight;
 			frame.width = itemWidth;
 			frame.height = itemHeight;
 			descriptor.frame = frame;
@@ -94,7 +94,7 @@ public class VGridLayout extends LayoutController {
 
 			FrameDescriptor fd = frameDescriptors.get(i);
 
-			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
+			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
 				FrameDescriptor newDesc = new FrameDescriptor();
 				newDesc.itemIndex = frameDescriptors.get(i).itemIndex;
 				newDesc.frame = Frame.clone(frameDescriptors.get(i).frame);
@@ -104,7 +104,7 @@ public class VGridLayout extends LayoutController {
 		}
 
 		for (int i = 0; i < desc.size(); i++) {
-			desc.get(desc.keyAt(i)).frame.top -= viewPortTop;
+			desc.get(desc.keyAt(i)).frame.left -= viewPortLeft;
 		}
 
 		return desc;
@@ -112,15 +112,15 @@ public class VGridLayout extends LayoutController {
 
 	@Override
 	public Frame getViewportFrameForItemIndex(int index) {
-		int cols = width / itemWidth;
+		int rows = height / itemHeight;
 		Frame frame = new Frame();
-		frame.left = 0;
-		frame.top = (index / cols) * itemHeight;
+		frame.left = (index / rows) * itemWidth;
+		frame.top = 0;
 		frame.width = width;
 		frame.height = height;
 
-		if (itemHeight != -1 && height != -1 && frame.top > (frameDescriptors.size() / cols) * itemHeight - height)
-			frame.top = (frameDescriptors.size() / cols) * itemHeight - height;
+		if (itemWidth != -1 && width != -1 && frame.left > (frameDescriptors.size() / rows) * itemWidth - width)
+			frame.top = (frameDescriptors.size() / rows) * itemWidth - width;
 
 		return frame;
 	}
@@ -130,20 +130,20 @@ public class VGridLayout extends LayoutController {
 		Frame frame = new Frame();
 		frame.height = itemHeight;
 		frame.width = itemWidth;
-		frame.left = 0;
-		frame.top = height;
+		frame.left = width;
+		frame.top = 0;
 
 		return frame;
 	}
 
 	@Override
 	public boolean horizontalDragEnabled() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean verticalDragEnabled() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -158,7 +158,12 @@ public class VGridLayout extends LayoutController {
 
 	@Override
 	public int getMaximumViewPortX() {
-		return width;
+		if (itemsAdapter == null)
+			return 0;
+
+		int rows = height / itemHeight;
+
+		return (itemWidth * (itemsAdapter.getCount() / rows)) - width;
 	}
 
 	@Override
@@ -166,9 +171,7 @@ public class VGridLayout extends LayoutController {
 		if (itemsAdapter == null)
 			return 0;
 
-		int cols = width / itemWidth;
-
-		return (itemHeight * (itemsAdapter.getCount() / cols)) - height;
+		return height;
 	}
 
 }
