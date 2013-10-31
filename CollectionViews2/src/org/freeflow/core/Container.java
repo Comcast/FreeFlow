@@ -284,6 +284,7 @@ public class Container extends ViewGroup {
 		int oldTop = viewPortY;
 
 		viewPortX = (int) (viewPortX - movementX);
+		viewPortY = (int) (viewPortY - movementY);
 
 		if (viewPortX < layoutController.getMinimumViewPortX())
 			viewPortX = layoutController.getMinimumViewPortX();
@@ -294,8 +295,6 @@ public class Container extends ViewGroup {
 			viewPortY = layoutController.getMinimumViewPortY();
 		else if (viewPortY > layoutController.getMaximumViewPortY())
 			viewPortY = layoutController.getMaximumViewPortY();
-
-		viewPortY = (int) (viewPortY - movementY);
 
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
