@@ -8,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -22,7 +21,7 @@ public class Container extends ViewGroup {
 	private SparseArray<View> usedViews;
 	private ArrayList<View> viewpool;
 	private SparseArray<FrameDescriptor> frames = null;
-	private boolean inMeasure = false;
+	private boolean preventLayout = false;
 	private BaseAdapter itemAdapter;
 	private LayoutController layoutController;
 	public int viewPortX = 0;
@@ -58,7 +57,7 @@ public class Container extends ViewGroup {
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec) - 100);
 		if (layoutController != null) {
-			inMeasure = true;
+			preventLayout = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
@@ -68,15 +67,18 @@ public class Container extends ViewGroup {
 			}
 			cleanupViews();
 		}
-		inMeasure = false;
+		preventLayout = false;
 
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
 		if (usedViews.get(frameDesc.itemIndex) == null) {
 			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+			view.setAlpha(1);
 			usedViews.append(frameDesc.itemIndex, view);
+			preventLayout = true;
 			addView(view);
+			preventLayout = false;
 			doMeasure(frameDesc);
 		} else {
 			doMeasure(frameDesc);
@@ -100,10 +102,20 @@ public class Container extends ViewGroup {
 			if (frames.get(usedViews.keyAt(i)) != null)
 				continue;
 
-			View view = usedViews.get(usedViews.keyAt(i));
-			viewpool.add(view);
+			final View view = usedViews.get(usedViews.keyAt(i));
 			usedViews.remove(usedViews.keyAt(i));
-			removeView(view);
+
+			view.animate().alpha(0).setDuration(250).withEndAction(new Runnable() {
+
+				@Override
+				public void run() {
+					viewpool.add(view);
+					preventLayout = true;
+					removeView(view);
+					preventLayout = false;
+				}
+			}).start();
+
 		}
 
 	}
@@ -160,6 +172,7 @@ public class Container extends ViewGroup {
 			if (oldFrames != null) {
 
 				frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+				preventLayout = true;
 				cleanupViews();
 
 				for (int i = 0; i < frames.size(); i++) {
@@ -171,6 +184,7 @@ public class Container extends ViewGroup {
 					getAnimationForLayoutTransition(itemIndex,
 							of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf).start();
 				}
+				preventLayout = false;
 
 			}
 
@@ -194,7 +208,7 @@ public class Container extends ViewGroup {
 	@Override
 	public void requestLayout() {
 
-		if (inMeasure)
+		if (preventLayout)
 			return;
 
 		super.requestLayout();
@@ -213,8 +227,6 @@ public class Container extends ViewGroup {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-
-		// Log.d(TAG, "on touch");
 
 		if (mVelocityTracker == null)
 			mVelocityTracker = VelocityTracker.obtain();
@@ -302,8 +314,10 @@ public class Container extends ViewGroup {
 		for (int i = 0; i < frames.size(); i++) {
 			FrameDescriptor desc = frames.get(frames.keyAt(i));
 
+			preventLayout = true;
 			if (usedViews.get(desc.itemIndex) == null)
 				addAndMeasureViewIfNeeded(desc);
+			preventLayout = false;
 
 			View view = usedViews.get(desc.itemIndex);
 			doLayout(view, desc.frame);

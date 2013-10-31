@@ -8,17 +8,15 @@ import org.freeflow.layouts.VLayout;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements OnKeyListener {
+public class MainActivity extends Activity {
 
 	private static final String TAG = "MainActivity";
 	Container container = null;
@@ -38,7 +36,7 @@ public class MainActivity extends Activity implements OnKeyListener {
 		ImageAdapter adapter = new ImageAdapter(null);
 
 		container = new Container(this);
-		container.setOnKeyListener(this);
+
 		// container.setOnTouchListener(this);
 		container.setFocusable(true);
 		container.requestFocus();
@@ -51,13 +49,13 @@ public class MainActivity extends Activity implements OnKeyListener {
 		vGridLayout = new VGridLayout();
 		vGridLayout.setItemHeight(200);
 		vGridLayout.setItemWidth(200);
-		
+
 		hGridLayout = new HGridLayout();
 		hGridLayout.setItemHeight(200);
 		hGridLayout.setItemWidth(200);
 
 		container.setAdapter(adapter);
-		container.setLayout(hGridLayout);
+		container.setLayout(hLayout);
 
 		frameLayout.addView(container);
 
@@ -69,9 +67,9 @@ public class MainActivity extends Activity implements OnKeyListener {
 					container.setLayout(vLayout);
 				else if (container.getLayoutController() == vLayout)
 					container.setLayout(vGridLayout);
-				else if (container .getLayoutController() == vGridLayout)
+				else if (container.getLayoutController() == vGridLayout)
 					container.setLayout(hGridLayout);
-				else 
+				else
 					container.setLayout(hLayout);
 			}
 		});
@@ -114,7 +112,6 @@ public class MainActivity extends Activity implements OnKeyListener {
 			}
 
 			button.setFocusable(false);
-			button.setOnKeyListener(MainActivity.this);
 			button.setBackgroundResource(R.drawable.orange);
 			// button.setOnTouchListener(MainActivity.this);
 			button.setText("" + position);
@@ -123,56 +120,5 @@ public class MainActivity extends Activity implements OnKeyListener {
 		}
 
 	}
-
-	@Override
-	public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-		if (event.getAction() == KeyEvent.ACTION_DOWN) {
-
-			if (keyCode == KeyEvent.KEYCODE_D) {
-				// Log.d(TAG, "D pressed");
-				if (container.getLayoutController() == hLayout) {
-					container.viewPortX += 5;
-					container.viewPortX = container.viewPortX > 1000 ? 1000 : container.viewPortX;
-					container.viewPortY = 0;
-				} else {
-					container.viewPortY += 5;
-					container.viewPortY = container.viewPortY > 1000 ? 1000 : container.viewPortY;
-					container.viewPortX = 0;
-				}
-				container.requestLayout();
-				return true;
-			} else if (keyCode == KeyEvent.KEYCODE_A) {
-				// Log.d(TAG, "A pressed");
-				if (container.getLayoutController() == hLayout) {
-					container.viewPortX -= 5;
-					container.viewPortX = container.viewPortX < 0 ? 0 : container.viewPortX;
-					container.viewPortY = 0;
-				} else {
-					container.viewPortY -= 5;
-					container.viewPortY = container.viewPortY < 0 ? 0 : container.viewPortY;
-					container.viewPortX = 0;
-				}
-				container.requestLayout();
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	// @Override
-	// public boolean onTouch(View v, MotionEvent event) {
-	// if (event.getAction() == MotionEvent.ACTION_UP) {
-	// if (container.getLayoutController() == hLayout)
-	// container.setLayout(vLayout);
-	// else if (container.getLayoutController() == vLayout)
-	// // container.setLayout(vGridLayout);
-	// // else
-	// container.setLayout(hLayout);
-	// }
-	//
-	// return false;
-	// }
 
 }
