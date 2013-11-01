@@ -13,10 +13,10 @@ public class HLayout extends LayoutController {
 
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
-	private int width = -1;
-	private int height = -1;
-	private BaseAdapter itemsAdapter;
-	private ArrayList<FrameDescriptor> frameDescriptors = new ArrayList<FrameDescriptor>();
+	protected int width = -1;
+	protected int height = -1;
+	protected BaseAdapter itemsAdapter;
+	protected ArrayList<FrameDescriptor> frameDescriptors = new ArrayList<FrameDescriptor>();
 
 	public void setItemWidth(int i) {
 		this.itemWidth = i;
@@ -82,12 +82,11 @@ public class HLayout extends LayoutController {
 		SparseArray<FrameDescriptor> desc = new SparseArray<FrameDescriptor>();
 
 		for (int i = 0; i < frameDescriptors.size(); i++) {
-
-			if (frameDescriptors.get(i).frame.left + itemWidth > viewPortLeft
-					&& frameDescriptors.get(i).frame.left < viewPortLeft + width) {
+			FrameDescriptor fd = frameDescriptors.get(i);
+			if (fd.frame.left + fd.frame.width > viewPortLeft && fd.frame.left < viewPortLeft + width) {
 				FrameDescriptor newDesc = new FrameDescriptor();
-				newDesc.itemIndex = frameDescriptors.get(i).itemIndex;
-				newDesc.frame = Frame.clone(frameDescriptors.get(i).frame);
+				newDesc.itemIndex = fd.itemIndex;
+				newDesc.frame = Frame.clone(fd.frame);
 
 				desc.append(newDesc.itemIndex, newDesc);
 			}
@@ -156,6 +155,16 @@ public class HLayout extends LayoutController {
 	@Override
 	public int getMaximumViewPortY() {
 		return height;
+	}
+
+	@Override
+	public Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop) {
+		Frame frame = Frame.clone(frameDescriptors.get(index).frame);
+
+		frame.left = frame.left - viewPortLeft;
+		frame.top = frame.top - viewPortTop;
+
+		return frame;
 	}
 
 }

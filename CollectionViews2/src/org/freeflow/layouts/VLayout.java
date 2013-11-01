@@ -156,5 +156,15 @@ public class VLayout extends LayoutController {
 			return 0;
 		return (itemHeight * itemsAdapter.getCount()) - height;
 	}
+
+	@Override
+	public Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop) {
+		Frame frame = Frame.clone(frameDescriptors.get(index).frame);
+
+		frame.left = frame.left - viewPortLeft;
+		frame.top = frame.top - viewPortTop;
+
+		return frame;
+	}
 	
 }

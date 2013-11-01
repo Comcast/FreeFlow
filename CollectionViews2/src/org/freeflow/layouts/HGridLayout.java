@@ -174,4 +174,14 @@ public class HGridLayout extends LayoutController {
 		return height;
 	}
 
+	@Override
+	public Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop) {
+		Frame frame = Frame.clone(frameDescriptors.get(index).frame);
+
+		frame.left = frame.left - viewPortLeft;
+		frame.top = frame.top - viewPortTop;
+
+		return frame;
+	}
+
 }

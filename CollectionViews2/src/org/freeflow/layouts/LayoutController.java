@@ -1,7 +1,5 @@
 package org.freeflow.layouts;
 
-import java.util.ArrayList;
-
 import org.freeflow.core.Frame;
 import org.freeflow.core.FrameDescriptor;
 
@@ -13,8 +11,6 @@ import android.view.View.MeasureSpec;
 import android.widget.BaseAdapter;
 
 public abstract class LayoutController {
-
-	protected ArrayList<FrameDescriptor> newFrames = new ArrayList<FrameDescriptor>();
 
 	/**
 	 * Called whenever Container's onMeasure is triggered
@@ -40,6 +36,8 @@ public abstract class LayoutController {
 	public abstract SparseArray<FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
 	public abstract Frame getViewportFrameForItemIndex(int index);
+
+	public abstract Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop);
 
 	public abstract Frame getOffScreenStartFrame();
 

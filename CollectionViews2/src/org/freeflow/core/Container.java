@@ -18,12 +18,12 @@ import android.widget.BaseAdapter;
 public class Container extends ViewGroup {
 
 	private static final String TAG = "Container";
-	private SparseArray<View> usedViews;
-	private ArrayList<View> viewpool;
-	private SparseArray<FrameDescriptor> frames = null;
+	protected SparseArray<View> usedViews;
+	protected ArrayList<View> viewpool;
+	protected SparseArray<FrameDescriptor> frames = null;
 	private boolean preventLayout = false;
-	private BaseAdapter itemAdapter;
-	private LayoutController layoutController;
+	protected BaseAdapter itemAdapter;
+	protected LayoutController layoutController;
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -173,17 +173,27 @@ public class Container extends ViewGroup {
 
 				frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 				preventLayout = true;
-				cleanupViews();
+				// cleanupViews();
 
 				for (int i = 0; i < frames.size(); i++) {
-					FrameDescriptor of = oldFrames.get(frames.keyAt(i));
-
 					int itemIndex = frames.keyAt(i);
 					final FrameDescriptor nf = frames.get(itemIndex);
 
-					getAnimationForLayoutTransition(itemIndex,
-							of == null ? layoutController.getOffScreenStartFrame() : of.frame, nf).start();
+					if (oldFrames.get(itemIndex) != null)
+						oldFrames.remove(itemIndex);
+
+					getAnimationForLayoutTransition(itemIndex, nf).start();
 				}
+
+				for (int i = 0; i < oldFrames.size(); i++) {
+					int itemIndex = oldFrames.keyAt(i);
+					final FrameDescriptor nf = new FrameDescriptor();
+					nf.frame = layoutController.getFrameForItemIndexAndViewport(itemIndex, viewPortX, viewPortY);
+					nf.itemIndex = itemIndex;
+
+					getAnimationForLayoutTransition(itemIndex, nf).start();
+				}
+
 				preventLayout = false;
 
 			}
@@ -194,14 +204,27 @@ public class Container extends ViewGroup {
 
 	}
 
-	protected ValueAnimator getAnimationForLayoutTransition(final int itemIndex, final Frame of,
-			final FrameDescriptor nf) {
+	protected ValueAnimator getAnimationForLayoutTransition(final int itemIndex, final FrameDescriptor nf) {
 
+		boolean newFrame = false;
 		if (usedViews.get(nf.itemIndex) == null) {
 			addAndMeasureViewIfNeeded(nf);
+			newFrame = true;
 		}
 
-		return layoutController.getAnimationForLayoutTransition(itemIndex, of, nf, usedViews.get(itemIndex));
+		View v = usedViews.get(itemIndex);
+
+		Frame of = new Frame();
+		if (newFrame) {
+			of = layoutController.getOffScreenStartFrame();
+		} else {
+			of.left = v.getLeft();
+			of.top = v.getTop();
+			of.width = v.getMeasuredWidth();
+			of.height = v.getMeasuredHeight();
+		}
+
+		return layoutController.getAnimationForLayoutTransition(itemIndex, of, nf, v);
 
 	}
 
@@ -326,6 +349,10 @@ public class Container extends ViewGroup {
 
 		cleanupViews();
 
+	}
+
+	public BaseAdapter getAdapter() {
+		return itemAdapter;
 	}
 
 }
