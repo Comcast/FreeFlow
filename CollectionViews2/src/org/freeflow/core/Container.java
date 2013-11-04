@@ -2,8 +2,6 @@ package org.freeflow.core;
 
 import java.util.ArrayList;
 
-import org.freeflow.layouts.LayoutController;
-
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
@@ -170,32 +168,7 @@ public class Container extends ViewGroup {
 			viewPortY = vpFrame.top;
 
 			if (oldFrames != null) {
-
-				frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
-				preventLayout = true;
-				// cleanupViews();
-
-				for (int i = 0; i < frames.size(); i++) {
-					int itemIndex = frames.keyAt(i);
-					final FrameDescriptor nf = frames.get(itemIndex);
-
-					if (oldFrames.get(itemIndex) != null)
-						oldFrames.remove(itemIndex);
-
-					getAnimationForLayoutTransition(itemIndex, nf).start();
-				}
-
-				for (int i = 0; i < oldFrames.size(); i++) {
-					int itemIndex = oldFrames.keyAt(i);
-					final FrameDescriptor nf = new FrameDescriptor();
-					nf.frame = layoutController.getFrameForItemIndexAndViewport(itemIndex, viewPortX, viewPortY);
-					nf.itemIndex = itemIndex;
-
-					getAnimationForLayoutTransition(itemIndex, nf).start();
-				}
-
-				preventLayout = false;
-
+				layoutChanged(oldFrames);
 			}
 
 		} else {
@@ -224,7 +197,43 @@ public class Container extends ViewGroup {
 			of.height = v.getMeasuredHeight();
 		}
 
-		return layoutController.getAnimationForLayoutTransition(itemIndex, of, nf, v);
+		return layoutController.getLayoutAnimator().getFrameTransitionAnimation(itemIndex, of, nf, v);
+
+	}
+	
+	protected void layoutChanged() {
+		SparseArray<FrameDescriptor> oldFrames = frames;
+		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+		
+		layoutChanged(oldFrames);
+	}
+	
+	protected void layoutChanged(SparseArray<FrameDescriptor> oldFrames){
+
+		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+		preventLayout = true;
+		// cleanupViews();
+
+		for (int i = 0; i < frames.size(); i++) {
+			int itemIndex = frames.keyAt(i);
+			final FrameDescriptor nf = frames.get(itemIndex);
+
+			if (oldFrames.get(itemIndex) != null)
+				oldFrames.remove(itemIndex);
+
+			getAnimationForLayoutTransition(itemIndex, nf).start();
+		}
+
+		for (int i = 0; i < oldFrames.size(); i++) {
+			int itemIndex = oldFrames.keyAt(i);
+			final FrameDescriptor nf = new FrameDescriptor();
+			nf.frame = layoutController.getFrameForItemIndexAndViewport(itemIndex, viewPortX, viewPortY);
+			nf.itemIndex = itemIndex;
+
+			getAnimationForLayoutTransition(itemIndex, nf).start();
+		}
+
+		preventLayout = false;
 
 	}
 
