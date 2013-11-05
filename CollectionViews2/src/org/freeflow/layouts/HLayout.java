@@ -1,14 +1,12 @@
 package org.freeflow.layouts;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.FrameDescriptor;
 import org.freeflow.core.LayoutController;
-
-import android.util.Log;
-import android.util.SparseArray;
-import android.widget.BaseAdapter;
+import org.freeflow.core.Section;
 
 public class HLayout extends LayoutController {
 
@@ -16,8 +14,10 @@ public class HLayout extends LayoutController {
 	private int itemWidth = -1;
 	protected int width = -1;
 	protected int height = -1;
-	protected BaseAdapter itemsAdapter;
-	protected ArrayList<FrameDescriptor> frameDescriptors = new ArrayList<FrameDescriptor>();
+	private BaseSectionedAdapter itemsAdapter;
+	private HashMap<Object, FrameDescriptor> frameDescriptors = new HashMap<Object, FrameDescriptor>();
+	private int headerHeight = -1;
+	private int headerWidth = -1;
 
 	public void setItemWidth(int i) {
 		this.itemWidth = i;
@@ -39,7 +39,7 @@ public class HLayout extends LayoutController {
 	}
 
 	@Override
-	public void setItems(BaseAdapter adapter) {
+	public void setItems(BaseSectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 
 		if (width != -1 && height != -1) {
@@ -61,56 +61,88 @@ public class HLayout extends LayoutController {
 			throw new IllegalStateException("dimensions not set");
 		}
 
-		frameDescriptors.clear();
-		for (int i = 0; i < itemsAdapter.getCount(); i++) {
-			FrameDescriptor descriptor = new FrameDescriptor();
-			Frame frame = new Frame();
-			descriptor.itemIndex = i;
-			frame.left = i * itemWidth;
-			frame.top = 0;
-			frame.width = itemWidth;
-			frame.height = height;
-			descriptor.frame = frame;
-			frameDescriptors.add(descriptor);
+		if (headerWidth < 0) {
+			throw new IllegalStateException("headerWidth not set");
 		}
+		
+		if (headerHeight < 0) {
+			throw new IllegalStateException("headerHeight not set");
+		}
+
+		
+		frameDescriptors.clear();
+		int leftStart = 0;
+
+		for (int i = 0; i < itemsAdapter.getSectionCount(); i++) {
+
+			FrameDescriptor header = new FrameDescriptor();
+			Frame hframe = new Frame();
+			header.itemSection = i;
+			header.itemIndex = -1;
+			header.isHeader = true;
+			hframe.left = leftStart;
+			hframe.top = 0;
+			hframe.width = headerWidth;
+			hframe.height = headerHeight;
+			header.frame = hframe;
+			header.data = itemsAdapter.getSection(i).getSectionTitle();
+			frameDescriptors.put(header.data, header);
+
+			leftStart += headerWidth;
+
+			for (int j = 0; j < itemsAdapter.getSectionCount(); j++) {
+				FrameDescriptor descriptor = new FrameDescriptor();
+				Frame frame = new Frame();
+				descriptor.itemSection = i;
+				descriptor.itemIndex = j;
+				frame.left = j * itemWidth + leftStart;
+				frame.top = 0;
+				frame.width = itemWidth;
+				frame.height = height;
+				descriptor.frame = frame;
+				descriptor.data = itemsAdapter.getItem(i, j);
+				frameDescriptors.put(descriptor.data, descriptor);
+			}
+
+			leftStart += itemsAdapter.getCountForSection(i) * itemWidth;
+		}
+
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SparseArray<FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
-		SparseArray<FrameDescriptor> desc = new SparseArray<FrameDescriptor>();
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
+		Object[] keyset = frameDescriptors.keySet().toArray();
 		for (int i = 0; i < frameDescriptors.size(); i++) {
-			FrameDescriptor fd = frameDescriptors.get(i);
-			if (fd.frame.left + fd.frame.width > viewPortLeft && fd.frame.left < viewPortLeft + width) {
-				FrameDescriptor newDesc = new FrameDescriptor();
-				newDesc.itemIndex = fd.itemIndex;
-				newDesc.frame = Frame.clone(fd.frame);
 
-				desc.append(newDesc.itemIndex, newDesc);
+			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
+
+			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
+				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
+				newDesc.frame.left -= viewPortLeft;
+				desc.put(newDesc.data, newDesc);
 			}
-		}
-
-		for (int i = 0; i < desc.size(); i++) {
-			desc.get(desc.keyAt(i)).frame.left -= viewPortLeft;
 		}
 
 		return desc;
 	}
 
 	@Override
-	public Frame getViewportFrameForItemIndex(int index) {
+	public Frame getViewportFrameForItem(Object item) {
+		FrameDescriptor fd = frameDescriptors.get(item);
+
 		Frame frame = new Frame();
-		frame.left = index * itemWidth;
+		frame.left = fd.frame.left;
 		frame.top = 0;
 		frame.width = width;
 		frame.height = height;
 
-		if (itemWidth != -1 && width != -1 && frameDescriptors.size() > 0
-				&& frame.left > frameDescriptors.size() * itemWidth - width)
-			frame.left = frameDescriptors.size() * itemWidth - width;
+		if (itemWidth != -1 && width != -1 && frame.left > getMaximumViewPortX())
+			frame.left = getMaximumViewPortX();
 
 		return frame;
 	}
@@ -150,7 +182,14 @@ public class HLayout extends LayoutController {
 	public int getMaximumViewPortX() {
 		if (itemsAdapter == null)
 			return 0;
-		return (itemWidth * itemsAdapter.getCount()) - width;
+
+		int sectionIndex = itemsAdapter.getSectionCount() - 1;
+		Section s = itemsAdapter.getSection(sectionIndex);
+
+		Object lastFrameData = itemsAdapter.getItem(sectionIndex, s.getDataCount() - 1);
+		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
+
+		return (fd.frame.left + fd.frame.width) - width;
 	}
 
 	@Override
@@ -159,13 +198,19 @@ public class HLayout extends LayoutController {
 	}
 
 	@Override
-	public Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop) {
-		Frame frame = Frame.clone(frameDescriptors.get(index).frame);
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
+		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
 
-		frame.left = frame.left - viewPortLeft;
-		frame.top = frame.top - viewPortTop;
+		fd.frame.left -= viewPortLeft;
+		fd.frame.top -= viewPortTop;
 
-		return frame;
+		return fd;
+	}
+	
+	@Override
+	public void setHeaderItemDimensions(int hWidth, int hHeight) {
+		headerHeight = hHeight;
+		headerWidth = hWidth;
 	}
 
 }

@@ -1,6 +1,8 @@
 package org.freeflow.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -11,16 +13,17 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 
 public class Container extends ViewGroup {
 
 	private static final String TAG = "Container";
-	protected SparseArray<View> usedViews;
+	protected HashMap<Object, View> usedViews;
+	protected HashMap<Object, View> usedHeaderViews;
 	protected ArrayList<View> viewpool;
-	protected SparseArray<FrameDescriptor> frames = null;
+	protected ArrayList<View> headerViewpool;
+	protected HashMap<Object, FrameDescriptor> frames = null;
 	private boolean preventLayout = false;
-	protected BaseAdapter itemAdapter;
+	protected BaseSectionedAdapter itemAdapter;
 	protected LayoutController layoutController;
 	public int viewPortX = 0;
 	public int viewPortY = 0;
@@ -45,8 +48,10 @@ public class Container extends ViewGroup {
 	}
 
 	private void init() {
-		usedViews = new SparseArray<View>();
+		usedViews = new HashMap<Object, View>();
 		viewpool = new ArrayList<View>();
+		usedHeaderViews = new HashMap<Object, View>();
+		headerViewpool = new ArrayList<View>();
 
 	}
 
@@ -58,9 +63,9 @@ public class Container extends ViewGroup {
 			preventLayout = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
-
-			for (int i = 0; i < frames.size(); i++) {
-				FrameDescriptor frameDesc = frames.get(frames.keyAt(i));
+			Object[] keyset = frames.keySet().toArray();
+			for (int i = 0; i < keyset.length; i++) {
+				FrameDescriptor frameDesc = frames.get(keyset[i]);
 				addAndMeasureViewIfNeeded(frameDesc);
 			}
 			cleanupViews();
@@ -70,17 +75,31 @@ public class Container extends ViewGroup {
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
-		if (usedViews.get(frameDesc.itemIndex) == null) {
-			View view = itemAdapter.getView(frameDesc.itemIndex, viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+		if (frameDesc.isHeader && usedHeaderViews.get(frameDesc.data) == null) {
+
+			View view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
+					headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
 			view.setAlpha(1);
-			usedViews.append(frameDesc.itemIndex, view);
+			usedHeaderViews.put(frameDesc.data, view);
 			preventLayout = true;
 			addView(view);
 			preventLayout = false;
 			doMeasure(frameDesc);
+		} else if (!frameDesc.isHeader && usedViews.get(frameDesc.data) == null) {
+
+			View view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
+					viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+			view.setAlpha(1);
+			usedViews.put(frameDesc.data, view);
+			preventLayout = true;
+			addView(view);
+			preventLayout = false;
+			doMeasure(frameDesc);
+
 		} else {
 			doMeasure(frameDesc);
 		}
+
 	}
 
 	private void doMeasure(FrameDescriptor frameDesc) {
@@ -88,20 +107,23 @@ public class Container extends ViewGroup {
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 
-		usedViews.get(frameDesc.itemIndex).measure(widthSpec, heightSpec);
+		if (frameDesc.isHeader)
+			usedHeaderViews.get(frameDesc.data).measure(widthSpec, heightSpec);
+		else
+			usedViews.get(frameDesc.data).measure(widthSpec, heightSpec);
 
 	}
 
 	private void cleanupViews() {
 		if (usedViews == null)
 			return;
-
+		Object[] keyset = usedViews.keySet().toArray();
 		for (int i = usedViews.size() - 1; i >= 0; i--) {
-			if (frames.get(usedViews.keyAt(i)) != null)
+			if (frames.get(keyset[i]) != null)
 				continue;
 
-			final View view = usedViews.get(usedViews.keyAt(i));
-			usedViews.remove(usedViews.keyAt(i));
+			final View view = usedViews.get(keyset[i]);
+			usedViews.remove(keyset[i]);
 
 			view.animate().alpha(0).setDuration(250).withEndAction(new Runnable() {
 
@@ -116,17 +138,59 @@ public class Container extends ViewGroup {
 
 		}
 
+		keyset = usedHeaderViews.keySet().toArray();
+		for (int i = usedHeaderViews.size() - 1; i >= 0; i--) {
+			if (frames.get(keyset[i]) != null)
+				continue;
+
+			final View view = usedHeaderViews.get(keyset[i]);
+			usedHeaderViews.remove(keyset[i]);
+
+			view.animate().alpha(0).setDuration(250).withEndAction(new Runnable() {
+
+				@Override
+				public void run() {
+					headerViewpool.add(view);
+					preventLayout = true;
+					removeView(view);
+					preventLayout = false;
+				}
+			}).start();
+
+		}
+
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		if (layoutController == null || frames == null)
 			return;
+
+		Object[] keyset = usedViews.keySet().toArray();
 		for (int i = 0; i < usedViews.size(); i++) {
 
-			View v = usedViews.get(usedViews.keyAt(i));
+			View v = usedViews.get(keyset[i]);
 
-			FrameDescriptor desc = frames.get(usedViews.keyAt(i));
+			FrameDescriptor desc = frames.get(keyset[i]);
+
+			if (desc == null)
+				continue;
+
+			Frame frame = desc.frame;
+
+			if (v == null || frame == null)
+				continue;
+
+			doLayout(v, frame);
+
+		}
+
+		keyset = usedHeaderViews.keySet().toArray();
+		for (int i = 0; i < usedHeaderViews.size(); i++) {
+
+			View v = usedHeaderViews.get(keyset[i]);
+
+			FrameDescriptor desc = frames.get(keyset[i]);
 
 			if (desc == null)
 				continue;
@@ -150,7 +214,7 @@ public class Container extends ViewGroup {
 
 		layoutController = lc;
 
-		SparseArray<FrameDescriptor> oldFrames = frames;
+		HashMap<Object, FrameDescriptor> oldFrames = frames;
 
 		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -159,10 +223,24 @@ public class Container extends ViewGroup {
 			layoutController.setItems(itemAdapter);
 		}
 
-		if (frames != null) {
-			int index = frames.keyAt(0);
+		if (frames != null && frames.size() > 0) {
 
-			Frame vpFrame = layoutController.getViewportFrameForItemIndex(index);
+			Object[] keys = frames.keySet().toArray();
+
+			Object data = null;
+			int lowestSection = 99999;
+			int lowestPosition = 99999;
+			for (int i = 0; i < keys.length; i++) {
+				FrameDescriptor fd = frames.get(keys[i]);
+				if (fd.itemSection < lowestSection
+						|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
+					data = fd.data;
+					lowestSection = fd.itemSection;
+					lowestPosition = fd.itemIndex;
+				}
+			}
+
+			Frame vpFrame = layoutController.getViewportFrameForItem(data);
 
 			viewPortX = vpFrame.left;
 			viewPortY = vpFrame.top;
@@ -177,15 +255,22 @@ public class Container extends ViewGroup {
 
 	}
 
-	protected ValueAnimator getAnimationForLayoutTransition(final int itemIndex, final FrameDescriptor nf) {
+	protected ValueAnimator getAnimationForLayoutTransition(final FrameDescriptor nf) {
 
 		boolean newFrame = false;
-		if (usedViews.get(nf.itemIndex) == null) {
-			addAndMeasureViewIfNeeded(nf);
-			newFrame = true;
+		if (nf.isHeader) {
+			if (usedHeaderViews.get(nf.data) == null) {
+				addAndMeasureViewIfNeeded(nf);
+				newFrame = true;
+			}
+		} else {
+			if (usedViews.get(nf.data) == null) {
+				addAndMeasureViewIfNeeded(nf);
+				newFrame = true;
+			}
 		}
 
-		View v = usedViews.get(itemIndex);
+		View v = nf.isHeader ? usedHeaderViews.get(nf.data) : usedViews.get(nf.data);
 
 		Frame of = new Frame();
 		if (newFrame) {
@@ -197,40 +282,38 @@ public class Container extends ViewGroup {
 			of.height = v.getMeasuredHeight();
 		}
 
-		return layoutController.getLayoutAnimator().getFrameTransitionAnimation(itemIndex, of, nf, v);
+		return layoutController.getLayoutAnimator().getFrameTransitionAnimation(of, nf, v);
 
 	}
-	
+
 	protected void layoutChanged() {
-		SparseArray<FrameDescriptor> oldFrames = frames;
+		HashMap<Object, FrameDescriptor> oldFrames = frames;
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
-		
+
 		layoutChanged(oldFrames);
 	}
-	
-	protected void layoutChanged(SparseArray<FrameDescriptor> oldFrames){
+
+	protected void layoutChanged(HashMap<Object, FrameDescriptor> oldFrames) {
 
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 		preventLayout = true;
 		// cleanupViews();
-
+		Object[] keyset = frames.keySet().toArray();
 		for (int i = 0; i < frames.size(); i++) {
-			int itemIndex = frames.keyAt(i);
-			final FrameDescriptor nf = frames.get(itemIndex);
 
-			if (oldFrames.get(itemIndex) != null)
-				oldFrames.remove(itemIndex);
+			final FrameDescriptor nf = frames.get(keyset[i]);
 
-			getAnimationForLayoutTransition(itemIndex, nf).start();
+			if (oldFrames.get(keyset[i]) != null)
+				oldFrames.remove(keyset[i]);
+
+			getAnimationForLayoutTransition(nf).start();
 		}
 
+		keyset = oldFrames.keySet().toArray();
 		for (int i = 0; i < oldFrames.size(); i++) {
-			int itemIndex = oldFrames.keyAt(i);
-			final FrameDescriptor nf = new FrameDescriptor();
-			nf.frame = layoutController.getFrameForItemIndexAndViewport(itemIndex, viewPortX, viewPortY);
-			nf.itemIndex = itemIndex;
 
-			getAnimationForLayoutTransition(itemIndex, nf).start();
+			FrameDescriptor nf = layoutController.getFrameDescriptorForItemAndViewport(keyset[i], viewPortX, viewPortY);
+			getAnimationForLayoutTransition(nf).start();
 		}
 
 		preventLayout = false;
@@ -246,7 +329,7 @@ public class Container extends ViewGroup {
 		super.requestLayout();
 	}
 
-	public void setAdapter(BaseAdapter adapter) {
+	public void setAdapter(BaseSectionedAdapter adapter) {
 		this.itemAdapter = adapter;
 		if (layoutController != null) {
 			layoutController.setItems(adapter);
@@ -306,8 +389,6 @@ public class Container extends ViewGroup {
 
 						moveScreen(translateX, translateY);
 
-						if (animation.getAnimatedFraction() == 1f)
-							requestLayout();
 					}
 				});
 
@@ -343,15 +424,21 @@ public class Container extends ViewGroup {
 
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
+		Object[] keyset = frames.keySet().toArray();
 		for (int i = 0; i < frames.size(); i++) {
-			FrameDescriptor desc = frames.get(frames.keyAt(i));
+			FrameDescriptor desc = frames.get(keyset[i]);
 
 			preventLayout = true;
-			if (usedViews.get(desc.itemIndex) == null)
+			if (usedViews.get(desc.data) == null && usedHeaderViews.get(desc.data) == null)
 				addAndMeasureViewIfNeeded(desc);
 			preventLayout = false;
 
-			View view = usedViews.get(desc.itemIndex);
+			View view;
+			if (desc.isHeader)
+				view = usedHeaderViews.get(desc.data);
+			else
+				view = usedViews.get(desc.data);
+
 			doLayout(view, desc.frame);
 
 		}
@@ -360,7 +447,7 @@ public class Container extends ViewGroup {
 
 	}
 
-	public BaseAdapter getAdapter() {
+	public BaseSectionedAdapter getAdapter() {
 		return itemAdapter;
 	}
 

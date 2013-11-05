@@ -6,9 +6,8 @@ import android.view.View;
 public abstract class LayoutControllerAnimator {
 
 	public LayoutControllerAnimator() {
-		
+
 	}
-	
-	public abstract ValueAnimator getFrameTransitionAnimation(final int itemIndex, final Frame of, final FrameDescriptor nf,
-			final View v);
+
+	public abstract ValueAnimator getFrameTransitionAnimation(final Frame of, final FrameDescriptor nf, final View v);
 }

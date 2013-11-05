@@ -1,17 +1,19 @@
 package org.freeflow.collectionviews2;
 
+import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Container;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
 
+import android.R.color;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -33,7 +35,14 @@ public class MainActivity extends Activity {
 
 		FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frameLayout);
 
-		ImageAdapter adapter = new ImageAdapter(null);
+		ImageAdapter adapter = new ImageAdapter();
+
+		for (int i = 0; i < 10; i++) {
+			adapter.createNewSection("Section " + i);
+			for (int j = 0; j < 10; j++) {
+				adapter.addItemForSection(new Object(), i);
+			}
+		}
 
 		container = new Container(this);
 
@@ -42,17 +51,21 @@ public class MainActivity extends Activity {
 		container.requestFocus();
 		hLayout = new HLayout();
 		hLayout.setItemWidth(100);
+		hLayout.setHeaderItemDimensions(150, 600);
 
 		vLayout = new VLayout();
 		vLayout.setItemHeight(100);
+		vLayout.setHeaderItemDimensions(600, 150);
 
 		vGridLayout = new VGridLayout();
 		vGridLayout.setItemHeight(200);
 		vGridLayout.setItemWidth(200);
+		vGridLayout.setHeaderItemDimensions(600, 100);
 
 		hGridLayout = new HGridLayout();
 		hGridLayout.setItemHeight(200);
 		hGridLayout.setItemWidth(200);
+		hGridLayout.setHeaderItemDimensions(100, 600);
 
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
@@ -77,46 +90,47 @@ public class MainActivity extends Activity {
 		frameLayout.findViewById(R.id.transitionButton).bringToFront();
 	}
 
-	class ImageAdapter extends BaseAdapter {
+	class ImageAdapter extends BaseSectionedAdapter {
 
-		private static final String TAG = "ImageAdapter";
-		private String[] images;
-
-		public ImageAdapter(String[] images) {
-			this.images = images;
+		@Override
+		public long getItemId(int section, int position) {
+			return section * 1000 + position;
 		}
 
 		@Override
-		public int getCount() {
-			return 100;
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return String.valueOf(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView button = null;
+		public View getViewForSection(int section, int position, View convertView, ViewGroup parent) {
+			TextView tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");
-				button = (TextView) convertView;
+				tv = (TextView) convertView;
 			} else {
-				button = new TextView(MainActivity.this);
+				tv = new TextView(MainActivity.this);
 			}
 
-			button.setFocusable(false);
-			button.setBackgroundResource(R.drawable.orange);
+			tv.setFocusable(false);
+			tv.setBackgroundResource(R.drawable.orange);
 			// button.setOnTouchListener(MainActivity.this);
-			button.setText("" + position);
+			tv.setText("s" + section + " p" + position);
 
-			return button;
+			return tv;
+		}
+
+		@Override
+		public View getHeaderViewForSection(int section, View convertView, ViewGroup parent) {
+			TextView tv = null;
+			if (convertView != null) {
+				// Log.d(TAG, "Convert view not null");
+				tv = (TextView) convertView;
+			} else {
+				tv = new TextView(MainActivity.this);
+			}
+
+			tv.setFocusable(false);
+			tv.setBackgroundColor(Color.GRAY);
+			// button.setOnTouchListener(MainActivity.this);
+			tv.setText("section header" + section);
+
+			return tv;
 		}
 
 	}

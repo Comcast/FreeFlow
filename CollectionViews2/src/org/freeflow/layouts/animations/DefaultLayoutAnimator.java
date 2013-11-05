@@ -15,8 +15,7 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public ValueAnimator getFrameTransitionAnimation(final int itemIndex, final Frame of, final FrameDescriptor nf,
-			final View v) {
+	public ValueAnimator getFrameTransitionAnimation(final Frame of, final FrameDescriptor nf, final View v) {
 
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(500);
@@ -51,6 +50,6 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
 		return anim;
 	}
-	
+
 	
 }

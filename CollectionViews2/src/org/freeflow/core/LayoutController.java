@@ -1,13 +1,8 @@
 package org.freeflow.core;
 
-import org.freeflow.layouts.animations.DefaultLayoutAnimator;
+import java.util.HashMap;
 
-import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.util.SparseArray;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.widget.BaseAdapter;
+import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 
 public abstract class LayoutController {
 
@@ -21,7 +16,7 @@ public abstract class LayoutController {
 	 */
 	public abstract void setDimensions(int measuredWidth, int measuredHeight);
 
-	public abstract void setItems(BaseAdapter adapter);
+	public abstract void setItems(BaseSectionedAdapter adapter);
 
 	/**
 	 * Generate the frame descriptors of all views in the given viewport, you
@@ -34,11 +29,11 @@ public abstract class LayoutController {
 	 *            the top bound of the viewport
 	 * @return
 	 */
-	public abstract SparseArray<FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
+	public abstract HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
-	public abstract Frame getViewportFrameForItemIndex(int index);
+	public abstract Frame getViewportFrameForItem(Object data);
 
-	public abstract Frame getFrameForItemIndexAndViewport(int index, int viewPortLeft, int viewPortTop);
+	public abstract FrameDescriptor getFrameDescriptorForItemAndViewport(Object item, int viewPortLeft, int viewPortTop);
 
 	public abstract Frame getOffScreenStartFrame();
 
@@ -66,5 +61,7 @@ public abstract class LayoutController {
 	public abstract int getMaximumViewPortX();
 
 	public abstract int getMaximumViewPortY();
+	
+	public abstract void setHeaderItemDimensions(int hWidth, int hHeight);
 
 }
