@@ -218,6 +218,8 @@ public class Container extends ViewGroup {
 	}
 
 	public void setLayout(LayoutController lc) {
+		
+		if(lc == layoutController) return;
 
 		layoutController = lc;
 
@@ -291,7 +293,9 @@ public class Container extends ViewGroup {
 
 		if (v instanceof StateListener)
 			((StateListener) v).ReportCurrentState(nf.state);
-
+		if(nf.frame.equals(of)){
+			return;
+		}
 		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
 
 	}
@@ -314,6 +318,7 @@ public class Container extends ViewGroup {
 			final FrameDescriptor nf = frames.get(keyset[i]);
 
 			if (oldFrames.get(keyset[i]) != null)
+				
 				oldFrames.remove(keyset[i]);
 
 			transitionToFrame(nf);

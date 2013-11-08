@@ -18,9 +18,6 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	@Override
 	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v, int duration) {
 
-		if (of.equals(nf.frame))
-			return;
-
 		if (v instanceof iFrameChangeListener) {
 			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
 			return;
