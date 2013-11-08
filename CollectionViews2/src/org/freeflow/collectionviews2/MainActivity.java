@@ -38,7 +38,8 @@ public class MainActivity extends Activity {
 		ImageAdapter adapter = new ImageAdapter();
 
 		for (int i = 0; i < 10; i++) {
-			adapter.createNewSection("Section " + i);
+			adapter.createNewSection("Section " + i, true);
+			
 			for (int j = 0; j < 10; j++) {
 				adapter.addItemForSection(new Object(), i);
 			}

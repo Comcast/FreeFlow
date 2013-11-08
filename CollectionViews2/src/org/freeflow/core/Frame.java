@@ -15,4 +15,14 @@ public class Frame {
 
 		return newFrame;
 	}
+
+	public boolean equals(Frame frame) {
+		if(frame == null)
+			return false;
+		
+		if (frame.left == left && frame.top == top && frame.width == width && frame.height == height)
+			return true;
+
+		return false;
+	}
 }

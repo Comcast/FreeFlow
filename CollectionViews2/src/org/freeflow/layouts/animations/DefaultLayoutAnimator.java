@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.animation.LinearInterpolator;
 
 public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
@@ -15,10 +16,18 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public ValueAnimator getFrameTransitionAnimation(final Frame of, final FrameDescriptor nf, final View v) {
+	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v, int duration) {
+
+		if (of.equals(nf.frame))
+			return;
+
+		if (v instanceof iFrameChangeListener) {
+			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
+			return;
+		}
 
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-		anim.setDuration(500);
+		anim.setDuration(duration);
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
 			@Override
@@ -48,8 +57,9 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 			}
 		});
 
-		return anim;
+		anim.setInterpolator(new LinearInterpolator());
+
+		anim.start();
 	}
 
-	
 }

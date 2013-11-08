@@ -28,6 +28,8 @@ public class Container extends ViewGroup {
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
+	private int animationDuration = 500;
+
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
@@ -52,13 +54,12 @@ public class Container extends ViewGroup {
 		viewpool = new ArrayList<View>();
 		usedHeaderViews = new HashMap<Object, View>();
 		headerViewpool = new ArrayList<View>();
-
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec) - 100);
+		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 		if (layoutController != null) {
 			preventLayout = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -107,10 +108,15 @@ public class Container extends ViewGroup {
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 
+		View v = null;
 		if (frameDesc.isHeader)
-			usedHeaderViews.get(frameDesc.data).measure(widthSpec, heightSpec);
+			v = usedHeaderViews.get(frameDesc.data);
 		else
-			usedViews.get(frameDesc.data).measure(widthSpec, heightSpec);
+			v = usedViews.get(frameDesc.data);
+
+		v.measure(widthSpec, heightSpec);
+		if (v instanceof StateListener)
+			((StateListener) v).ReportCurrentState(frameDesc.state);
 
 	}
 
@@ -208,6 +214,7 @@ public class Container extends ViewGroup {
 
 	private void doLayout(View view, Frame frame) {
 		view.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+
 	}
 
 	public void setLayout(LayoutController lc) {
@@ -255,7 +262,7 @@ public class Container extends ViewGroup {
 
 	}
 
-	protected ValueAnimator getAnimationForLayoutTransition(final FrameDescriptor nf) {
+	protected void transitionToFrame(final FrameDescriptor nf) {
 
 		boolean newFrame = false;
 		if (nf.isHeader) {
@@ -282,19 +289,22 @@ public class Container extends ViewGroup {
 			of.height = v.getMeasuredHeight();
 		}
 
-		return layoutController.getLayoutAnimator().getFrameTransitionAnimation(of, nf, v);
+		if (v instanceof StateListener)
+			((StateListener) v).ReportCurrentState(nf.state);
+
+		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
 
 	}
 
-	protected void layoutChanged() {
+	public void layoutChanged() {
 		HashMap<Object, FrameDescriptor> oldFrames = frames;
-		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
 		layoutChanged(oldFrames);
 	}
 
-	protected void layoutChanged(HashMap<Object, FrameDescriptor> oldFrames) {
+	public void layoutChanged(HashMap<Object, FrameDescriptor> oldFrames) {
 
+		layoutController.generateFrameDescriptors();
 		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 		preventLayout = true;
 		// cleanupViews();
@@ -306,14 +316,16 @@ public class Container extends ViewGroup {
 			if (oldFrames.get(keyset[i]) != null)
 				oldFrames.remove(keyset[i]);
 
-			getAnimationForLayoutTransition(nf).start();
+			transitionToFrame(nf);
+
 		}
 
 		keyset = oldFrames.keySet().toArray();
 		for (int i = 0; i < oldFrames.size(); i++) {
 
 			FrameDescriptor nf = layoutController.getFrameDescriptorForItemAndViewport(keyset[i], viewPortX, viewPortY);
-			getAnimationForLayoutTransition(nf).start();
+			transitionToFrame(nf);
+
 		}
 
 		preventLayout = false;
@@ -449,6 +461,10 @@ public class Container extends ViewGroup {
 
 	public BaseSectionedAdapter getAdapter() {
 		return itemAdapter;
+	}
+
+	public void setAnimationDuration(int animationDuration) {
+		this.animationDuration = animationDuration;
 	}
 
 }

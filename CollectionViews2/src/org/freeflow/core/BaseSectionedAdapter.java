@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 public abstract class BaseSectionedAdapter {
 
-	private ArrayList<Section> sections;
+	protected ArrayList<Section> sections;
 
 	public BaseSectionedAdapter() {
 		sections = new ArrayList<Section>();
@@ -22,9 +22,10 @@ public abstract class BaseSectionedAdapter {
 
 	}
 
-	public int createNewSection(String title) {
+	public int createNewSection(String title, boolean shouldDisplayHeader) {
 		Section s = new Section();
 		s.setSectionTitle(title);
+		s.setShouldDisplayHeader(shouldDisplayHeader);
 		sections.add(s);
 
 		return sections.size();
