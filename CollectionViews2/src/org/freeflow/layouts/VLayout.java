@@ -93,7 +93,7 @@ public class VLayout extends LayoutController {
 				topStart += headerHeight;
 			}
 
-			for (int j = 0; j < itemsAdapter.getNumberOfSections(); j++) {
+			for (int j = 0; j < s.getDataCount(); j++) {
 				FrameDescriptor descriptor = new FrameDescriptor();
 				Frame frame = new Frame();
 				descriptor.itemSection = i;

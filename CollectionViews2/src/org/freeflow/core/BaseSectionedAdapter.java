@@ -5,13 +5,9 @@ import java.util.ArrayList;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class BaseSectionedAdapter {
+public interface BaseSectionedAdapter {
 
 //	protected ArrayList<Section> sections;
-
-	public BaseSectionedAdapter() {
-//		sections = new ArrayList<Section>();
-	}
 
 //	public void addItemForSection(Object object, int section) {
 //		if (section < 0 || section > sections.size()) {

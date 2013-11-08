@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
 		frameLayout.findViewById(R.id.transitionButton).bringToFront();
 	}
 
-	class ImageAdapter extends BaseSectionedAdapter {
+	class ImageAdapter implements BaseSectionedAdapter {
 
 		private ArrayList<Section> sections = new ArrayList<Section>();
 		
