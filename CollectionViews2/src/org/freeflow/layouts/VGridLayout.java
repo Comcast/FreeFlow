@@ -63,11 +63,11 @@ public class VGridLayout extends LayoutController {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
-		
+
 		if (headerWidth < 0) {
 			throw new IllegalStateException("headerWidth not set");
 		}
-		
+
 		if (headerHeight < 0) {
 			throw new IllegalStateException("headerHeight not set");
 		}
@@ -81,24 +81,28 @@ public class VGridLayout extends LayoutController {
 
 		int topStart = 0;
 
-		for (int i = 0; i < itemsAdapter.getSectionCount(); i++) {
+		for (int i = 0; i < itemsAdapter.getNumberOfSections(); i++) {
 
-			FrameDescriptor header = new FrameDescriptor();
-			Frame hframe = new Frame();
-			header.itemSection = i;
-			header.itemIndex = -1;
-			header.isHeader = true;
-			hframe.left = 0;
-			hframe.top = topStart;
-			hframe.width = headerWidth;
-			hframe.height = headerHeight;
-			header.frame = hframe;
-			header.data = itemsAdapter.getSection(i).getSectionTitle();
-			frameDescriptors.put(header.data, header);
+			Section s = itemsAdapter.getSection(i);
 
-			topStart += headerHeight;
+			if (s.shouldDisplayHeader()) {
+				FrameDescriptor header = new FrameDescriptor();
+				Frame hframe = new Frame();
+				header.itemSection = i;
+				header.itemIndex = -1;
+				header.isHeader = true;
+				hframe.left = 0;
+				hframe.top = topStart;
+				hframe.width = headerWidth;
+				hframe.height = headerHeight;
+				header.frame = hframe;
+				header.data = s.getSectionTitle();
+				frameDescriptors.put(header.data, header);
+				topStart += headerHeight;
+			}
+			
 
-			for (int j = 0; j < itemsAdapter.getSectionCount(); j++) {
+			for (int j = 0; j < itemsAdapter.getNumberOfSections(); j++) {
 				FrameDescriptor descriptor = new FrameDescriptor();
 				Frame frame = new Frame();
 				descriptor.itemSection = i;
@@ -108,14 +112,15 @@ public class VGridLayout extends LayoutController {
 				frame.width = itemWidth;
 				frame.height = itemHeight;
 				descriptor.frame = frame;
-				descriptor.data = itemsAdapter.getItem(i, j);
+				descriptor.data = s.getData().get(j);
 				frameDescriptors.put(descriptor.data, descriptor);
 			}
 			int mod = 0;
-			if (itemsAdapter.getCountForSection(i) % cols != 0)
+			if (s.getDataCount()% cols != 0)
 				mod = 1;
 
-			topStart += ((itemsAdapter.getCountForSection(i) / cols) + mod) * itemHeight;
+			topStart += ((s.getDataCount() / cols) + mod)
+					* itemHeight;
 		}
 
 	}
@@ -124,13 +129,15 @@ public class VGridLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(
+			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
 		Object[] keyset = frameDescriptors.keySet().toArray();
 		for (int i = 0; i < frameDescriptors.size(); i++) {
 			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
-			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
+			if (fd.frame.top + itemHeight > viewPortTop
+					&& fd.frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
 				newDesc.frame.top -= viewPortTop;
 				desc.put(newDesc.data, newDesc);
@@ -197,17 +204,21 @@ public class VGridLayout extends LayoutController {
 		if (itemsAdapter == null)
 			return 0;
 
-		int sectionIndex = itemsAdapter.getSectionCount() - 1;
+		int sectionIndex = itemsAdapter.getNumberOfSections() - 1;
 		Section s = itemsAdapter.getSection(sectionIndex);
 
-		Object lastFrameData = itemsAdapter.getItem(sectionIndex, s.getDataCount() - 1);
+		if (s.getDataCount() == 0)
+			return 0;
+		
+		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
 		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
 
 		return (fd.frame.top + fd.frame.height) - height;
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data,
+			int viewPortLeft, int viewPortTop) {
 		if (frameDescriptors.get(data) == null)
 			return null;
 

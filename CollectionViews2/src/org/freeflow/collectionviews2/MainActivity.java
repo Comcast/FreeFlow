@@ -1,13 +1,15 @@
 package org.freeflow.collectionviews2;
 
+import java.util.ArrayList;
+
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Container;
+import org.freeflow.core.Section;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
 
-import android.R.color;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -37,13 +39,7 @@ public class MainActivity extends Activity {
 
 		ImageAdapter adapter = new ImageAdapter();
 
-		for (int i = 0; i < 10; i++) {
-			adapter.createNewSection("Section " + i, true);
-			
-			for (int j = 0; j < 10; j++) {
-				adapter.addItemForSection(new Object(), i);
-			}
-		}
+		
 
 		container = new Container(this);
 
@@ -93,6 +89,20 @@ public class MainActivity extends Activity {
 
 	class ImageAdapter extends BaseSectionedAdapter {
 
+		private ArrayList<Section> sections = new ArrayList<Section>();
+		
+		public ImageAdapter() {
+			for (int i = 0; i < 10; i++) {
+				Section s  = new Section();
+				s.setShouldDisplayHeader(true);
+				s.setSectionTitle("Section " + i);
+				for (int j = 0; j < 10; j++) {
+					s.addItem(new Object());
+				}
+				sections.add(s);
+			}
+		}
+		
 		@Override
 		public long getItemId(int section, int position) {
 			return section * 1000 + position;
@@ -132,6 +142,21 @@ public class MainActivity extends Activity {
 			tv.setText("section header" + section);
 
 			return tv;
+		}
+
+		@Override
+		public int getNumberOfSections() {
+			// TODO Auto-generated method stub
+			return sections.size();
+		}
+
+		@Override
+		public Section getSection(int index) {
+			// TODO Auto-generated method stub
+			if(index < sections.size() && index >= 0)
+				return sections.get(index);
+			
+			return null;
 		}
 
 	}

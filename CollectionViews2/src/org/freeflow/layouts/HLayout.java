@@ -64,33 +64,35 @@ public class HLayout extends LayoutController {
 		if (headerWidth < 0) {
 			throw new IllegalStateException("headerWidth not set");
 		}
-		
+
 		if (headerHeight < 0) {
 			throw new IllegalStateException("headerHeight not set");
 		}
 
-		
 		frameDescriptors.clear();
 		int leftStart = 0;
 
-		for (int i = 0; i < itemsAdapter.getSectionCount(); i++) {
+		for (int i = 0; i < itemsAdapter.getNumberOfSections(); i++) {
+			Section s = itemsAdapter.getSection(i);
 
-			FrameDescriptor header = new FrameDescriptor();
-			Frame hframe = new Frame();
-			header.itemSection = i;
-			header.itemIndex = -1;
-			header.isHeader = true;
-			hframe.left = leftStart;
-			hframe.top = 0;
-			hframe.width = headerWidth;
-			hframe.height = headerHeight;
-			header.frame = hframe;
-			header.data = itemsAdapter.getSection(i).getSectionTitle();
-			frameDescriptors.put(header.data, header);
+			if (s.shouldDisplayHeader()) {
+				FrameDescriptor header = new FrameDescriptor();
+				Frame hframe = new Frame();
+				header.itemSection = i;
+				header.itemIndex = -1;
+				header.isHeader = true;
+				hframe.left = leftStart;
+				hframe.top = 0;
+				hframe.width = headerWidth;
+				hframe.height = headerHeight;
+				header.frame = hframe;
+				header.data = s.getSectionTitle();
+				frameDescriptors.put(header.data, header);
 
-			leftStart += headerWidth;
+				leftStart += headerWidth;
+			}
 
-			for (int j = 0; j < itemsAdapter.getSectionCount(); j++) {
+			for (int j = 0; j < itemsAdapter.getNumberOfSections(); j++) {
 				FrameDescriptor descriptor = new FrameDescriptor();
 				Frame frame = new Frame();
 				descriptor.itemSection = i;
@@ -100,11 +102,11 @@ public class HLayout extends LayoutController {
 				frame.width = itemWidth;
 				frame.height = height;
 				descriptor.frame = frame;
-				descriptor.data = itemsAdapter.getItem(i, j);
+				descriptor.data = s.getData().get(j);
 				frameDescriptors.put(descriptor.data, descriptor);
 			}
 
-			leftStart += itemsAdapter.getCountForSection(i) * itemWidth;
+			leftStart += s.getDataCount() * itemWidth;
 		}
 
 	}
@@ -113,7 +115,8 @@ public class HLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(
+			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
 		Object[] keyset = frameDescriptors.keySet().toArray();
@@ -121,7 +124,8 @@ public class HLayout extends LayoutController {
 
 			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
 
-			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
+			if (fd.frame.left + itemWidth > viewPortLeft
+					&& fd.frame.left < viewPortLeft + width) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
 				newDesc.frame.left -= viewPortLeft;
 				desc.put(newDesc.data, newDesc);
@@ -141,7 +145,8 @@ public class HLayout extends LayoutController {
 		frame.width = width;
 		frame.height = height;
 
-		if (itemWidth != -1 && width != -1 && frame.left > getMaximumViewPortX())
+		if (itemWidth != -1 && width != -1
+				&& frame.left > getMaximumViewPortX())
 			frame.left = getMaximumViewPortX();
 
 		return frame;
@@ -183,10 +188,13 @@ public class HLayout extends LayoutController {
 		if (itemsAdapter == null)
 			return 0;
 
-		int sectionIndex = itemsAdapter.getSectionCount() - 1;
+		int sectionIndex = itemsAdapter.getNumberOfSections() - 1;
 		Section s = itemsAdapter.getSection(sectionIndex);
 
-		Object lastFrameData = itemsAdapter.getItem(sectionIndex, s.getDataCount() - 1);
+		if (s.getDataCount() == 0)
+			return 0;
+
+		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
 		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
 
 		return (fd.frame.left + fd.frame.width) - width;
@@ -198,7 +206,8 @@ public class HLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data,
+			int viewPortLeft, int viewPortTop) {
 		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
 
 		fd.frame.left -= viewPortLeft;
@@ -206,7 +215,7 @@ public class HLayout extends LayoutController {
 
 		return fd;
 	}
-	
+
 	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
 		headerHeight = hHeight;
