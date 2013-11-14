@@ -16,8 +16,12 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v, int duration) {
+	public void clear() {
 
+	}
+
+	@Override
+	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v, final int duration) {
 		if (v instanceof iFrameChangeListener) {
 			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
 			return;
@@ -30,10 +34,8 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
 
-				if (v == null) {
+				if (v == null)
 					animation.cancel();
-					return;
-				}
 
 				int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
 				int itemHeight = of.height + (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
@@ -52,11 +54,16 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
 				v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 			}
+
 		});
 
 		anim.setInterpolator(new LinearInterpolator());
 
 		anim.start();
+
 	}
 
+	@Override
+	public void start(int duration) {
+	}
 }
