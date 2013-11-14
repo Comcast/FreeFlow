@@ -116,15 +116,12 @@ public class VLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(
-			int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
-		Object[] keyset = frameDescriptors.keySet().toArray();
-		for (int i = 0; i < frameDescriptors.size(); i++) {
-			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
-			if (fd.frame.top + itemHeight > viewPortTop
-					&& fd.frame.top < viewPortTop + height) {
+		for (FrameDescriptor fd : frameDescriptors.values()) {
+
+			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
 				newDesc.frame.top -= viewPortTop;
 				desc.put(newDesc.data, newDesc);
@@ -196,7 +193,7 @@ public class VLayout extends LayoutController {
 
 		if (s.getDataCount() == 0)
 			return 0;
-		
+
 		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
 		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
 
@@ -204,8 +201,7 @@ public class VLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data,
-			int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
 		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
 
 		fd.frame.left -= viewPortLeft;

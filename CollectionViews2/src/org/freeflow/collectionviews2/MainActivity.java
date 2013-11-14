@@ -9,6 +9,7 @@ import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
+import org.freeflow.layouts.animations.ScaleAnimator;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -26,9 +27,13 @@ public class MainActivity extends Activity {
 	Container container = null;
 	HLayout hLayout = null;
 	VLayout vLayout = null;
-
 	VGridLayout vGridLayout = null;
 	HGridLayout hGridLayout = null;
+	HLayout hLayout1 = null;
+	VLayout vLayout1 = null;
+	VGridLayout vGridLayout1 = null;
+	HGridLayout hGridLayout1 = null;
+	Button changeButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +43,6 @@ public class MainActivity extends Activity {
 		FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frameLayout);
 
 		ImageAdapter adapter = new ImageAdapter();
-
-		
 
 		container = new Container(this);
 
@@ -64,23 +67,58 @@ public class MainActivity extends Activity {
 		hGridLayout.setItemWidth(200);
 		hGridLayout.setHeaderItemDimensions(100, 600);
 
+		hLayout1 = new HLayout();
+		hLayout1.setItemWidth(100);
+		hLayout1.setHeaderItemDimensions(150, 600);
+
+		vLayout1 = new VLayout();
+		vLayout1.setItemHeight(100);
+		vLayout1.setHeaderItemDimensions(600, 150);
+
+		vGridLayout1 = new VGridLayout();
+		vGridLayout1.setItemHeight(200);
+		vGridLayout1.setItemWidth(200);
+		vGridLayout1.setHeaderItemDimensions(600, 100);
+
+		hGridLayout1 = new HGridLayout();
+		hGridLayout1.setItemHeight(200);
+		hGridLayout1.setItemWidth(200);
+		hGridLayout1.setHeaderItemDimensions(100, 600);
+
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
+		hGridLayout1.setLayoutAnimator(new ScaleAnimator());
+		hLayout1.setLayoutAnimator(new ScaleAnimator());
+		vLayout1.setLayoutAnimator(new ScaleAnimator());
+		vGridLayout1.setLayoutAnimator(new ScaleAnimator());
 
 		frameLayout.addView(container);
 
-		((Button) frameLayout.findViewById(R.id.transitionButton)).setOnClickListener(new OnClickListener() {
+		changeButton = ((Button) frameLayout.findViewById(R.id.transitionButton));
+		changeButton.setText("Layout");
+		changeButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if (container.getLayoutController() == hLayout)
+				if (container.getLayoutController() == hLayout) {
+					changeButton.setText("Layout");
 					container.setLayout(vLayout);
-				else if (container.getLayoutController() == vLayout)
+				} else if (container.getLayoutController() == vLayout) {
 					container.setLayout(vGridLayout);
-				else if (container.getLayoutController() == vGridLayout)
+				} else if (container.getLayoutController() == vGridLayout) {
 					container.setLayout(hGridLayout);
-				else
+				} else if (container.getLayoutController() == hGridLayout) {
+					changeButton.setText("Scale");
+					container.setLayout(hLayout1);
+				} else if (container.getLayoutController() == hLayout1) {
+					container.setLayout(vLayout1);
+				} else if (container.getLayoutController() == vLayout1) {
+					container.setLayout(vGridLayout1);
+				} else if (container.getLayoutController() == vGridLayout1) {
+					container.setLayout(hGridLayout1);
+				} else {
 					container.setLayout(hLayout);
+				}
 			}
 		});
 
@@ -90,10 +128,10 @@ public class MainActivity extends Activity {
 	class ImageAdapter implements BaseSectionedAdapter {
 
 		private ArrayList<Section> sections = new ArrayList<Section>();
-		
+
 		public ImageAdapter() {
 			for (int i = 0; i < 10; i++) {
-				Section s  = new Section();
+				Section s = new Section();
 				s.setShouldDisplayHeader(true);
 				s.setSectionTitle("Section " + i);
 				for (int j = 0; j < 10; j++) {
@@ -102,7 +140,7 @@ public class MainActivity extends Activity {
 				sections.add(s);
 			}
 		}
-		
+
 		@Override
 		public long getItemId(int section, int position) {
 			return section * 1000 + position;
@@ -153,9 +191,9 @@ public class MainActivity extends Activity {
 		@Override
 		public Section getSection(int index) {
 			// TODO Auto-generated method stub
-			if(index < sections.size() && index >= 0)
+			if (index < sections.size() && index >= 0)
 				return sections.get(index);
-			
+
 			return null;
 		}
 

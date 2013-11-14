@@ -100,7 +100,6 @@ public class VGridLayout extends LayoutController {
 				frameDescriptors.put(header.data, header);
 				topStart += headerHeight;
 			}
-			
 
 			for (int j = 0; j < s.getDataCount(); j++) {
 				FrameDescriptor descriptor = new FrameDescriptor();
@@ -116,11 +115,10 @@ public class VGridLayout extends LayoutController {
 				frameDescriptors.put(descriptor.data, descriptor);
 			}
 			int mod = 0;
-			if (s.getDataCount()% cols != 0)
+			if (s.getDataCount() % cols != 0)
 				mod = 1;
 
-			topStart += ((s.getDataCount() / cols) + mod)
-					* itemHeight;
+			topStart += ((s.getDataCount() / cols) + mod) * itemHeight;
 		}
 
 	}
@@ -129,15 +127,12 @@ public class VGridLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(
-			int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
-		Object[] keyset = frameDescriptors.keySet().toArray();
-		for (int i = 0; i < frameDescriptors.size(); i++) {
-			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
-			if (fd.frame.top + itemHeight > viewPortTop
-					&& fd.frame.top < viewPortTop + height) {
+		for (FrameDescriptor fd : frameDescriptors.values()) {
+
+			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
 				newDesc.frame.top -= viewPortTop;
 				desc.put(newDesc.data, newDesc);
@@ -209,7 +204,7 @@ public class VGridLayout extends LayoutController {
 
 		if (s.getDataCount() == 0)
 			return 0;
-		
+
 		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
 		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
 
@@ -217,8 +212,7 @@ public class VGridLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data,
-			int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
 		if (frameDescriptors.get(data) == null)
 			return null;
 

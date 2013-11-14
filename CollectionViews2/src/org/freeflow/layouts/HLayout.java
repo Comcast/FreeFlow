@@ -115,17 +115,12 @@ public class HLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(
-			int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
-		Object[] keyset = frameDescriptors.keySet().toArray();
-		for (int i = 0; i < frameDescriptors.size(); i++) {
+		for (FrameDescriptor fd : frameDescriptors.values()) {
 
-			FrameDescriptor fd = frameDescriptors.get(keyset[i]);
-
-			if (fd.frame.left + itemWidth > viewPortLeft
-					&& fd.frame.left < viewPortLeft + width) {
+			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
 				newDesc.frame.left -= viewPortLeft;
 				desc.put(newDesc.data, newDesc);
@@ -145,8 +140,7 @@ public class HLayout extends LayoutController {
 		frame.width = width;
 		frame.height = height;
 
-		if (itemWidth != -1 && width != -1
-				&& frame.left > getMaximumViewPortX())
+		if (itemWidth != -1 && width != -1 && frame.left > getMaximumViewPortX())
 			frame.left = getMaximumViewPortX();
 
 		return frame;
@@ -206,8 +200,7 @@ public class HLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data,
-			int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
 		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
 
 		fd.frame.left -= viewPortLeft;
