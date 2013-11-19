@@ -68,7 +68,6 @@ public class Container extends ViewGroup {
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 		if (layoutController != null) {
-			preventLayout = true;
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
 
@@ -78,11 +77,6 @@ public class Container extends ViewGroup {
 
 			cleanupViews();
 		}
-		preventLayout = false;
-
-//		if (DEBUG)
-//			Log.d(TAG, "O0nMeasure End " + (System.currentTimeMillis() - start));
-
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
@@ -96,9 +90,7 @@ public class Container extends ViewGroup {
 					headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
 			view.setAlpha(1);
 			usedHeaderViews.put(frameDesc.data, view);
-			preventLayout = true;
 			addView(view);
-			preventLayout = false;
 			doMeasure(frameDesc);
 		} else if (!frameDesc.isHeader && usedViews.get(frameDesc.data) == null) {
 
@@ -106,9 +98,7 @@ public class Container extends ViewGroup {
 					viewpool.size() > 0 ? viewpool.remove(0) : null, this);
 			view.setAlpha(1);
 			usedViews.put(frameDesc.data, view);
-			preventLayout = true;
 			addView(view);
-			preventLayout = false;
 			doMeasure(frameDesc);
 
 		} else {
@@ -171,9 +161,7 @@ public class Container extends ViewGroup {
 				@Override
 				public void run() {
 					viewpool.add(view);
-					preventLayout = true;
 					removeView(view);
-					preventLayout = false;
 				}
 			}).start();
 
@@ -195,9 +183,7 @@ public class Container extends ViewGroup {
 				@Override
 				public void run() {
 					headerViewpool.add(view);
-					preventLayout = true;
 					removeView(view);
-					preventLayout = false;
 				}
 			}).start();
 
