@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 
 public class Container extends ViewGroup {
 
-	private static boolean DEBUG = false;
+	private static boolean DEBUG = true;
 
 	private static final String TAG = "Container";
 	protected HashMap<Object, View> usedViews;
@@ -63,8 +63,8 @@ public class Container extends ViewGroup {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d("DEBUG", "OnMeasure Start " + start);
+	
+			Log.d(TAG, "onMeasure Start " + start);
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 		if (layoutController != null) {
@@ -80,15 +80,15 @@ public class Container extends ViewGroup {
 		}
 		preventLayout = false;
 
-		if (DEBUG)
-			Log.d("DEBUG", "OnMeasure End " + (System.currentTimeMillis() - start));
+//		if (DEBUG)
+//			Log.d(TAG, "O0nMeasure End " + (System.currentTimeMillis() - start));
 
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", "addAndMeasureViewIfNeeded Start " + start);
+			Log.d(TAG, "addAndMeasureViewIfNeeded Start " + start);
 
 		if (frameDesc.isHeader && usedHeaderViews.get(frameDesc.data) == null) {
 
@@ -115,15 +115,15 @@ public class Container extends ViewGroup {
 			doMeasure(frameDesc);
 		}
 
-		if (DEBUG)
-			Log.d("DEBUG", "addAndMeasureViewIfNeeded End " + (System.currentTimeMillis() - start));
+//		if (DEBUG)
+//			Log.d(TAG, "addAndMeasureViewIfNeeded End " + (System.currentTimeMillis() - start));
 
 	}
 
 	private void doMeasure(FrameDescriptor frameDesc) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", "doMeasure Start " + start);
+			Log.d(TAG, "doMeasure Start " + start);
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
@@ -139,18 +139,18 @@ public class Container extends ViewGroup {
 			((StateListener) v).ReportCurrentState(frameDesc.state);
 
 		if (DEBUG)
-			Log.d("DEBUG", "doMeasure End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "doMeasure End " + (System.currentTimeMillis() - start));
 
 	}
 
 	private void cleanupViews() {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", "cleanupViews Start " + start);
+			Log.d(TAG, "cleanupViews Start " + start);
 
 		if (usedViews == null) {
 			if (DEBUG)
-				Log.d("DEBUG", "cleanupViews End " + (System.currentTimeMillis() - start));
+				Log.d(TAG, "cleanupViews End " + (System.currentTimeMillis() - start));
 
 			return;
 		}
@@ -204,7 +204,7 @@ public class Container extends ViewGroup {
 		}
 
 		if (DEBUG)
-			Log.d("DEBUG", "cleanupViews End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "cleanupViews End " + (System.currentTimeMillis() - start));
 
 	}
 
@@ -212,11 +212,11 @@ public class Container extends ViewGroup {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", "onLayout Start " + start);
+			Log.d(TAG, "onLayout Start " + start);
 
 		if (layoutController == null || frames == null) {
-			if (DEBUG)
-				Log.d("DEBUG", "onLayout End " + (System.currentTimeMillis() - start));
+//			if (DEBUG)
+//				Log.d(TAG, "onLayout End " + (System.currentTimeMillis() - start));
 			return;
 		}
 
@@ -258,31 +258,29 @@ public class Container extends ViewGroup {
 			doLayout(v, frame);
 		}
 
-		if (DEBUG)
-			Log.d("DEBUG", "onLayout End " + (System.currentTimeMillis() - start));
+//		if (DEBUG)
+//			Log.d(TAG, "onLayout End " + (System.currentTimeMillis() - start));
 
 	}
 
 	private void doLayout(View view, Frame frame) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", "doLayout start " + start);
+			Log.d(TAG, "doLayout start " + start);
 
 		view.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 
 		if (DEBUG)
-			Log.d("DEBUG", "doLayout End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "doLayout End " + (System.currentTimeMillis() - start));
 
 	}
 
 	public void setLayout(LayoutController lc) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", " setLayout start " + start);
+			Log.d(TAG, " setLayout start " + start);
 
 		if (lc == layoutController) {
-			if (DEBUG)
-				Log.d("DEBUG", "setLayout End " + (System.currentTimeMillis() - start));
 			return;
 		}
 
@@ -324,15 +322,15 @@ public class Container extends ViewGroup {
 			requestLayout();
 		}
 
-		if (DEBUG)
-			Log.d("DEBUG", "setLayout End " + (System.currentTimeMillis() - start));
+//		if (DEBUG)
+//			Log.d(TAG, "setLayout End " + (System.currentTimeMillis() - start));
 
 	}
 
 	protected void transitionToFrame(final FrameDescriptor nf) {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
-			Log.d("DEBUG", " transitionToFrame start " + start);
+			Log.d(TAG, " transitionToFrame start " + start);
 
 		boolean newFrame = false;
 		if (nf.isHeader) {
@@ -367,7 +365,7 @@ public class Container extends ViewGroup {
 		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
 
 		if (DEBUG)
-			Log.d("DEBUG", "transitionToFrame End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "transitionToFrame End " + (System.currentTimeMillis() - start));
 
 	}
 
@@ -382,7 +380,7 @@ public class Container extends ViewGroup {
 		long start = System.currentTimeMillis();
 
 		if (DEBUG)
-			Log.d("DEBUG", " layoutChanged Start " + start);
+			Log.d(TAG, " layoutChanged Start " + start);
 
 		layoutController.getLayoutAnimator().clear();
 
@@ -415,7 +413,7 @@ public class Container extends ViewGroup {
 		preventLayout = false;
 
 		if (DEBUG)
-			Log.d("DEBUG", "layoutChanged End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "layoutChanged End " + (System.currentTimeMillis() - start));
 
 	}
 
@@ -441,7 +439,7 @@ public class Container extends ViewGroup {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-
+		if(layoutController == null) return false;
 		if (!layoutController.horizontalDragEnabled() && !layoutController.verticalDragEnabled())
 			return false;
 
@@ -511,7 +509,7 @@ public class Container extends ViewGroup {
 		long start = System.currentTimeMillis();
 
 		if (DEBUG)
-			Log.d("DEBUG", "moveScreen start " + start);
+			Log.d(TAG, "moveScreen start " + start);
 
 		if (layoutController.horizontalDragEnabled())
 			viewPortX = (int) (viewPortX - movementX);
@@ -557,7 +555,7 @@ public class Container extends ViewGroup {
 		cleanupViews();
 
 		if (DEBUG)
-			Log.d("DEBUG", "moveScreen End " + (System.currentTimeMillis() - start));
+			Log.d(TAG, "moveScreen End " + (System.currentTimeMillis() - start));
 
 	}
 
