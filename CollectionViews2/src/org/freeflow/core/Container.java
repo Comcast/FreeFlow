@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -17,8 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class Container extends ViewGroup {
-
-	private static boolean DEBUG = true;
 
 	private static final String TAG = "Container";
 	protected HashMap<Object, View> usedViews;
@@ -58,12 +55,13 @@ public class Container extends ViewGroup {
 		viewpool = new ArrayList<View>();
 		usedHeaderViews = new HashMap<Object, View>();
 		headerViewpool = new ArrayList<View>();
+		frames = new HashMap<Object, FrameDescriptor>();
+
+		((HashMap<Object, FrameDescriptor>) frames).put(new Object(), new FrameDescriptor());
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		long start = System.currentTimeMillis();
-		Log.d(TAG, "onMeasure Start " + start);
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 		if (layoutController != null) {
@@ -79,9 +77,6 @@ public class Container extends ViewGroup {
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, "addAndMeasureViewIfNeeded Start " + start);
 
 		if (frameDesc.isHeader && usedHeaderViews.get(frameDesc.data) == null) {
 
@@ -104,15 +99,13 @@ public class Container extends ViewGroup {
 			doMeasure(frameDesc);
 		}
 
-//		if (DEBUG)
-//			Log.d(TAG, "addAndMeasureViewIfNeeded End " + (System.currentTimeMillis() - start));
+		// if (DEBUG)
+		// Log.d(TAG, "addAndMeasureViewIfNeeded End " +
+		// (System.currentTimeMillis() - start));
 
 	}
 
 	private void doMeasure(FrameDescriptor frameDesc) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, "doMeasure Start " + start);
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
@@ -127,20 +120,11 @@ public class Container extends ViewGroup {
 		if (v instanceof StateListener)
 			((StateListener) v).ReportCurrentState(frameDesc.state);
 
-		if (DEBUG)
-			Log.d(TAG, "doMeasure End " + (System.currentTimeMillis() - start));
-
 	}
 
 	private void cleanupViews() {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, "cleanupViews Start " + start);
 
 		if (usedViews == null) {
-			if (DEBUG)
-				Log.d(TAG, "cleanupViews End " + (System.currentTimeMillis() - start));
-
 			return;
 		}
 
@@ -154,15 +138,8 @@ public class Container extends ViewGroup {
 
 			final View view = (View) m.getValue();
 			it.remove();
-
-			view.animate().alpha(0).setDuration(250).withEndAction(new Runnable() {
-
-				@Override
-				public void run() {
-					viewpool.add(view);
-					removeView(view);
-				}
-			}).start();
+			viewpool.add(view);
+			removeView(view);
 
 		}
 
@@ -177,31 +154,20 @@ public class Container extends ViewGroup {
 			final View view = (View) m.getValue();
 			it.remove();
 
-			view.animate().alpha(0).setDuration(250).withEndAction(new Runnable() {
-
-				@Override
-				public void run() {
-					headerViewpool.add(view);
-					removeView(view);
-				}
-			}).start();
+			headerViewpool.add(view);
+			removeView(view);
 
 		}
-
-		if (DEBUG)
-			Log.d(TAG, "cleanupViews End " + (System.currentTimeMillis() - start));
 
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, "onLayout Start " + start);
 
 		if (layoutController == null || frames == null) {
-//			if (DEBUG)
-//				Log.d(TAG, "onLayout End " + (System.currentTimeMillis() - start));
+			// if (DEBUG)
+			// Log.d(TAG, "onLayout End " + (System.currentTimeMillis() -
+			// start));
 			return;
 		}
 
@@ -243,31 +209,22 @@ public class Container extends ViewGroup {
 			doLayout(v, frame);
 		}
 
-//		if (DEBUG)
-//			Log.d(TAG, "onLayout End " + (System.currentTimeMillis() - start));
-
 	}
 
 	private void doLayout(View view, Frame frame) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, "doLayout start " + start);
 
-		view.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
-
-		if (DEBUG)
-			Log.d(TAG, "doLayout End " + (System.currentTimeMillis() - start));
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
+				+ frame.height - viewPortY);
 
 	}
 
 	public void setLayout(LayoutController lc) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, " setLayout start " + start);
 
 		if (lc == layoutController) {
 			return;
 		}
+
+		boolean shouldReturn = layoutController == null;
 
 		layoutController = lc;
 
@@ -279,6 +236,9 @@ public class Container extends ViewGroup {
 		if (this.itemAdapter != null) {
 			layoutController.setItems(itemAdapter);
 		}
+
+		if (shouldReturn)
+			return;
 
 		if (frames != null && frames.size() > 0) {
 
@@ -294,10 +254,18 @@ public class Container extends ViewGroup {
 				}
 			}
 
-			Frame vpFrame = layoutController.getViewportFrameForItem(data);
+			Frame vpFrame = layoutController.getFrameDescriptorForItem(data).frame;
 
 			viewPortX = vpFrame.left;
 			viewPortY = vpFrame.top;
+
+			if (viewPortX > layoutController.getMaximumViewPortX())
+				viewPortX = layoutController.getMaximumViewPortX();
+
+			if (viewPortY > layoutController.getMaximumViewPortY())
+				viewPortY = layoutController.getMaximumViewPortY();
+
+			Log.d(TAG, viewPortX + ", " + viewPortY);
 
 			if (oldFrames != null) {
 				layoutChanged(oldFrames);
@@ -307,15 +275,9 @@ public class Container extends ViewGroup {
 			requestLayout();
 		}
 
-//		if (DEBUG)
-//			Log.d(TAG, "setLayout End " + (System.currentTimeMillis() - start));
-
 	}
 
 	protected void transitionToFrame(final FrameDescriptor nf) {
-		long start = System.currentTimeMillis();
-		if (DEBUG)
-			Log.d(TAG, " transitionToFrame start " + start);
 
 		boolean newFrame = false;
 		if (nf.isHeader) {
@@ -347,10 +309,8 @@ public class Container extends ViewGroup {
 		if (nf.frame.equals(of)) {
 			return;
 		}
-		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
 
-		if (DEBUG)
-			Log.d(TAG, "transitionToFrame End " + (System.currentTimeMillis() - start));
+		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
 
 	}
 
@@ -362,11 +322,6 @@ public class Container extends ViewGroup {
 
 	public void layoutChanged(HashMap<? extends Object, FrameDescriptor> oldFrames) {
 
-		long start = System.currentTimeMillis();
-
-		if (DEBUG)
-			Log.d(TAG, " layoutChanged Start " + start);
-
 		layoutController.getLayoutAnimator().clear();
 
 		layoutController.generateFrameDescriptors();
@@ -377,8 +332,11 @@ public class Container extends ViewGroup {
 		Iterator it = frames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			final FrameDescriptor nf = (FrameDescriptor) m.getValue();
-
+			FrameDescriptor nf = FrameDescriptor.clone((FrameDescriptor) m.getValue());
+			
+			nf.frame.left -= viewPortX;
+			nf.frame.top -= viewPortY;
+			
 			if (oldFrames.get(m.getKey()) != null)
 				oldFrames.remove(m.getKey());
 
@@ -388,17 +346,15 @@ public class Container extends ViewGroup {
 
 		it = oldFrames.keySet().iterator();
 		while (it.hasNext()) {
-			FrameDescriptor nf = layoutController.getFrameDescriptorForItemAndViewport(it.next(), viewPortX, viewPortY);
+			FrameDescriptor nf = layoutController.getFrameDescriptorForItem(it.next());
+			nf.frame.left -= viewPortX;
+			nf.frame.top -= viewPortY;
 			transitionToFrame(nf);
-
 		}
 
 		layoutController.getLayoutAnimator().start(animationDuration);
 
 		preventLayout = false;
-
-		if (DEBUG)
-			Log.d(TAG, "layoutChanged End " + (System.currentTimeMillis() - start));
 
 	}
 
@@ -424,7 +380,8 @@ public class Container extends ViewGroup {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if(layoutController == null) return false;
+		if (layoutController == null)
+			return false;
 		if (!layoutController.horizontalDragEnabled() && !layoutController.verticalDragEnabled())
 			return false;
 
@@ -491,11 +448,6 @@ public class Container extends ViewGroup {
 
 	private void moveScreen(float movementX, float movementY) {
 
-		long start = System.currentTimeMillis();
-
-		if (DEBUG)
-			Log.d(TAG, "moveScreen start " + start);
-
 		if (layoutController.horizontalDragEnabled())
 			viewPortX = (int) (viewPortX - movementX);
 
@@ -516,10 +468,9 @@ public class Container extends ViewGroup {
 
 		Iterator it = frames.entrySet().iterator();
 		while (it.hasNext()) {
-			
+
 			Map.Entry m = (Map.Entry) it.next();
-		
-		
+
 			FrameDescriptor desc = (FrameDescriptor) m.getValue();
 
 			preventLayout = true;
@@ -538,9 +489,6 @@ public class Container extends ViewGroup {
 		}
 
 		cleanupViews();
-
-		if (DEBUG)
-			Log.d(TAG, "moveScreen End " + (System.currentTimeMillis() - start));
 
 	}
 

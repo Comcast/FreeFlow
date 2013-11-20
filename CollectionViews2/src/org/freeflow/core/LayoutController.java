@@ -7,7 +7,7 @@ import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 public abstract class LayoutController {
 
 	protected LayoutControllerAnimator layoutAnimator = null;
-	
+
 	/**
 	 * Called whenever Container's onMeasure is triggered
 	 * 
@@ -31,25 +31,22 @@ public abstract class LayoutController {
 	 */
 	public abstract HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
-	public abstract Frame getViewportFrameForItem(Object data);
-
-	public abstract FrameDescriptor getFrameDescriptorForItemAndViewport(Object item, int viewPortLeft, int viewPortTop);
+	public abstract FrameDescriptor getFrameDescriptorForItem(Object item);
 
 	public abstract Frame getOffScreenStartFrame();
 
-	public abstract void generateFrameDescriptors();
-	
+	protected abstract void generateFrameDescriptors();
+
 	public LayoutControllerAnimator getLayoutAnimator() {
-		if(layoutAnimator == null)
+		if (layoutAnimator == null)
 			layoutAnimator = new DefaultLayoutAnimator();
 		return layoutAnimator;
 	}
-	
+
 	public void setLayoutAnimator(LayoutControllerAnimator layoutAnimator) {
 		this.layoutAnimator = layoutAnimator;
 	}
 
-	
 	public abstract boolean horizontalDragEnabled();
 
 	public abstract boolean verticalDragEnabled();
@@ -61,7 +58,7 @@ public abstract class LayoutController {
 	public abstract int getMaximumViewPortX();
 
 	public abstract int getMaximumViewPortY();
-	
+
 	public abstract void setHeaderItemDimensions(int hWidth, int hHeight);
 
 }

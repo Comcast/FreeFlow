@@ -10,6 +10,9 @@ public class FrameDescriptor {
 	public Frame frame;
 
 	public static FrameDescriptor clone(FrameDescriptor desc) {
+		if(desc == null)
+			return null;
+		
 		FrameDescriptor fd = new FrameDescriptor();
 		fd.itemIndex = desc.itemIndex;
 		fd.itemSection = desc.itemSection;
