@@ -10,6 +10,7 @@ import org.freeflow.core.Section;
 
 public class HLayout extends LayoutController {
 
+	private boolean dataChanged = false;
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
 	protected int width = -1;
@@ -33,26 +34,20 @@ public class HLayout extends LayoutController {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		if (itemsAdapter != null) {
-			generateFrameDescriptors();
-		}
+		dataChanged = true;
 	}
 
 	@Override
 	public void setItems(BaseSectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
-
-		if (width != -1 && height != -1) {
-			generateFrameDescriptors();
-		}
-
+		dataChanged = true;
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	@Override
-	public void generateFrameDescriptors() {
+	protected void generateFrameDescriptors() {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
@@ -68,6 +63,8 @@ public class HLayout extends LayoutController {
 		if (headerHeight < 0) {
 			throw new IllegalStateException("headerHeight not set");
 		}
+
+		dataChanged = false;
 
 		frameDescriptors.clear();
 		int leftStart = 0;
@@ -115,35 +112,22 @@ public class HLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+	public HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
+		if(frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
+		
 		for (FrameDescriptor fd : frameDescriptors.values()) {
 
 			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
-				newDesc.frame.left -= viewPortLeft;
 				desc.put(newDesc.data, newDesc);
 			}
 		}
 
 		return desc;
-	}
-
-	@Override
-	public Frame getViewportFrameForItem(Object item) {
-		FrameDescriptor fd = frameDescriptors.get(item);
-
-		Frame frame = new Frame();
-		frame.left = fd.frame.left;
-		frame.top = 0;
-		frame.width = width;
-		frame.height = height;
-
-		if (itemWidth != -1 && width != -1 && frame.left > getMaximumViewPortX())
-			frame.left = getMaximumViewPortX();
-
-		return frame;
 	}
 
 	@Override
@@ -196,23 +180,29 @@ public class HLayout extends LayoutController {
 
 	@Override
 	public int getMaximumViewPortY() {
-		return height;
+		return 0;
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItem(Object data) {
+		if(frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
+		
 		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
-
-		fd.frame.left -= viewPortLeft;
-		fd.frame.top -= viewPortTop;
-
 		return fd;
 	}
 
 	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
+		if(hWidth == headerWidth && hHeight == headerHeight)
+			return;
+		
 		headerHeight = hHeight;
 		headerWidth = hWidth;
+		dataChanged = true;
+		
+		
 	}
 
 }

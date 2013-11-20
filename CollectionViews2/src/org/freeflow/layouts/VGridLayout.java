@@ -10,6 +10,7 @@ import org.freeflow.core.Section;
 
 public class VGridLayout extends LayoutController {
 
+	private boolean dataChanged = false;
 	private static final String TAG = "VGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
@@ -20,12 +21,20 @@ public class VGridLayout extends LayoutController {
 	private BaseSectionedAdapter itemsAdapter;
 	private HashMap<Object, FrameDescriptor> frameDescriptors = new HashMap<Object, FrameDescriptor>();
 
-	public void setItemHeight(int i) {
-		this.itemHeight = i;
+	public void setItemHeight(int itemHeight) {
+		if (itemHeight == this.itemHeight)
+			return;
+
+		this.itemHeight = itemHeight;
+		dataChanged = true;
 	}
 
 	public void setItemWidth(int itemWidth) {
+		if (itemWidth == this.itemWidth)
+			return;
+
 		this.itemWidth = itemWidth;
+		dataChanged = true;
 	}
 
 	/**
@@ -38,24 +47,21 @@ public class VGridLayout extends LayoutController {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		if (itemsAdapter != null) {
-			generateFrameDescriptors();
-		}
+
+		dataChanged = true;
 	}
 
 	@Override
 	public void setItems(BaseSectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
-		if (width != -1 && height != -1 && itemWidth != -1 && itemHeight != -1) {
-			generateFrameDescriptors();
-		}
+		dataChanged = true;
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	@Override
-	public void generateFrameDescriptors() {
+	protected void generateFrameDescriptors() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
 		}
@@ -74,6 +80,8 @@ public class VGridLayout extends LayoutController {
 
 		if (height < 0 || width < 0)
 			throw new IllegalStateException("dimensions not set");
+
+		dataChanged = false;
 
 		frameDescriptors.clear();
 
@@ -127,35 +135,21 @@ public class VGridLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+	public HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
+		if(frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
+		
 		for (FrameDescriptor fd : frameDescriptors.values()) {
-
 			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
-				newDesc.frame.top -= viewPortTop;
 				desc.put(newDesc.data, newDesc);
 			}
 		}
 
 		return desc;
-	}
-
-	@Override
-	public Frame getViewportFrameForItem(Object item) {
-		FrameDescriptor fd = frameDescriptors.get(item);
-
-		Frame frame = new Frame();
-		frame.top = fd.frame.top;
-		frame.left = 0;
-		frame.width = width;
-		frame.height = height;
-
-		if (frame.top > getMaximumViewPortY())
-			frame.top = getMaximumViewPortY();
-
-		return frame;
 	}
 
 	@Override
@@ -191,7 +185,7 @@ public class VGridLayout extends LayoutController {
 
 	@Override
 	public int getMaximumViewPortX() {
-		return width;
+		return 0;
 	}
 
 	@Override
@@ -212,20 +206,24 @@ public class VGridLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
+	public FrameDescriptor getFrameDescriptorForItem(Object data) {
+		if(frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
+		
 		if (frameDescriptors.get(data) == null)
 			return null;
 
 		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
-
-		fd.frame.left -= viewPortLeft;
-		fd.frame.top -= viewPortTop;
-
 		return fd;
 	}
 
 	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
+		if (hWidth == headerWidth && headerHeight == hHeight)
+			return;
+
+		dataChanged = true;
 		headerWidth = hWidth;
 		headerHeight = hHeight;
 	}

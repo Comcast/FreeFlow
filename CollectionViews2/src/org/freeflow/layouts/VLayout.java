@@ -10,6 +10,7 @@ import org.freeflow.core.Section;
 
 public class VLayout extends LayoutController {
 
+	private boolean dataChanged = false;
 	private static final String TAG = "VLayout";
 	private int itemHeight = -1;
 	private int width = -1;
@@ -33,25 +34,21 @@ public class VLayout extends LayoutController {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		if (itemsAdapter != null) {
-			generateFrameDescriptors();
-		}
+		dataChanged = true;
 	}
 
 	@Override
 	public void setItems(BaseSectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 
-		if (width != -1 && height != -1) {
-			generateFrameDescriptors();
-		}
+		dataChanged = true;
 	}
 
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	@Override
-	public void generateFrameDescriptors() {
+	protected void generateFrameDescriptors() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
 		}
@@ -67,6 +64,8 @@ public class VLayout extends LayoutController {
 		if (headerHeight < 0) {
 			throw new IllegalStateException("headerHeight not set");
 		}
+
+		dataChanged = false;
 
 		frameDescriptors.clear();
 		int topStart = 0;
@@ -116,35 +115,21 @@ public class VLayout extends LayoutController {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
+	public HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
 
-		for (FrameDescriptor fd : frameDescriptors.values()) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
 
+		for (FrameDescriptor fd : frameDescriptors.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
 				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
-				newDesc.frame.top -= viewPortTop;
 				desc.put(newDesc.data, newDesc);
 			}
 		}
 
 		return desc;
-	}
-
-	@Override
-	public Frame getViewportFrameForItem(Object item) {
-		FrameDescriptor fd = frameDescriptors.get(item);
-
-		Frame frame = new Frame();
-		frame.top = fd.frame.top;
-		frame.left = 0;
-		frame.width = width;
-		frame.height = height;
-
-		if (frame.top > getMaximumViewPortY())
-			frame.top = getMaximumViewPortY();
-
-		return frame;
 	}
 
 	@Override
@@ -180,7 +165,7 @@ public class VLayout extends LayoutController {
 
 	@Override
 	public int getMaximumViewPortX() {
-		return width;
+		return 0;
 	}
 
 	@Override
@@ -201,11 +186,12 @@ public class VLayout extends LayoutController {
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItemAndViewport(Object data, int viewPortLeft, int viewPortTop) {
-		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
+	public FrameDescriptor getFrameDescriptorForItem(Object data) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
+			generateFrameDescriptors();
+		}
 
-		fd.frame.left -= viewPortLeft;
-		fd.frame.top -= viewPortTop;
+		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
 
 		return fd;
 	}
