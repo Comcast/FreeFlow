@@ -29,7 +29,7 @@ public abstract class LayoutController {
 	 *            the top bound of the viewport
 	 * @return
 	 */
-	public abstract HashMap<Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
+	public abstract HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
 
 	public abstract Frame getViewportFrameForItem(Object data);
 

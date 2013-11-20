@@ -25,7 +25,7 @@ public class Container extends ViewGroup {
 	protected HashMap<Object, View> usedHeaderViews;
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
-	protected HashMap<Object, FrameDescriptor> frames = null;
+	protected HashMap<? extends Object, FrameDescriptor> frames = null;
 	private boolean preventLayout = false;
 	protected BaseSectionedAdapter itemAdapter;
 	protected LayoutController layoutController;
@@ -63,8 +63,7 @@ public class Container extends ViewGroup {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		long start = System.currentTimeMillis();
-	
-			Log.d(TAG, "onMeasure Start " + start);
+		Log.d(TAG, "onMeasure Start " + start);
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
 		if (layoutController != null) {
@@ -272,7 +271,7 @@ public class Container extends ViewGroup {
 
 		layoutController = lc;
 
-		HashMap<Object, FrameDescriptor> oldFrames = frames;
+		HashMap<? extends Object, FrameDescriptor> oldFrames = frames;
 
 		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
 			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -356,12 +355,12 @@ public class Container extends ViewGroup {
 	}
 
 	public void layoutChanged() {
-		HashMap<Object, FrameDescriptor> oldFrames = frames;
+		HashMap<? extends Object, FrameDescriptor> oldFrames = frames;
 
 		layoutChanged(oldFrames);
 	}
 
-	public void layoutChanged(HashMap<Object, FrameDescriptor> oldFrames) {
+	public void layoutChanged(HashMap<? extends Object, FrameDescriptor> oldFrames) {
 
 		long start = System.currentTimeMillis();
 
