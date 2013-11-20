@@ -32,7 +32,7 @@ public class Container extends ViewGroup {
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
-	private int animationDuration = 500;
+	private int animationDuration = 250;
 
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;

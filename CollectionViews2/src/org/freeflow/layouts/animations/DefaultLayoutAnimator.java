@@ -8,7 +8,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
@@ -57,7 +57,7 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
 		});
 
-		anim.setInterpolator(new LinearInterpolator());
+		anim.setInterpolator(new DecelerateInterpolator(2.0f));
 
 		anim.start();
 
