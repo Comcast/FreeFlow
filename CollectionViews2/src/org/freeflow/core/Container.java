@@ -87,7 +87,6 @@ public class Container extends ViewGroup {
 
 			View view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
 					headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
-			view.setAlpha(1);
 			usedHeaderViews.put(frameDesc.data, view);
 			addView(view);
 			doMeasure(frameDesc);
@@ -95,7 +94,6 @@ public class Container extends ViewGroup {
 
 			View view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
 					viewpool.size() > 0 ? viewpool.remove(0) : null, this);
-			view.setAlpha(1);
 			usedViews.put(frameDesc.data, view);
 			addView(view);
 			doMeasure(frameDesc);
