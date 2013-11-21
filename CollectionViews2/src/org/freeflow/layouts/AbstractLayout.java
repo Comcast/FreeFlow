@@ -6,11 +6,11 @@ import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
-import org.freeflow.layouts.animations.LayoutControllerAnimator;
+import org.freeflow.layouts.animations.LayoutAnimator;
 
 public abstract class AbstractLayout {
 
-	protected LayoutControllerAnimator layoutAnimator = null;
+	protected LayoutAnimator layoutAnimator = null;
 
 	/**
 	 * Called whenever Container's onMeasure is triggered
@@ -40,16 +40,6 @@ public abstract class AbstractLayout {
 	public abstract Frame getOffScreenStartFrame();
 
 	public abstract void generateItemProxies();
-
-	public LayoutControllerAnimator getLayoutAnimator() {
-		if (layoutAnimator == null)
-			layoutAnimator = new DefaultLayoutAnimator();
-		return layoutAnimator;
-	}
-
-	public void setLayoutAnimator(LayoutControllerAnimator layoutAnimator) {
-		this.layoutAnimator = layoutAnimator;
-	}
 
 	public abstract boolean horizontalDragEnabled();
 

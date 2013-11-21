@@ -5,9 +5,9 @@ import org.freeflow.core.ItemProxy;
 
 import android.view.View;
 
-public abstract class LayoutControllerAnimator {
+public abstract class LayoutAnimator {
 
-	public LayoutControllerAnimator() {
+	public LayoutAnimator() {
 
 	}
 	

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.freeflow.layouts.AbstractLayout;
+import org.freeflow.layouts.animations.LayoutAnimator;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -34,6 +35,8 @@ public class Container extends ViewGroup {
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
+	
+	private LayoutAnimator layoutAnimator;
 
 	public Container(Context context) {
 		super(context);
@@ -299,7 +302,7 @@ public class Container extends ViewGroup {
 			return;
 		}
 
-		layout.getLayoutAnimator().transitionToFrame(of, nf, v);
+		layoutAnimator.transitionToFrame(of, nf, v);
 
 	}
 
@@ -311,14 +314,14 @@ public class Container extends ViewGroup {
 
 	private void layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames) {
 
-		layout.getLayoutAnimator().clear();
+		layoutAnimator.clear();
 
 		layout.generateItemProxies();
 		frames = layout.getItemProxies(viewPortX, viewPortY);
 		preventLayout = true;
 		// cleanupViews();
 
-		Iterator it = frames.entrySet().iterator();
+		Iterator<?> it = frames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
 			ItemProxy nf = ItemProxy.clone((ItemProxy) m.getValue());
@@ -341,7 +344,7 @@ public class Container extends ViewGroup {
 			transitionToFrame(nf);
 		}
 
-		layout.getLayoutAnimator().start();
+		layoutAnimator.start();
 
 		preventLayout = false;
 
@@ -483,6 +486,14 @@ public class Container extends ViewGroup {
 
 	public BaseSectionedAdapter getAdapter() {
 		return itemAdapter;
+	}
+	
+	public void setLayoutAnimator(LayoutAnimator anim){
+		layoutAnimator = anim;
+	}
+	
+	public LayoutAnimator getLayoutAnimator(){
+		return layoutAnimator;
 	}
 
 }

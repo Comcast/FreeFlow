@@ -87,11 +87,8 @@ public class MainActivity extends Activity {
 
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
-		hGridLayout1.setLayoutAnimator(new ScaleAnimator());
-		hLayout1.setLayoutAnimator(new ScaleAnimator());
-		vLayout1.setLayoutAnimator(new ScaleAnimator());
-		vGridLayout1.setLayoutAnimator(new ScaleAnimator());
-
+		container.setLayoutAnimator(new ScaleAnimator());
+		
 		frameLayout.addView(container);
 
 		changeButton = ((Button) frameLayout.findViewById(R.id.transitionButton));

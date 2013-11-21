@@ -1,5 +1,12 @@
 package org.freeflow.core;
 
+/**
+ * A Frame is just a Rectangle that defines the position of
+ * an item. Its usually used in conjunction with <code>ItemProxy</code>
+ * objects
+ *
+ */
+
 public class Frame {
 	public int left;
 	public int top;

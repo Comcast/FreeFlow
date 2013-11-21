@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
-public class ScaleAnimator extends LayoutControllerAnimator {
+public class ScaleAnimator extends LayoutAnimator {
 	
 	
 	private int duration = 250;

@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
-public class DefaultLayoutAnimator extends LayoutControllerAnimator {
+public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	private int duration = 250;
 	
