@@ -1,6 +1,6 @@
 package org.freeflow.core;
 
-public class FrameDescriptor {
+public class ItemProxy {
 	public int itemIndex;
 	public int itemSection;
 	public Object data;
@@ -9,11 +9,11 @@ public class FrameDescriptor {
 
 	public Frame frame;
 
-	public static FrameDescriptor clone(FrameDescriptor desc) {
+	public static ItemProxy clone(ItemProxy desc) {
 		if(desc == null)
 			return null;
 		
-		FrameDescriptor fd = new FrameDescriptor();
+		ItemProxy fd = new ItemProxy();
 		fd.itemIndex = desc.itemIndex;
 		fd.itemSection = desc.itemSection;
 		fd.data = desc.data;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
-import org.freeflow.core.FrameDescriptor;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 
 public class VGridLayout extends AbstractLayout {
@@ -18,7 +18,7 @@ public class VGridLayout extends AbstractLayout {
 	private int width = -1;
 	private int height = -1;
 	private BaseSectionedAdapter itemsAdapter;
-	private HashMap<Object, FrameDescriptor> frameDescriptors = new HashMap<Object, FrameDescriptor>();
+	private HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
 
 	public void setItemHeight(int itemHeight) {
 		if (itemHeight == this.itemHeight)
@@ -60,7 +60,7 @@ public class VGridLayout extends AbstractLayout {
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	@Override
-	public void generateFrameDescriptors() {
+	public void generateItemProxies() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
 		}
@@ -93,7 +93,7 @@ public class VGridLayout extends AbstractLayout {
 			Section s = itemsAdapter.getSection(i);
 
 			if (s.shouldDisplayHeader()) {
-				FrameDescriptor header = new FrameDescriptor();
+				ItemProxy header = new ItemProxy();
 				Frame hframe = new Frame();
 				header.itemSection = i;
 				header.itemIndex = -1;
@@ -109,7 +109,7 @@ public class VGridLayout extends AbstractLayout {
 			}
 
 			for (int j = 0; j < s.getDataCount(); j++) {
-				FrameDescriptor descriptor = new FrameDescriptor();
+				ItemProxy descriptor = new ItemProxy();
 				Frame frame = new Frame();
 				descriptor.itemSection = i;
 				descriptor.itemIndex = j;
@@ -134,16 +134,16 @@ public class VGridLayout extends AbstractLayout {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop) {
-		HashMap<Object, FrameDescriptor> desc = new HashMap<Object, FrameDescriptor>();
+	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
+		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
 		if(frameDescriptors.size() == 0 || dataChanged) {
-			generateFrameDescriptors();
+			generateItemProxies();
 		}
 		
-		for (FrameDescriptor fd : frameDescriptors.values()) {
+		for (ItemProxy fd : frameDescriptors.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
-				FrameDescriptor newDesc = FrameDescriptor.clone(fd);
+				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}
 		}
@@ -199,21 +199,21 @@ public class VGridLayout extends AbstractLayout {
 			return 0;
 
 		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
-		FrameDescriptor fd = frameDescriptors.get(lastFrameData);
+		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
 		return (fd.frame.top + fd.frame.height) - height;
 	}
 
 	@Override
-	public FrameDescriptor getFrameDescriptorForItem(Object data) {
+	public ItemProxy getItemProxyForItem(Object data) {
 		if(frameDescriptors.size() == 0 || dataChanged) {
-			generateFrameDescriptors();
+			generateItemProxies();
 		}
 		
 		if (frameDescriptors.get(data) == null)
 			return null;
 
-		FrameDescriptor fd = FrameDescriptor.clone(frameDescriptors.get(data));
+		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
 		return fd;
 	}
 

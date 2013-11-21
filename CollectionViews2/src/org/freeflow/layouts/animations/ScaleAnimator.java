@@ -1,7 +1,7 @@
 package org.freeflow.layouts.animations;
 
 import org.freeflow.core.Frame;
-import org.freeflow.core.FrameDescriptor;
+import org.freeflow.core.ItemProxy;
 
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -16,7 +16,7 @@ public class ScaleAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v) {
+	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 
 		if (v instanceof iFrameChangeListener) {
 			((iFrameChangeListener) v).animateToFrame(of, nf, duration);

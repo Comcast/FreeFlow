@@ -24,10 +24,10 @@ public class Container extends ViewGroup {
 	protected HashMap<Object, View> usedHeaderViews;
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
-	protected HashMap<? extends Object, FrameDescriptor> frames = null;
+	protected HashMap<? extends Object, ItemProxy> frames = null;
 	private boolean preventLayout = false;
 	protected BaseSectionedAdapter itemAdapter;
-	protected AbstractLayout layoutController;
+	protected AbstractLayout layout;	
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -55,20 +55,20 @@ public class Container extends ViewGroup {
 		viewpool = new ArrayList<View>();
 		usedHeaderViews = new HashMap<Object, View>();
 		headerViewpool = new ArrayList<View>();
-		frames = new HashMap<Object, FrameDescriptor>();
+		frames = new HashMap<Object, ItemProxy>();
 
-		((HashMap<Object, FrameDescriptor>) frames).put(new Object(), new FrameDescriptor());
+		((HashMap<Object, ItemProxy>) frames).put(new Object(), new ItemProxy());
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
-		if (layoutController != null) {
-			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-			frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+		if (layout != null) {
+			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+			frames = layout.getItemProxies(viewPortX, viewPortY);
 
-			for (FrameDescriptor frameDesc : frames.values()) {
+			for (ItemProxy frameDesc : frames.values()) {
 				addAndMeasureViewIfNeeded(frameDesc);
 			}
 
@@ -76,7 +76,7 @@ public class Container extends ViewGroup {
 		}
 	}
 
-	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
+	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
 		if (frameDesc.isHeader){
 			view = usedHeaderViews.get(frameDesc.data);
@@ -101,7 +101,7 @@ public class Container extends ViewGroup {
 		doMeasure(view, frameDesc);
 	}
 
-	private void doMeasure(View v, FrameDescriptor frameDesc) {
+	private void doMeasure(View v, ItemProxy frameDesc) {
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
@@ -153,7 +153,7 @@ public class Container extends ViewGroup {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-		if (layoutController == null || frames == null) {
+		if (layout == null || frames == null) {
 			// if (DEBUG)
 			// Log.d(TAG, "onLayout End " + (System.currentTimeMillis() -
 			// start));
@@ -165,7 +165,7 @@ public class Container extends ViewGroup {
 			Map.Entry m = (Map.Entry) it.next();
 			View v = (View) m.getValue();
 
-			FrameDescriptor desc = frames.get(m.getKey());
+			ItemProxy desc = frames.get(m.getKey());
 
 			if (desc == null)
 				continue;
@@ -185,7 +185,7 @@ public class Container extends ViewGroup {
 
 			View v = (View) m.getValue();
 
-			FrameDescriptor desc = frames.get(m.getKey());
+			ItemProxy desc = frames.get(m.getKey());
 
 			if (desc == null)
 				continue;
@@ -209,21 +209,21 @@ public class Container extends ViewGroup {
 
 	public void setLayout(AbstractLayout lc) {
 
-		if (lc == layoutController) {
+		if (lc == layout) {
 			return;
 		}
 
-		boolean shouldReturn = layoutController == null;
+		boolean shouldReturn = layout == null;
 
-		layoutController = lc;
+		layout = lc;
 
-		HashMap<? extends Object, FrameDescriptor> oldFrames = frames;
+		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
-			layoutController.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 
 		if (this.itemAdapter != null) {
-			layoutController.setItems(itemAdapter);
+			layout.setItems(itemAdapter);
 		}
 
 		if (shouldReturn)
@@ -234,7 +234,7 @@ public class Container extends ViewGroup {
 			Object data = null;
 			int lowestSection = 99999;
 			int lowestPosition = 99999;
-			for (FrameDescriptor fd : frames.values()) {
+			for (ItemProxy fd : frames.values()) {
 				if (fd.itemSection < lowestSection
 						|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 					data = fd.data;
@@ -243,16 +243,16 @@ public class Container extends ViewGroup {
 				}
 			}
 
-			Frame vpFrame = layoutController.getFrameDescriptorForItem(data).frame;
+			Frame vpFrame = layout.getItemProxyForItem(data).frame;
 
 			viewPortX = vpFrame.left;
 			viewPortY = vpFrame.top;
 
-			if (viewPortX > layoutController.getMaximumViewPortX())
-				viewPortX = layoutController.getMaximumViewPortX();
+			if (viewPortX > layout.getMaximumViewPortX())
+				viewPortX = layout.getMaximumViewPortX();
 
-			if (viewPortY > layoutController.getMaximumViewPortY())
-				viewPortY = layoutController.getMaximumViewPortY();
+			if (viewPortY > layout.getMaximumViewPortY())
+				viewPortY = layout.getMaximumViewPortY();
 
 			Log.d(TAG, viewPortX + ", " + viewPortY);
 
@@ -266,7 +266,7 @@ public class Container extends ViewGroup {
 
 	}
 
-	protected void transitionToFrame(final FrameDescriptor nf) {
+	protected void transitionToFrame(final ItemProxy nf) {
 
 		boolean newFrame = false;
 		if (nf.isHeader) {
@@ -285,7 +285,7 @@ public class Container extends ViewGroup {
 
 		Frame of = new Frame();
 		if (newFrame) {
-			of = layoutController.getOffScreenStartFrame();
+			of = layout.getOffScreenStartFrame();
 		} else {
 			of.left = (int) (v.getLeft() + v.getTranslationX());
 			of.top = (int) (v.getTop() + v.getTranslationY());
@@ -299,29 +299,29 @@ public class Container extends ViewGroup {
 			return;
 		}
 
-		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v);
+		layout.getLayoutAnimator().transitionToFrame(of, nf, v);
 
 	}
 
 	public void layoutChanged() {
-		HashMap<? extends Object, FrameDescriptor> oldFrames = frames;
+		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		layoutChanged(oldFrames);
 	}
 
-	public void layoutChanged(HashMap<? extends Object, FrameDescriptor> oldFrames) {
+	private void layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames) {
 
-		layoutController.getLayoutAnimator().clear();
+		layout.getLayoutAnimator().clear();
 
-		layoutController.generateFrameDescriptors();
-		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+		layout.generateItemProxies();
+		frames = layout.getItemProxies(viewPortX, viewPortY);
 		preventLayout = true;
 		// cleanupViews();
 
 		Iterator it = frames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			FrameDescriptor nf = FrameDescriptor.clone((FrameDescriptor) m.getValue());
+			ItemProxy nf = ItemProxy.clone((ItemProxy) m.getValue());
 			
 			nf.frame.left -= viewPortX;
 			nf.frame.top -= viewPortY;
@@ -335,13 +335,13 @@ public class Container extends ViewGroup {
 
 		it = oldFrames.keySet().iterator();
 		while (it.hasNext()) {
-			FrameDescriptor nf = layoutController.getFrameDescriptorForItem(it.next());
+			ItemProxy nf = layout.getItemProxyForItem(it.next());
 			nf.frame.left -= viewPortX;
 			nf.frame.top -= viewPortY;
 			transitionToFrame(nf);
 		}
 
-		layoutController.getLayoutAnimator().start();
+		layout.getLayoutAnimator().start();
 
 		preventLayout = false;
 
@@ -358,20 +358,20 @@ public class Container extends ViewGroup {
 
 	public void setAdapter(BaseSectionedAdapter adapter) {
 		this.itemAdapter = adapter;
-		if (layoutController != null) {
-			layoutController.setItems(adapter);
+		if (layout != null) {
+			layout.setItems(adapter);
 		}
 	}
 
 	public AbstractLayout getLayoutController() {
-		return layoutController;
+		return layout;
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (layoutController == null)
+		if (layout == null)
 			return false;
-		if (!layoutController.horizontalDragEnabled() && !layoutController.verticalDragEnabled())
+		if (!layout.horizontalDragEnabled() && !layout.verticalDragEnabled())
 			return false;
 
 		if (mVelocityTracker == null)
@@ -437,30 +437,30 @@ public class Container extends ViewGroup {
 
 	private void moveScreen(float movementX, float movementY) {
 
-		if (layoutController.horizontalDragEnabled())
+		if (layout.horizontalDragEnabled())
 			viewPortX = (int) (viewPortX - movementX);
 
-		if (layoutController.verticalDragEnabled())
+		if (layout.verticalDragEnabled())
 			viewPortY = (int) (viewPortY - movementY);
 
-		if (viewPortX < layoutController.getMinimumViewPortX())
-			viewPortX = layoutController.getMinimumViewPortX();
-		else if (viewPortX > layoutController.getMaximumViewPortX())
-			viewPortX = layoutController.getMaximumViewPortX();
+		if (viewPortX < layout.getMinimumViewPortX())
+			viewPortX = layout.getMinimumViewPortX();
+		else if (viewPortX > layout.getMaximumViewPortX())
+			viewPortX = layout.getMaximumViewPortX();
 
-		if (viewPortY < layoutController.getMinimumViewPortY())
-			viewPortY = layoutController.getMinimumViewPortY();
-		else if (viewPortY > layoutController.getMaximumViewPortY())
-			viewPortY = layoutController.getMaximumViewPortY();
+		if (viewPortY < layout.getMinimumViewPortY())
+			viewPortY = layout.getMinimumViewPortY();
+		else if (viewPortY > layout.getMaximumViewPortY())
+			viewPortY = layout.getMaximumViewPortY();
 
-		frames = layoutController.getFrameDescriptors(viewPortX, viewPortY);
+		frames = layout.getItemProxies(viewPortX, viewPortY);
 
 		Iterator it = frames.entrySet().iterator();
 		while (it.hasNext()) {
 
 			Map.Entry m = (Map.Entry) it.next();
 
-			FrameDescriptor desc = (FrameDescriptor) m.getValue();
+			ItemProxy desc = (ItemProxy) m.getValue();
 
 			preventLayout = true;
 			if (usedViews.get(desc.data) == null && usedHeaderViews.get(desc.data) == null)

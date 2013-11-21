@@ -3,7 +3,7 @@ package org.freeflow.layouts.tests;
 import junit.framework.TestCase;
 
 import org.freeflow.core.BaseSectionedAdapter;
-import org.freeflow.core.FrameDescriptor;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.layouts.HLayout;
 
 import android.util.SparseArray;

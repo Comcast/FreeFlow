@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
-import org.freeflow.core.FrameDescriptor;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutControllerAnimator;
 
@@ -33,13 +33,13 @@ public abstract class AbstractLayout {
 	 *            the top bound of the viewport
 	 * @return
 	 */
-	public abstract HashMap<? extends Object, FrameDescriptor> getFrameDescriptors(int viewPortLeft, int viewPortTop);
+	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop);
 
-	public abstract FrameDescriptor getFrameDescriptorForItem(Object item);
+	public abstract ItemProxy getItemProxyForItem(Object item);
 
 	public abstract Frame getOffScreenStartFrame();
 
-	public abstract void generateFrameDescriptors();
+	public abstract void generateItemProxies();
 
 	public LayoutControllerAnimator getLayoutAnimator() {
 		if (layoutAnimator == null)
