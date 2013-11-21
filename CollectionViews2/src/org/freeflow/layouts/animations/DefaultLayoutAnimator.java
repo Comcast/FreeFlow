@@ -2,7 +2,6 @@ package org.freeflow.layouts.animations;
 
 import org.freeflow.core.Frame;
 import org.freeflow.core.FrameDescriptor;
-import org.freeflow.core.LayoutControllerAnimator;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -12,6 +11,8 @@ import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 
+	private int duration = 250;
+	
 	public DefaultLayoutAnimator() {
 	}
 
@@ -21,7 +22,7 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v, final int duration) {
+	public void transitionToFrame(final Frame of, final FrameDescriptor nf, final View v) {
 		if (v instanceof iFrameChangeListener) {
 			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
 			return;
@@ -64,6 +65,6 @@ public class DefaultLayoutAnimator extends LayoutControllerAnimator {
 	}
 
 	@Override
-	public void start(int duration) {
+	public void start() {
 	}
 }

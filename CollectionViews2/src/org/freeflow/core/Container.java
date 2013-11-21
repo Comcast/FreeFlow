@@ -29,8 +29,6 @@ public class Container extends ViewGroup {
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
-	private int animationDuration = 250;
-
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
@@ -308,7 +306,7 @@ public class Container extends ViewGroup {
 			return;
 		}
 
-		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v, animationDuration);
+		layoutController.getLayoutAnimator().transitionToFrame(of, nf, v);
 
 	}
 
@@ -350,7 +348,7 @@ public class Container extends ViewGroup {
 			transitionToFrame(nf);
 		}
 
-		layoutController.getLayoutAnimator().start(animationDuration);
+		layoutController.getLayoutAnimator().start();
 
 		preventLayout = false;
 
@@ -492,10 +490,6 @@ public class Container extends ViewGroup {
 
 	public BaseSectionedAdapter getAdapter() {
 		return itemAdapter;
-	}
-
-	public void setAnimationDuration(int animationDuration) {
-		this.animationDuration = animationDuration;
 	}
 
 }

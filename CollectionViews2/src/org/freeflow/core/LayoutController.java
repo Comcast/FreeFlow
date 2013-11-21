@@ -3,6 +3,7 @@ package org.freeflow.core;
 import java.util.HashMap;
 
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
+import org.freeflow.layouts.animations.LayoutControllerAnimator;
 
 public abstract class LayoutController {
 
