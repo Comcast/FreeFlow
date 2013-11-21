@@ -5,10 +5,9 @@ import java.util.HashMap;
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.FrameDescriptor;
-import org.freeflow.core.LayoutController;
 import org.freeflow.core.Section;
 
-public class VLayout extends LayoutController {
+public class VLayout extends AbstractLayout {
 
 	private boolean dataChanged = false;
 	private static final String TAG = "VLayout";
@@ -48,7 +47,7 @@ public class VLayout extends LayoutController {
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
 	@Override
-	protected void generateFrameDescriptors() {
+	public void generateFrameDescriptors() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
 		}

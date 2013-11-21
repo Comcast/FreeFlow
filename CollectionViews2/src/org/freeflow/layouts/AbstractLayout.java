@@ -1,11 +1,14 @@
-package org.freeflow.core;
+package org.freeflow.layouts;
 
 import java.util.HashMap;
 
+import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.Frame;
+import org.freeflow.core.FrameDescriptor;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutControllerAnimator;
 
-public abstract class LayoutController {
+public abstract class AbstractLayout {
 
 	protected LayoutControllerAnimator layoutAnimator = null;
 
@@ -36,7 +39,7 @@ public abstract class LayoutController {
 
 	public abstract Frame getOffScreenStartFrame();
 
-	protected abstract void generateFrameDescriptors();
+	public abstract void generateFrameDescriptors();
 
 	public LayoutControllerAnimator getLayoutAnimator() {
 		if (layoutAnimator == null)

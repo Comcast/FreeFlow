@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.freeflow.layouts.AbstractLayout;
+
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
@@ -25,7 +27,7 @@ public class Container extends ViewGroup {
 	protected HashMap<? extends Object, FrameDescriptor> frames = null;
 	private boolean preventLayout = false;
 	protected BaseSectionedAdapter itemAdapter;
-	protected LayoutController layoutController;
+	protected AbstractLayout layoutController;
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -75,43 +77,34 @@ public class Container extends ViewGroup {
 	}
 
 	private void addAndMeasureViewIfNeeded(FrameDescriptor frameDesc) {
-
-		if (frameDesc.isHeader && usedHeaderViews.get(frameDesc.data) == null) {
-
-			View view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
-					headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
-			usedHeaderViews.put(frameDesc.data, view);
-			addView(view);
-			doMeasure(frameDesc);
-		} else if (!frameDesc.isHeader && usedViews.get(frameDesc.data) == null) {
-
-			View view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
-					viewpool.size() > 0 ? viewpool.remove(0) : null, this);
-			usedViews.put(frameDesc.data, view);
-			addView(view);
-			doMeasure(frameDesc);
-
-		} else {
-			doMeasure(frameDesc);
+		View view;
+		if (frameDesc.isHeader){
+			view = usedHeaderViews.get(frameDesc.data);
+			if(view == null){
+				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
+						headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
+				usedHeaderViews.put(frameDesc.data, view);
+				addView(view);
+			}
+			
 		}
-
-		// if (DEBUG)
-		// Log.d(TAG, "addAndMeasureViewIfNeeded End " +
-		// (System.currentTimeMillis() - start));
-
+		else{
+			view = usedViews.get(frameDesc.data);
+			if(view == null){
+				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
+						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+				usedViews.put(frameDesc.data, view);
+				addView(view);
+			}
+		}
+				
+		doMeasure(view, frameDesc);
 	}
 
-	private void doMeasure(FrameDescriptor frameDesc) {
+	private void doMeasure(View v, FrameDescriptor frameDesc) {
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
-
-		View v = null;
-		if (frameDesc.isHeader)
-			v = usedHeaderViews.get(frameDesc.data);
-		else
-			v = usedViews.get(frameDesc.data);
-
 		v.measure(widthSpec, heightSpec);
 		if (v instanceof StateListener)
 			((StateListener) v).ReportCurrentState(frameDesc.state);
@@ -214,7 +207,7 @@ public class Container extends ViewGroup {
 
 	}
 
-	public void setLayout(LayoutController lc) {
+	public void setLayout(AbstractLayout lc) {
 
 		if (lc == layoutController) {
 			return;
@@ -370,7 +363,7 @@ public class Container extends ViewGroup {
 		}
 	}
 
-	public LayoutController getLayoutController() {
+	public AbstractLayout getLayoutController() {
 		return layoutController;
 	}
 
