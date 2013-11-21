@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.freeflow.layouts.AbstractLayout;
+import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutAnimator;
 
 import android.animation.ValueAnimator;
@@ -36,7 +37,7 @@ public class Container extends ViewGroup {
 	private float deltaX = -1f;
 	private float deltaY = -1f;
 	
-	private LayoutAnimator layoutAnimator;
+	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
 
 	public Container(Context context) {
 		super(context);
