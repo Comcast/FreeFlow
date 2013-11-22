@@ -39,8 +39,6 @@ public abstract class AbstractLayout {
 
 	public abstract Frame getOffScreenStartFrame();
 
-	public abstract void generateItemProxies();
-
 	public abstract boolean horizontalDragEnabled();
 
 	public abstract boolean verticalDragEnabled();

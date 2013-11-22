@@ -261,7 +261,11 @@ public class Container extends ViewGroup {
 			Log.d(TAG, viewPortX + ", " + viewPortY);
 
 			if (oldFrames != null) {
-				layoutChanged(oldFrames);
+				// Create a copy of the incoming values because the source Layout
+				// may change the map inside its own class 
+				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+				layoutChanged(oldFrames, newFrames);
+				
 			}
 
 		} else {
@@ -308,21 +312,17 @@ public class Container extends ViewGroup {
 	}
 
 	public void layoutChanged() {
-		HashMap<? extends Object, ItemProxy> oldFrames = frames;
-
-		layoutChanged(oldFrames);
+		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+		layoutChanged(frames, newFrames);
 	}
 
-	private void layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames) {
+	private void layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames, HashMap<? extends Object, ItemProxy> newFrames) {
 
 		layoutAnimator.clear();
-
-		layout.generateItemProxies();
-		frames = layout.getItemProxies(viewPortX, viewPortY);
 		preventLayout = true;
 		// cleanupViews();
 
-		Iterator<?> it = frames.entrySet().iterator();
+		Iterator<?> it = newFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
 			ItemProxy nf = ItemProxy.clone((ItemProxy) m.getValue());
@@ -348,7 +348,7 @@ public class Container extends ViewGroup {
 		layoutAnimator.start();
 
 		preventLayout = false;
-
+		frames = newFrames;
 	}
 
 	@Override

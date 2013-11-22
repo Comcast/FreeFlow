@@ -59,7 +59,6 @@ public class VGridLayout extends AbstractLayout {
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
-	@Override
 	public void generateItemProxies() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");

@@ -45,7 +45,6 @@ public class HLayout extends AbstractLayout {
 	/**
 	 * TODO: Future optimization: can we avoid object allocation here?
 	 */
-	@Override
 	public void generateItemProxies() {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
