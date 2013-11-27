@@ -163,17 +163,7 @@ public class HGridLayout extends AbstractLayout {
 	}
 
 	@Override
-	public int getMinimumViewPortX() {
-		return 0;
-	}
-
-	@Override
-	public int getMinimumViewPortY() {
-		return 0;
-	}
-
-	@Override
-	public int getMaximumViewPortX() {
+	public int getContentWidth() {
 		if (itemsAdapter == null)
 			return 0;
 
@@ -190,7 +180,7 @@ public class HGridLayout extends AbstractLayout {
 	}
 
 	@Override
-	public int getMaximumViewPortY() {
+	public int getContentHeight() {
 		if (itemsAdapter == null)
 			return 0;
 

@@ -152,22 +152,12 @@ public class VLayout extends AbstractLayout {
 	}
 
 	@Override
-	public int getMinimumViewPortX() {
+	public int getContentWidth() {
 		return 0;
 	}
 
 	@Override
-	public int getMinimumViewPortY() {
-		return 0;
-	}
-
-	@Override
-	public int getMaximumViewPortX() {
-		return 0;
-	}
-
-	@Override
-	public int getMaximumViewPortY() {
+	public int getContentHeight() {
 		if (itemsAdapter == null)
 			return 0;
 

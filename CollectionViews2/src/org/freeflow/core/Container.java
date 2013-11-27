@@ -268,11 +268,11 @@ public class Container extends ViewGroup {
 			viewPortX = vpFrame.left;
 			viewPortY = vpFrame.top;
 
-			if (viewPortX > layout.getMaximumViewPortX())
-				viewPortX = layout.getMaximumViewPortX();
+			if (viewPortX > layout.getContentWidth())
+				viewPortX = layout.getContentWidth();
 
-			if (viewPortY > layout.getMaximumViewPortY())
-				viewPortY = layout.getMaximumViewPortY();
+			if (viewPortY > layout.getContentHeight())
+				viewPortY = layout.getContentHeight();
 
 			Log.d(TAG, viewPortX + ", " + viewPortY);
 
@@ -522,15 +522,15 @@ public class Container extends ViewGroup {
 		if (layout.verticalDragEnabled())
 			viewPortY = (int) (viewPortY - movementY);
 
-		if (viewPortX < layout.getMinimumViewPortX())
-			viewPortX = layout.getMinimumViewPortX();
-		else if (viewPortX > layout.getMaximumViewPortX())
-			viewPortX = layout.getMaximumViewPortX();
+		if (viewPortX < 0)
+			viewPortX = 0;
+		else if (viewPortX > layout.getContentWidth())
+			viewPortX = layout.getContentWidth();
 
-		if (viewPortY < layout.getMinimumViewPortY())
-			viewPortY = layout.getMinimumViewPortY();
-		else if (viewPortY > layout.getMaximumViewPortY())
-			viewPortY = layout.getMaximumViewPortY();
+		if (viewPortY < 0)
+			viewPortY = 0;
+		else if (viewPortY > layout.getContentHeight())
+			viewPortY = layout.getContentHeight();
 
 		frames = layout.getItemProxies(viewPortX, viewPortY);
 

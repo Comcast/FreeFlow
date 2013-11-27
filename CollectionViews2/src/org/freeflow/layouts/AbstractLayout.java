@@ -43,13 +43,9 @@ public abstract class AbstractLayout {
 
 	public abstract boolean verticalDragEnabled();
 
-	public abstract int getMinimumViewPortX();
+	public abstract int getContentWidth();
 
-	public abstract int getMinimumViewPortY();
-
-	public abstract int getMaximumViewPortX();
-
-	public abstract int getMaximumViewPortY();
+	public abstract int getContentHeight();
 
 	public abstract void setHeaderItemDimensions(int hWidth, int hHeight);
 
