@@ -18,6 +18,7 @@ import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 public class Container extends ViewGroup {
@@ -37,25 +38,26 @@ public class Container extends ViewGroup {
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
+	private int maxFlingVelocity;
 	
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
 
 	public Container(Context context) {
 		super(context);
-		init();
+		init(context);
 	}
 
 	public Container(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init();
+		init(context);
 	}
 
 	public Container(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		init();
+		init(context);
 	}
 
-	private void init() {
+	private void init(Context context) {
 		usedViews = new HashMap<Object, View>();
 		viewpool = new ArrayList<View>();
 		usedHeaderViews = new HashMap<Object, View>();
@@ -63,6 +65,8 @@ public class Container extends ViewGroup {
 		frames = new HashMap<Object, ItemProxy>();
 
 		((HashMap<Object, ItemProxy>) frames).put(new Object(), new ItemProxy());
+		
+		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 	}
 
 	@Override
@@ -477,7 +481,7 @@ public class Container extends ViewGroup {
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 
-			mVelocityTracker.computeCurrentVelocity(1000);
+			mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
 
 			// frames = layoutController.getFrameDescriptors(viewPortX,
 			// viewPortY);
