@@ -31,7 +31,7 @@ public class Container extends ViewGroup {
 	protected HashMap<? extends Object, ItemProxy> frames = null;
 	private boolean preventLayout = false;
 	protected BaseSectionedAdapter itemAdapter;
-	protected AbstractLayout layout;	
+	protected AbstractLayout layout;
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -39,7 +39,7 @@ public class Container extends ViewGroup {
 	private float deltaX = -1f;
 	private float deltaY = -1f;
 	private int maxFlingVelocity;
-	
+
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
 
 	public Container(Context context) {
@@ -64,21 +64,23 @@ public class Container extends ViewGroup {
 		headerViewpool = new ArrayList<View>();
 		frames = new HashMap<Object, ItemProxy>();
 
-		((HashMap<Object, ItemProxy>) frames).put(new Object(), new ItemProxy());
-		
-		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		((HashMap<Object, ItemProxy>) frames)
+				.put(new Object(), new ItemProxy());
+
+		maxFlingVelocity = ViewConfiguration.get(context)
+				.getScaledMaximumFlingVelocity();
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		
+
 		int w = MeasureSpec.getSize(widthMeasureSpec);
 		int h = MeasureSpec.getSize(heightMeasureSpec);
 		onMeasureCalled(w, h);
 	}
-	
-	public void onMeasureCalled(int w, int h){
-		setMeasuredDimension(w,h);
+
+	public void onMeasureCalled(int w, int h) {
+		setMeasuredDimension(w, h);
 		if (layout != null) {
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			frames = layout.getItemProxies(viewPortX, viewPortY);
@@ -90,44 +92,46 @@ public class Container extends ViewGroup {
 			cleanupViews();
 		}
 	}
-	
 
 	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
-		if (frameDesc.isHeader){
+		if (frameDesc.isHeader) {
 			view = usedHeaderViews.get(frameDesc.data);
-			if(view == null){
-				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
-						headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
+			if (view == null) {
+				view = itemAdapter.getHeaderViewForSection(
+						frameDesc.itemSection,
+						headerViewpool.size() > 0 ? headerViewpool.remove(0)
+								: null, this);
 				usedHeaderViews.put(frameDesc.data, view);
 				addView(view);
 			}
-			
-		}
-		else{
+
+		} else {
 			view = usedViews.get(frameDesc.data);
-			if(view == null){
-				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
+			if (view == null) {
+				view = itemAdapter.getViewForSection(frameDesc.itemSection,
+						frameDesc.itemIndex,
 						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
 				usedViews.put(frameDesc.data, view);
 				addView(view);
 			}
 		}
-				
+
 		doMeasure(view, frameDesc);
 	}
-	
+
 	@Override
-	public void addView(View v){
+	public void addView(View v) {
 		super.addView(v);
-		Log.d(TAG,  "New child added...count: "+this.getChildCount());
+		Log.d(TAG, "New child added...count: " + this.getChildCount());
 	}
-	
 
 	private void doMeasure(View v, ItemProxy frameDesc) {
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width,
+				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height,
+				MeasureSpec.EXACTLY);
 		v.measure(widthSpec, heightSpec);
 		if (v instanceof StateListener)
 			((StateListener) v).ReportCurrentState(frameDesc.state);
@@ -222,8 +226,8 @@ public class Container extends ViewGroup {
 
 	private void doLayout(View view, Frame frame) {
 
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
-				+ frame.height - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left
+				+ frame.width - viewPortX, frame.top + frame.height - viewPortY);
 
 	}
 
@@ -277,12 +281,14 @@ public class Container extends ViewGroup {
 			Log.d(TAG, viewPortX + ", " + viewPortY);
 
 			if (oldFrames != null) {
-				// Create a copy of the incoming values because the source Layout
-				// may change the map inside its own class 
-				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+				// Create a copy of the incoming values because the source
+				// Layout
+				// may change the map inside its own class
+				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(
+						layout.getItemProxies(viewPortX, viewPortY));
 				LayoutChangeSet changeSet = layoutChanged(oldFrames, newFrames);
 				animateChanges(changeSet);
-				
+
 			}
 
 		} else {
@@ -290,107 +296,112 @@ public class Container extends ViewGroup {
 		}
 
 	}
-	
+
 	/**
-	 * Returns the actual frame for a view as its on stage.
-	 * The ItemProxy's frame object always represents the position it wants to be in but
-	 * actual frame may be different based on animation etc.
+	 * Returns the actual frame for a view as its on stage. The ItemProxy's
+	 * frame object always represents the position it wants to be in but actual
+	 * frame may be different based on animation etc.
 	 * 
-	 * @param proxy The proxy to get the <code>Frame</code> for
-	 * @return 		The Frame for the proxy or null if that view doesn't exist
+	 * @param proxy
+	 *            The proxy to get the <code>Frame</code> for
+	 * @return The Frame for the proxy or null if that view doesn't exist
 	 */
-	public Frame getActualFrame(final ItemProxy proxy){
-		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
-		if(v == null){
+	public Frame getActualFrame(final ItemProxy proxy) {
+		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews
+				.get(proxy.data);
+		if (v == null) {
 			return null;
 		}
-		
+
 		Frame of = new Frame();
 		of.left = (int) (v.getLeft() + v.getTranslationX());
 		of.top = (int) (v.getTop() + v.getTranslationY());
 		of.width = v.getWidth();
 		of.height = v.getHeight();
-		
+
 		return of;
-		
+
 	}
 
-//	protected void transitionToFrame(final ItemProxy proxy) {
-//
-//		boolean newFrame = false;
-//		if (proxy.isHeader) {
-//			if (usedHeaderViews.get(proxy.data) == null) {
-//				addAndMeasureViewIfNeeded(proxy);
-//				newFrame = true;
-//			}
-//		} else {
-//			if (usedViews.get(proxy.data) == null) {
-//				addAndMeasureViewIfNeeded(proxy);
-//				newFrame = true;
-//			}
-//		}
-//
-//		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
-//
-//		Frame of = new Frame();
-//		if (newFrame) {
-//			of = layout.getOffScreenStartFrame();
-//		} else {
-//			of.left = (int) (v.getLeft() + v.getTranslationX());
-//			of.top = (int) (v.getTop() + v.getTranslationY());
-//			of.width = v.getWidth();
-//			of.height = v.getHeight();
-//		}
-//
-//		if (v instanceof StateListener)
-//			((StateListener) v).ReportCurrentState(proxy.state);
-//		if (proxy.frame.equals(of)) {
-//			return;
-//		}
-//
-//		layoutAnimator.transitionToFrame(of, proxy, v);
-//
-//	}
+	// protected void transitionToFrame(final ItemProxy proxy) {
+	//
+	// boolean newFrame = false;
+	// if (proxy.isHeader) {
+	// if (usedHeaderViews.get(proxy.data) == null) {
+	// addAndMeasureViewIfNeeded(proxy);
+	// newFrame = true;
+	// }
+	// } else {
+	// if (usedViews.get(proxy.data) == null) {
+	// addAndMeasureViewIfNeeded(proxy);
+	// newFrame = true;
+	// }
+	// }
+	//
+	// View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) :
+	// usedViews.get(proxy.data);
+	//
+	// Frame of = new Frame();
+	// if (newFrame) {
+	// of = layout.getOffScreenStartFrame();
+	// } else {
+	// of.left = (int) (v.getLeft() + v.getTranslationX());
+	// of.top = (int) (v.getTop() + v.getTranslationY());
+	// of.width = v.getWidth();
+	// of.height = v.getHeight();
+	// }
+	//
+	// if (v instanceof StateListener)
+	// ((StateListener) v).ReportCurrentState(proxy.state);
+	// if (proxy.frame.equals(of)) {
+	// return;
+	// }
+	//
+	// layoutAnimator.transitionToFrame(of, proxy, v);
+	//
+	// }
 
 	public void layoutChanged() {
-		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(
+				layout.getItemProxies(viewPortX, viewPortY));
 		LayoutChangeSet changeSet = layoutChanged(frames, newFrames);
 		animateChanges(changeSet);
 	}
-	
-	private void animateChanges(LayoutChangeSet changeSet){
-		ArrayList<Pair<ItemProxy, Frame>> moved =  changeSet.getMoved();
-		for(Pair<ItemProxy, Frame> item : moved){
+
+	private void animateChanges(LayoutChangeSet changeSet) {
+		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
+		for (Pair<ItemProxy, Frame> item : moved) {
 			ItemProxy proxy = item.first;
-			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
-			if(v != null){
-				layoutAnimator.transitionToFrame(item.second, item.first, v );
+			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
+					: usedViews.get(proxy.data);
+			if (v != null) {
+				layoutAnimator.transitionToFrame(item.second, item.first, v);
 			}
-//			transitionToFrame(proxy);
-			
+			// transitionToFrame(proxy);
+
 		}
-		
-		for(ItemProxy proxy : changeSet.removed){
-			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
-			if(v != null){
-				if(proxy.isHeader){
-					//usedHeaderViews.remove(v);
-					//headerViewpool.add(v);				
-				}
-				else{
-					//usedViews.remove(v);
-					//viewpool.add(v);
+
+		for (ItemProxy proxy : changeSet.removed) {
+			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
+					: usedViews.get(proxy.data);
+			if (v != null) {
+				if (proxy.isHeader) {
+					// usedHeaderViews.remove(v);
+					// headerViewpool.add(v);
+				} else {
+					// usedViews.remove(v);
+					// viewpool.add(v);
 				}
 				removeView(v);
-				
+
 			}
-			
+
 		}
 	}
-	
-	
 
-	private LayoutChangeSet layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames, HashMap<? extends Object, ItemProxy> newFrames) {
+	private LayoutChangeSet layoutChanged(
+			HashMap<? extends Object, ItemProxy> oldFrames,
+			HashMap<? extends Object, ItemProxy> newFrames) {
 
 		layoutAnimator.clear();
 		// cleanupViews();
@@ -400,14 +411,14 @@ public class Container extends ViewGroup {
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
 			ItemProxy proxy = ItemProxy.clone((ItemProxy) m.getValue());
-			
+
 			proxy.frame.left -= viewPortX;
 			proxy.frame.top -= viewPortY;
-			
+
 			if (oldFrames.get(m.getKey()) != null)
 				oldFrames.remove(m.getKey());
 
-			//transitionToFrame(proxy);
+			// transitionToFrame(proxy);
 			change.addToMoved(proxy, getActualFrame(proxy));
 
 		}
@@ -417,11 +428,11 @@ public class Container extends ViewGroup {
 			ItemProxy proxy = layout.getItemProxyForItem(it.next());
 			proxy.frame.left -= viewPortX;
 			proxy.frame.top -= viewPortY;
-			//transitionToFrame(nf);
+			// transitionToFrame(nf);
 			change.addToDeleted(proxy);
 		}
 
-		//layoutAnimator.start();
+		// layoutAnimator.start();
 		frames = newFrames;
 		return change;
 	}
@@ -435,8 +446,22 @@ public class Container extends ViewGroup {
 		super.requestLayout();
 	}
 
+	/**
+	 * Sets the adapter for the this CollectionView.All view pools will be
+	 * cleared at this point and all views on the stage will be cleared
+	 * 
+	 * @param adapter
+	 *            The {@link BaseSectionedAdapter} that will populate this
+	 *            Collection
+	 */
 	public void setAdapter(BaseSectionedAdapter adapter) {
 		this.itemAdapter = adapter;
+		// reset all view caches etc
+		viewpool.clear();
+		headerViewpool.clear();
+		usedHeaderViews = new HashMap<Object, View>();
+		usedViews = new HashMap<Object, View>();
+		removeAllViews();
 		if (layout != null) {
 			layout.setItems(adapter);
 		}
@@ -494,8 +519,10 @@ public class Container extends ViewGroup {
 
 					@Override
 					public void onAnimationUpdate(ValueAnimator animation) {
-						int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
-						int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
+						int translateX = (int) ((1 - animation
+								.getAnimatedFraction()) * velocityX / 350);
+						int translateY = (int) ((1 - animation
+								.getAnimatedFraction()) * velocityY / 350);
 
 						moveScreen(translateX, translateY);
 
@@ -542,7 +569,8 @@ public class Container extends ViewGroup {
 			ItemProxy desc = (ItemProxy) m.getValue();
 
 			preventLayout = true;
-			if (usedViews.get(desc.data) == null && usedHeaderViews.get(desc.data) == null)
+			if (usedViews.get(desc.data) == null
+					&& usedHeaderViews.get(desc.data) == null)
 				addAndMeasureViewIfNeeded(desc);
 			preventLayout = false;
 
@@ -563,12 +591,12 @@ public class Container extends ViewGroup {
 	public BaseSectionedAdapter getAdapter() {
 		return itemAdapter;
 	}
-	
-	public void setLayoutAnimator(LayoutAnimator anim){
+
+	public void setLayoutAnimator(LayoutAnimator anim) {
 		layoutAnimator = anim;
 	}
-	
-	public LayoutAnimator getLayoutAnimator(){
+
+	public LayoutAnimator getLayoutAnimator() {
 		return layoutAnimator;
 	}
 
