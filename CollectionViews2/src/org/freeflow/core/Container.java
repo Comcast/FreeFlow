@@ -117,7 +117,13 @@ public class Container extends ViewGroup {
 			}
 		}
 
-		doMeasure(view, frameDesc);
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width,
+				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height,
+				MeasureSpec.EXACTLY);
+		view.measure(widthSpec, heightSpec);
+		if (view instanceof StateListener)
+			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
 
 	@Override
@@ -126,18 +132,7 @@ public class Container extends ViewGroup {
 		Log.d(TAG, "New child added...count: " + this.getChildCount());
 	}
 
-	private void doMeasure(View v, ItemProxy frameDesc) {
-
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width,
-				MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height,
-				MeasureSpec.EXACTLY);
-		v.measure(widthSpec, heightSpec);
-		if (v instanceof StateListener)
-			((StateListener) v).ReportCurrentState(frameDesc.state);
-
-	}
-
+	
 	private void cleanupViews() {
 
 		if (usedViews == null) {
