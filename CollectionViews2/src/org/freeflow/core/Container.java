@@ -14,6 +14,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -66,8 +67,14 @@ public class Container extends ViewGroup {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
-		setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+		
+		int w = MeasureSpec.getSize(widthMeasureSpec);
+		int h = MeasureSpec.getSize(heightMeasureSpec);
+		onMeasureCalled(w, h);
+	}
+	
+	public void onMeasureCalled(int w, int h){
+		setMeasuredDimension(w,h);
 		if (layout != null) {
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
 			frames = layout.getItemProxies(viewPortX, viewPortY);
@@ -79,6 +86,7 @@ public class Container extends ViewGroup {
 			cleanupViews();
 		}
 	}
+	
 
 	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
@@ -104,6 +112,13 @@ public class Container extends ViewGroup {
 				
 		doMeasure(view, frameDesc);
 	}
+	
+	@Override
+	public void addView(View v){
+		super.addView(v);
+		Log.d(TAG,  "New child added...count: "+this.getChildCount());
+	}
+	
 
 	private void doMeasure(View v, ItemProxy frameDesc) {
 
@@ -158,9 +173,6 @@ public class Container extends ViewGroup {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 		if (layout == null || frames == null) {
-			// if (DEBUG)
-			// Log.d(TAG, "onLayout End " + (System.currentTimeMillis() -
-			// start));
 			return;
 		}
 
@@ -264,7 +276,8 @@ public class Container extends ViewGroup {
 				// Create a copy of the incoming values because the source Layout
 				// may change the map inside its own class 
 				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
-				layoutChanged(oldFrames, newFrames);
+				LayoutChangeSet changeSet = layoutChanged(oldFrames, newFrames);
+				animateChanges(changeSet);
 				
 			}
 
@@ -273,82 +286,140 @@ public class Container extends ViewGroup {
 		}
 
 	}
-
-	protected void transitionToFrame(final ItemProxy nf) {
-
-		boolean newFrame = false;
-		if (nf.isHeader) {
-			if (usedHeaderViews.get(nf.data) == null) {
-				addAndMeasureViewIfNeeded(nf);
-				newFrame = true;
-			}
-		} else {
-			if (usedViews.get(nf.data) == null) {
-				addAndMeasureViewIfNeeded(nf);
-				newFrame = true;
-			}
+	
+	/**
+	 * Returns the actual frame for a view as its on stage.
+	 * The ItemProxy's frame object always represents the position it wants to be in but
+	 * actual frame may be different based on animation etc.
+	 * 
+	 * @param proxy The proxy to get the <code>Frame</code> for
+	 * @return 		The Frame for the proxy or null if that view doesn't exist
+	 */
+	public Frame getActualFrame(final ItemProxy proxy){
+		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
+		if(v == null){
+			return null;
 		}
-
-		View v = nf.isHeader ? usedHeaderViews.get(nf.data) : usedViews.get(nf.data);
-
+		
 		Frame of = new Frame();
-		if (newFrame) {
-			of = layout.getOffScreenStartFrame();
-		} else {
-			of.left = (int) (v.getLeft() + v.getTranslationX());
-			of.top = (int) (v.getTop() + v.getTranslationY());
-			of.width = v.getWidth();
-			of.height = v.getHeight();
-		}
-
-		if (v instanceof StateListener)
-			((StateListener) v).ReportCurrentState(nf.state);
-		if (nf.frame.equals(of)) {
-			return;
-		}
-
-		layoutAnimator.transitionToFrame(of, nf, v);
-
+		of.left = (int) (v.getLeft() + v.getTranslationX());
+		of.top = (int) (v.getTop() + v.getTranslationY());
+		of.width = v.getWidth();
+		of.height = v.getHeight();
+		
+		return of;
+		
 	}
+
+//	protected void transitionToFrame(final ItemProxy proxy) {
+//
+//		boolean newFrame = false;
+//		if (proxy.isHeader) {
+//			if (usedHeaderViews.get(proxy.data) == null) {
+//				addAndMeasureViewIfNeeded(proxy);
+//				newFrame = true;
+//			}
+//		} else {
+//			if (usedViews.get(proxy.data) == null) {
+//				addAndMeasureViewIfNeeded(proxy);
+//				newFrame = true;
+//			}
+//		}
+//
+//		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
+//
+//		Frame of = new Frame();
+//		if (newFrame) {
+//			of = layout.getOffScreenStartFrame();
+//		} else {
+//			of.left = (int) (v.getLeft() + v.getTranslationX());
+//			of.top = (int) (v.getTop() + v.getTranslationY());
+//			of.width = v.getWidth();
+//			of.height = v.getHeight();
+//		}
+//
+//		if (v instanceof StateListener)
+//			((StateListener) v).ReportCurrentState(proxy.state);
+//		if (proxy.frame.equals(of)) {
+//			return;
+//		}
+//
+//		layoutAnimator.transitionToFrame(of, proxy, v);
+//
+//	}
 
 	public void layoutChanged() {
 		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
-		layoutChanged(frames, newFrames);
+		LayoutChangeSet changeSet = layoutChanged(frames, newFrames);
+		animateChanges(changeSet);
 	}
+	
+	private void animateChanges(LayoutChangeSet changeSet){
+		ArrayList<Pair<ItemProxy, Frame>> moved =  changeSet.getMoved();
+		for(Pair<ItemProxy, Frame> item : moved){
+			ItemProxy proxy = item.first;
+			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
+			if(v != null){
+				layoutAnimator.transitionToFrame(item.second, item.first, v );
+			}
+//			transitionToFrame(proxy);
+			
+		}
+		
+		for(ItemProxy proxy : changeSet.removed){
+			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews.get(proxy.data);
+			if(v != null){
+				if(proxy.isHeader){
+					//usedHeaderViews.remove(v);
+					//headerViewpool.add(v);				
+				}
+				else{
+					//usedViews.remove(v);
+					//viewpool.add(v);
+				}
+				removeView(v);
+				
+			}
+			
+		}
+	}
+	
+	
 
-	private void layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames, HashMap<? extends Object, ItemProxy> newFrames) {
+	private LayoutChangeSet layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames, HashMap<? extends Object, ItemProxy> newFrames) {
 
 		layoutAnimator.clear();
-		preventLayout = true;
 		// cleanupViews();
+		LayoutChangeSet change = new LayoutChangeSet();
 
 		Iterator<?> it = newFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			ItemProxy nf = ItemProxy.clone((ItemProxy) m.getValue());
+			ItemProxy proxy = ItemProxy.clone((ItemProxy) m.getValue());
 			
-			nf.frame.left -= viewPortX;
-			nf.frame.top -= viewPortY;
+			proxy.frame.left -= viewPortX;
+			proxy.frame.top -= viewPortY;
 			
 			if (oldFrames.get(m.getKey()) != null)
 				oldFrames.remove(m.getKey());
 
-			transitionToFrame(nf);
+			//transitionToFrame(proxy);
+			change.addToMoved(proxy, getActualFrame(proxy));
 
 		}
 
 		it = oldFrames.keySet().iterator();
 		while (it.hasNext()) {
-			ItemProxy nf = layout.getItemProxyForItem(it.next());
-			nf.frame.left -= viewPortX;
-			nf.frame.top -= viewPortY;
-			transitionToFrame(nf);
+			ItemProxy proxy = layout.getItemProxyForItem(it.next());
+			proxy.frame.left -= viewPortX;
+			proxy.frame.top -= viewPortY;
+			//transitionToFrame(nf);
+			change.addToDeleted(proxy);
 		}
 
-		layoutAnimator.start();
-
-		preventLayout = false;
+		//layoutAnimator.start();
 		frames = newFrames;
+		return change;
 	}
 
 	@Override

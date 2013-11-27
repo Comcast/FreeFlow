@@ -12,6 +12,18 @@ public class Frame {
 	public int top;
 	public int width;
 	public int height;
+	
+	public Frame(){
+		
+	}
+	
+	public Frame(int left, int top, int width, int height){
+		this.left = left;
+		this.top = top;
+		this.width = width;
+		this.height = height;
+	}
+	
 
 	public static Frame clone(Frame frame) {
 		Frame newFrame = new Frame();
