@@ -123,11 +123,11 @@ public class Container extends ViewGroup {
 			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
 
-	@Override
-	public void addView(View v) {
-		super.addView(v);
-		Log.d(TAG, "New child added...count: " + this.getChildCount());
-	}
+//	@Override
+//	public void addView(View v) {
+//		super.addView(v);
+//		Log.d(TAG, "New child added...count: " + this.getChildCount());
+//	}
 
 	
 	private void cleanupViews() {
