@@ -371,28 +371,20 @@ public class Container extends ViewGroup {
 			ItemProxy proxy = item.first;
 			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
 					: usedViews.get(proxy.data);
-			if (v != null) {
-				layoutAnimator.transitionToFrame(item.second, item.first, v);
-			}
-			// transitionToFrame(proxy);
-
+			layoutAnimator.transitionToFrame(item.second, item.first, v);
 		}
 
 		for (ItemProxy proxy : changeSet.removed) {
 			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
 					: usedViews.get(proxy.data);
-			if (v != null) {
-				if (proxy.isHeader) {
-					// usedHeaderViews.remove(v);
-					// headerViewpool.add(v);
-				} else {
-					// usedViews.remove(v);
-					// viewpool.add(v);
-				}
-				removeView(v);
-
+			if (proxy.isHeader) {
+				// usedHeaderViews.remove(v);
+				// headerViewpool.add(v);
+			} else {
+				// usedViews.remove(v);
+				// viewpool.add(v);
 			}
-
+			removeView(v);
 		}
 	}
 
