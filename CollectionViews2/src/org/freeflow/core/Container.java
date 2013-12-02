@@ -64,9 +64,6 @@ public class Container extends ViewGroup {
 		headerViewpool = new ArrayList<View>();
 		frames = new HashMap<Object, ItemProxy>();
 
-		((HashMap<Object, ItemProxy>) frames)
-				.put(new Object(), new ItemProxy());
-
 		maxFlingVelocity = ViewConfiguration.get(context)
 				.getScaledMaximumFlingVelocity();
 	}
@@ -240,7 +237,7 @@ public class Container extends ViewGroup {
 
 		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-
+		
 		if (this.itemAdapter != null) {
 			layout.setItems(itemAdapter);
 		}
@@ -289,7 +286,7 @@ public class Container extends ViewGroup {
 		} else {
 			requestLayout();
 		}
-
+		
 	}
 
 	/**
@@ -364,6 +361,11 @@ public class Container extends ViewGroup {
 	}
 
 	private void animateChanges(LayoutChangeSet changeSet) {
+		
+		for (ItemProxy proxy : changeSet.getAdded()) {
+			addAndMeasureViewIfNeeded(proxy);
+		}
+		
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 		for (Pair<ItemProxy, Frame> item : moved) {
 			ItemProxy proxy = item.first;
@@ -397,7 +399,6 @@ public class Container extends ViewGroup {
 	private LayoutChangeSet layoutChanged(
 			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
-
 		layoutAnimator.clear();
 		// cleanupViews();
 		LayoutChangeSet change = new LayoutChangeSet();
@@ -410,11 +411,17 @@ public class Container extends ViewGroup {
 			proxy.frame.left -= viewPortX;
 			proxy.frame.top -= viewPortY;
 
-			if (oldFrames.get(m.getKey()) != null)
+			if (oldFrames.get(m.getKey()) != null){
 				oldFrames.remove(m.getKey());
+				change.addToMoved(proxy, getActualFrame(proxy));
+			}
+			else{
+				change.addToAdded(proxy);
+			}
+				
 
 			// transitionToFrame(proxy);
-			change.addToMoved(proxy, getActualFrame(proxy));
+			
 
 		}
 
