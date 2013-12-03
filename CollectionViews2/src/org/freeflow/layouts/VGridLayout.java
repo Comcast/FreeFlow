@@ -141,7 +141,7 @@ public class VGridLayout extends AbstractLayout {
 		}
 		
 		for (ItemProxy fd : frameDescriptors.values()) {
-			if (fd.frame.top + itemHeight > viewPortTop && fd.frame.top < viewPortTop + height) {
+			if (fd.frame.top + itemHeight > viewPortTop - itemHeight && fd.frame.top < viewPortTop + height + itemHeight) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}

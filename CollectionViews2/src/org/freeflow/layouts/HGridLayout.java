@@ -132,7 +132,7 @@ public class HGridLayout extends AbstractLayout {
 		
 		for (ItemProxy fd : frameDescriptors.values()) {
 
-			if (fd.frame.left + itemWidth > viewPortLeft && fd.frame.left < viewPortLeft + width) {
+			if (fd.frame.left + itemWidth > viewPortLeft - itemWidth && fd.frame.left < viewPortLeft + width + itemWidth) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}
