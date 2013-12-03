@@ -24,8 +24,8 @@ import android.view.ViewGroup;
 public class Container extends ViewGroup {
 
 	private static final String TAG = "Container";
-	protected HashMap<Object, View> usedViews;
-	protected HashMap<Object, View> usedHeaderViews;
+	protected HashMap<Object, ItemProxy> usedViews;
+	protected HashMap<Object, ItemProxy> usedHeaderViews;
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
 	protected HashMap<? extends Object, ItemProxy> frames = null;
@@ -58,9 +58,10 @@ public class Container extends ViewGroup {
 	}
 
 	private void init(Context context) {
-		usedViews = new HashMap<Object, View>();
+		usedViews = new HashMap<Object, ItemProxy>();
+		usedHeaderViews = new HashMap<Object, ItemProxy>();
+		
 		viewpool = new ArrayList<View>();
-		usedHeaderViews = new HashMap<Object, View>();
 		headerViewpool = new ArrayList<View>();
 		frames = new HashMap<Object, ItemProxy>();
 
@@ -92,25 +93,36 @@ public class Container extends ViewGroup {
 
 	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
+		ItemProxy oldProxy;
 		if (frameDesc.isHeader) {
-			view = usedHeaderViews.get(frameDesc.data);
-			if (view == null) {
+			oldProxy = usedHeaderViews.get(frameDesc.data);
+			if (oldProxy == null) {
 				view = itemAdapter.getHeaderViewForSection(
 						frameDesc.itemSection,
 						headerViewpool.size() > 0 ? headerViewpool.remove(0)
 								: null, this);
-				usedHeaderViews.put(frameDesc.data, view);
+				frameDesc.view = view;
+				usedHeaderViews.put(frameDesc.data, frameDesc);
 				addView(view);
+			}
+			else{
+				view = oldProxy.view;
+				frameDesc.view = oldProxy.view;
 			}
 
 		} else {
-			view = usedViews.get(frameDesc.data);
-			if (view == null) {
+			oldProxy = usedViews.get(frameDesc.data);
+			if (oldProxy == null) {
 				view = itemAdapter.getViewForSection(frameDesc.itemSection,
 						frameDesc.itemIndex,
 						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
-				usedViews.put(frameDesc.data, view);
+				frameDesc.view = view;
+				usedViews.put(frameDesc.data, frameDesc);
 				addView(view);
+			}
+			else{
+				view = oldProxy.view;
+				frameDesc.view = oldProxy.view;
 			}
 		}
 
@@ -143,9 +155,11 @@ public class Container extends ViewGroup {
 
 			if (frames.get(m.getKey()) != null)
 				continue;
-
-			final View view = (View) m.getValue();
+			
+			ItemProxy proxy = (ItemProxy) m.getValue();
+			final View view = proxy.view;
 			it.remove();
+			proxy.view = null;
 			viewpool.add(view);
 			removeView(view);
 
@@ -159,10 +173,13 @@ public class Container extends ViewGroup {
 			if (frames.get(m.getKey()) != null)
 				continue;
 
-			final View view = (View) m.getValue();
+			ItemProxy proxy = (ItemProxy) m.getValue();
+			final View view = proxy.view;
+			
 			it.remove();
 
 			headerViewpool.add(view);
+			proxy.view = null;
 			removeView(view);
 
 		}
@@ -179,7 +196,7 @@ public class Container extends ViewGroup {
 		Iterator it = usedViews.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			View v = (View) m.getValue();
+			View v = ((ItemProxy) m.getValue()).view;
 
 			ItemProxy desc = frames.get(m.getKey());
 
@@ -199,7 +216,7 @@ public class Container extends ViewGroup {
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
 
-			View v = (View) m.getValue();
+			View v = ((ItemProxy) m.getValue()).view;
 
 			ItemProxy desc = frames.get(m.getKey());
 
@@ -224,7 +241,7 @@ public class Container extends ViewGroup {
 	}
 
 	public void setLayout(AbstractLayout lc) {
-
+		
 		if (lc == layout) {
 			return;
 		}
@@ -279,6 +296,9 @@ public class Container extends ViewGroup {
 				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(
 						layout.getItemProxies(viewPortX, viewPortY));
 				LayoutChangeSet changeSet = layoutChanged(oldFrames, newFrames);
+				
+				
+				
 				animateChanges(changeSet);
 
 			}
@@ -299,8 +319,7 @@ public class Container extends ViewGroup {
 	 * @return The Frame for the proxy or null if that view doesn't exist
 	 */
 	public Frame getActualFrame(final ItemProxy proxy) {
-		View v = proxy.isHeader ? usedHeaderViews.get(proxy.data) : usedViews
-				.get(proxy.data);
+		View v = proxy.view;
 		if (v == null) {
 			return null;
 		}
@@ -361,7 +380,6 @@ public class Container extends ViewGroup {
 	}
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-		
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 		}
@@ -369,14 +387,12 @@ public class Container extends ViewGroup {
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 		for (Pair<ItemProxy, Frame> item : moved) {
 			ItemProxy proxy = item.first;
-			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
-					: usedViews.get(proxy.data);
+			View v = proxy.view;
 			layoutAnimator.transitionToFrame(item.second, item.first, v);
 		}
 
 		for (ItemProxy proxy : changeSet.removed) {
-			View v = proxy.isHeader ? usedHeaderViews.get(proxy.data)
-					: usedViews.get(proxy.data);
+			View v = proxy.view;
 			if (proxy.isHeader) {
 				// usedHeaderViews.remove(v);
 				// headerViewpool.add(v);
@@ -398,13 +414,16 @@ public class Container extends ViewGroup {
 		Iterator<?> it = newFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			ItemProxy proxy = ItemProxy.clone((ItemProxy) m.getValue());
+			ItemProxy newItem = (ItemProxy) m.getValue();
+			ItemProxy proxy = ItemProxy.clone(newItem);
 
 			proxy.frame.left -= viewPortX;
 			proxy.frame.top -= viewPortY;
 
 			if (oldFrames.get(m.getKey()) != null){
-				oldFrames.remove(m.getKey());
+				ItemProxy old = oldFrames.remove(m.getKey());
+				proxy.view = old.view;
+				newItem.view  = old.view;
 				change.addToMoved(proxy, getActualFrame(proxy));
 			}
 			else{
@@ -428,6 +447,9 @@ public class Container extends ViewGroup {
 
 		// layoutAnimator.start();
 		frames = newFrames;
+		
+		
+		
 		return change;
 	}
 
@@ -453,8 +475,8 @@ public class Container extends ViewGroup {
 		// reset all view caches etc
 		viewpool.clear();
 		headerViewpool.clear();
-		usedHeaderViews = new HashMap<Object, View>();
-		usedViews = new HashMap<Object, View>();
+		usedHeaderViews = new HashMap<Object, ItemProxy>();
+		usedViews = new HashMap<Object, ItemProxy>();
 		removeAllViews();
 		if (layout != null) {
 			layout.setItems(adapter);
@@ -563,16 +585,18 @@ public class Container extends ViewGroup {
 			ItemProxy desc = (ItemProxy) m.getValue();
 
 			preventLayout = true;
-			if (usedViews.get(desc.data) == null
-					&& usedHeaderViews.get(desc.data) == null)
+			ItemProxy old = usedViews.get(desc.data) != null ? usedViews.get(desc.data) : usedHeaderViews.get(desc.data);
+			if (old == null){
 				addAndMeasureViewIfNeeded(desc);
+			}
+			else{
+				desc.view = old.view;
+			}
+				
 			preventLayout = false;
 
-			View view;
-			if (desc.isHeader)
-				view = usedHeaderViews.get(desc.data);
-			else
-				view = usedViews.get(desc.data);
+			View view = desc.view;
+			
 
 			doLayout(view, desc.frame);
 
