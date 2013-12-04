@@ -73,14 +73,6 @@ public class VGridLayout extends AbstractLayout {
 			throw new IllegalStateException("itemWidth not set");
 		}
 
-		if (headerWidth < 0) {
-			throw new IllegalStateException("headerWidth not set");
-		}
-
-		if (headerHeight < 0) {
-			throw new IllegalStateException("headerHeight not set");
-		}
-
 		if (height < 0 || width < 0)
 			throw new IllegalStateException("dimensions not set");
 
@@ -97,6 +89,15 @@ public class VGridLayout extends AbstractLayout {
 			Section s = itemsAdapter.getSection(i);
 
 			if (s.shouldDisplayHeader()) {
+
+				if (headerWidth < 0) {
+					throw new IllegalStateException("headerWidth not set");
+				}
+
+				if (headerHeight < 0) {
+					throw new IllegalStateException("headerHeight not set");
+				}
+
 				ItemProxy header = new ItemProxy();
 				Frame hframe = new Frame();
 				header.itemSection = i;

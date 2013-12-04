@@ -8,3 +8,13 @@ examples/PhotoGrid/bin/res/crunch/drawable-hdpi/ic_launcher.png
 examples/PhotoGrid/bin/res/crunch/drawable-mdpi/ic_launcher.png
 examples/PhotoGrid/bin/res/crunch/drawable-xhdpi/ic_launcher.png
 examples/PhotoGrid/gen/org/freeflow/examples/freeflowphotogrid/BuildConfig.java
+.gitignore1
+examples/PhotoGrid/.classpath
+examples/PhotoGrid/bin/classes.dex
+examples/PhotoGrid/bin/dexedLibs/android-support-v4-268bded86a5b73b99700f36e3d4ca9a4.jar
+examples/PhotoGrid/bin/dexedLibs/collectionviews2-16ad5486b2824cef8c982b53ad083fec.jar
+examples/PhotoGrid/bin/res/drawable-hdpi/ic_launcher.png
+examples/PhotoGrid/bin/res/drawable-mdpi/ic_launcher.png
+examples/PhotoGrid/bin/res/drawable-xhdpi/ic_launcher.png
+examples/PhotoGrid/bin/resources.ap_
+examples/PhotoGrid/project.properties

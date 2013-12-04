@@ -59,14 +59,6 @@ public class VLayout extends AbstractLayout {
 			throw new IllegalStateException("dimensions not set");
 		}
 
-		if (headerWidth < 0) {
-			throw new IllegalStateException("headerWidth not set");
-		}
-
-		if (headerHeight < 0) {
-			throw new IllegalStateException("headerHeight not set");
-		}
-
 		dataChanged = false;
 
 		frameDescriptors.clear();
@@ -78,6 +70,14 @@ public class VLayout extends AbstractLayout {
 
 			if (s.shouldDisplayHeader()) {
 
+				if (headerWidth < 0) {
+					throw new IllegalStateException("headerWidth not set");
+				}
+
+				if (headerHeight < 0) {
+					throw new IllegalStateException("headerHeight not set");
+				}
+				
 				ItemProxy header = new ItemProxy();
 				Frame hframe = new Frame();
 				header.itemSection = i;

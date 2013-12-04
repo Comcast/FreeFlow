@@ -9,7 +9,6 @@ import org.freeflow.core.Section;
 
 public class HGridLayout extends AbstractLayout {
 
-	
 	private boolean dataChanged = false;
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
@@ -22,7 +21,7 @@ public class HGridLayout extends AbstractLayout {
 	private int headerHeight = -1;
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
-	
+
 	public void setItemHeight(int i) {
 		this.itemHeight = i;
 	}
@@ -67,14 +66,6 @@ public class HGridLayout extends AbstractLayout {
 		if (height < 0 || width < 0)
 			throw new IllegalStateException("dimensions not set");
 
-		if (headerWidth < 0) {
-			throw new IllegalStateException("headerWidth not set");
-		}
-
-		if (headerHeight < 0) {
-			throw new IllegalStateException("headerHeight not set");
-		}
-
 		dataChanged = false;
 
 		frameDescriptors.clear();
@@ -87,6 +78,15 @@ public class HGridLayout extends AbstractLayout {
 			Section s = itemsAdapter.getSection(i);
 
 			if (s.shouldDisplayHeader()) {
+				
+				if (headerWidth < 0) {
+					throw new IllegalStateException("headerWidth not set");
+				}
+
+				if (headerHeight < 0) {
+					throw new IllegalStateException("headerHeight not set");
+				}
+				
 				ItemProxy header = new ItemProxy();
 				Frame hframe = new Frame();
 				header.itemSection = i;
