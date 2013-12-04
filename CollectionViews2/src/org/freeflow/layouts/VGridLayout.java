@@ -20,11 +20,16 @@ public class VGridLayout extends AbstractLayout {
 	private BaseSectionedAdapter itemsAdapter;
 	private HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
 
+	private int cellBufferSize = 0;
+	private int bufferCount = 1;
+
 	public void setItemHeight(int itemHeight) {
 		if (itemHeight == this.itemHeight)
 			return;
 
 		this.itemHeight = itemHeight;
+
+		cellBufferSize = bufferCount * cellBufferSize;
 		dataChanged = true;
 	}
 
@@ -130,18 +135,24 @@ public class VGridLayout extends AbstractLayout {
 	}
 
 	/**
+	 * NOTE: In this instance, we subtract/add the cellBufferSize (computed when
+	 * item height is set, defaulted to 1 cell) to add a buffer of
+	 * cellBufferSize to each end of the viewport. <br>
+	 * 
 	 * {@inheritDoc}
+	 * 
 	 */
 	@Override
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if(frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
 			generateItemProxies();
 		}
-		
+
 		for (ItemProxy fd : frameDescriptors.values()) {
-			if (fd.frame.top + itemHeight > viewPortTop - itemHeight && fd.frame.top < viewPortTop + height + itemHeight) {
+			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
+					&& fd.frame.top < viewPortTop + height + cellBufferSize) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}
@@ -195,10 +206,10 @@ public class VGridLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if(frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
 			generateItemProxies();
 		}
-		
+
 		if (frameDescriptors.get(data) == null)
 			return null;
 
@@ -216,4 +227,7 @@ public class VGridLayout extends AbstractLayout {
 		headerHeight = hHeight;
 	}
 
+	public void setBufferCount(int bufferCount) {
+		this.bufferCount = bufferCount;
+	}
 }

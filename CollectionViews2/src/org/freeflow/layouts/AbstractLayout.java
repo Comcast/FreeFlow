@@ -23,15 +23,24 @@ public abstract class AbstractLayout {
 	public abstract void setItems(BaseSectionedAdapter adapter);
 
 	/**
-	 * Generate the frame descriptors of all views in the given viewport, you
-	 * provide the left and top, the width and height are resolved from the
-	 * dimensions passed earlier in the setDimensions call
+	 * Generate the item proxies of all views in the given viewport, you provide
+	 * the left and top, the width and height are resolved from the dimensions
+	 * passed earlier in the setDimensions call. <br>
+	 * <br>
+	 * 
+	 * NOTE: Any item proxies returned by this method will be rendered, sized,
+	 * laid out, and animated, regardeless of whether they are on screen or not.
+	 * So if you would like to buffer off screen items, include them in the
+	 * returned hashmap. <br>
+	 * <br>
+	 * 
 	 * 
 	 * @param viewPortLeft
 	 *            The left bound of the viewport
 	 * @param viewPortTop
 	 *            the top bound of the viewport
-	 * @return
+	 * @return HashMap of Data to itemProxies All itemProxies returned will be
+	 *         renedered, sized, laid out, and animated
 	 */
 	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop);
 

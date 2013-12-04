@@ -9,6 +9,7 @@ import org.freeflow.core.Section;
 
 public class HGridLayout extends AbstractLayout {
 
+	
 	private boolean dataChanged = false;
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
@@ -19,13 +20,16 @@ public class HGridLayout extends AbstractLayout {
 	private HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
 	private int headerWidth = -1;
 	private int headerHeight = -1;
-
+	private int cellBufferSize = 0;
+	private int bufferCount = 1;
+	
 	public void setItemHeight(int i) {
 		this.itemHeight = i;
 	}
 
 	public void setItemWidth(int itemWidth) {
 		this.itemWidth = itemWidth;
+		cellBufferSize = bufferCount * itemWidth;
 	}
 
 	/**
@@ -120,19 +124,25 @@ public class HGridLayout extends AbstractLayout {
 	}
 
 	/**
+	 * NOTE: In this instance, we subtract/add the cellBufferSize (computed when
+	 * item width is set, defaulted to 1 cell) to add a buffer of cellBufferSize
+	 * to each end of the viewport. <br>
+	 * 
 	 * {@inheritDoc}
+	 * 
 	 */
 	@Override
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if(frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
 			generateItemProxies();
 		}
-		
+
 		for (ItemProxy fd : frameDescriptors.values()) {
 
-			if (fd.frame.left + itemWidth > viewPortLeft - itemWidth && fd.frame.left < viewPortLeft + width + itemWidth) {
+			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
+					&& fd.frame.left < viewPortLeft + width + cellBufferSize) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}
@@ -189,10 +199,10 @@ public class HGridLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if(frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || dataChanged) {
 			generateItemProxies();
 		}
-		
+
 		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
 
 		return fd;
@@ -207,6 +217,10 @@ public class HGridLayout extends AbstractLayout {
 		headerWidth = hWidth;
 		dataChanged = true;
 
+	}
+
+	public void setBufferCount(int bufferCount) {
+		this.bufferCount = bufferCount;
 	}
 
 }

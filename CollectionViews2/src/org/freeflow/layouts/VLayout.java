@@ -19,8 +19,12 @@ public class VLayout extends AbstractLayout {
 	private int headerHeight = -1;
 	private int headerWidth = -1;
 
+	private int cellBufferSize = 0;
+	private int bufferCount = 1;
+
 	public void setItemHeight(int i) {
 		this.itemHeight = i;
+		cellBufferSize = bufferCount * itemHeight;
 	}
 
 	/**
@@ -110,7 +114,12 @@ public class VLayout extends AbstractLayout {
 	}
 
 	/**
+	 * NOTE: In this instance, we subtract/add the cellBufferSize (computed when
+	 * item height is set, defaulted to 1 cell) to add a buffer of
+	 * cellBufferSize to each end of the viewport. <br>
+	 * 
 	 * {@inheritDoc}
+	 * 
 	 */
 	@Override
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
@@ -121,7 +130,8 @@ public class VLayout extends AbstractLayout {
 		}
 
 		for (ItemProxy fd : frameDescriptors.values()) {
-			if (fd.frame.top + itemHeight > viewPortTop - itemHeight && fd.frame.top < viewPortTop + height + itemHeight) {
+			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
+					&& fd.frame.top < viewPortTop + height + cellBufferSize) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
 				desc.put(newDesc.data, newDesc);
 			}
@@ -188,6 +198,10 @@ public class VLayout extends AbstractLayout {
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
 		headerWidth = hWidth;
 		headerHeight = hHeight;
+	}
+
+	public void setBufferCount(int bufferCount) {
+		this.bufferCount = bufferCount;
 	}
 
 }
