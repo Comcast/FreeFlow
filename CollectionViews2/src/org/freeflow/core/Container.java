@@ -60,13 +60,12 @@ public class Container extends ViewGroup {
 	private void init(Context context) {
 		usedViews = new HashMap<Object, ItemProxy>();
 		usedHeaderViews = new HashMap<Object, ItemProxy>();
-		
+
 		viewpool = new ArrayList<View>();
 		headerViewpool = new ArrayList<View>();
 		frames = new HashMap<Object, ItemProxy>();
 
-		maxFlingVelocity = ViewConfiguration.get(context)
-				.getScaledMaximumFlingVelocity();
+		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 	}
 
 	@Override
@@ -97,15 +96,17 @@ public class Container extends ViewGroup {
 		if (frameDesc.isHeader) {
 			oldProxy = usedHeaderViews.get(frameDesc.data);
 			if (oldProxy == null) {
-				view = itemAdapter.getHeaderViewForSection(
-						frameDesc.itemSection,
-						headerViewpool.size() > 0 ? headerViewpool.remove(0)
-								: null, this);
+				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
+						headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
+
+				if (view instanceof Container)
+					throw new IllegalStateException("A container cannot be a direct child view to a container");
+
 				frameDesc.view = view;
 				usedHeaderViews.put(frameDesc.data, frameDesc);
+
 				addView(view);
-			}
-			else{
+			} else {
 				view = oldProxy.view;
 				frameDesc.view = oldProxy.view;
 			}
@@ -113,35 +114,34 @@ public class Container extends ViewGroup {
 		} else {
 			oldProxy = usedViews.get(frameDesc.data);
 			if (oldProxy == null) {
-				view = itemAdapter.getViewForSection(frameDesc.itemSection,
-						frameDesc.itemIndex,
+				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
 						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+
+				if (view instanceof Container)
+					throw new IllegalStateException("A container cannot be a direct child view to a container");
+
 				frameDesc.view = view;
 				usedViews.put(frameDesc.data, frameDesc);
 				addView(view);
-			}
-			else{
+			} else {
 				view = oldProxy.view;
 				frameDesc.view = oldProxy.view;
 			}
 		}
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width,
-				MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height,
-				MeasureSpec.EXACTLY);
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
 
-//	@Override
-//	public void addView(View v) {
-//		super.addView(v);
-//		Log.d(TAG, "New child added...count: " + this.getChildCount());
-//	}
+	// @Override
+	// public void addView(View v) {
+	// super.addView(v);
+	// Log.d(TAG, "New child added...count: " + this.getChildCount());
+	// }
 
-	
 	private void cleanupViews() {
 
 		if (usedViews == null) {
@@ -155,7 +155,7 @@ public class Container extends ViewGroup {
 
 			if (frames.get(m.getKey()) != null)
 				continue;
-			
+
 			ItemProxy proxy = (ItemProxy) m.getValue();
 			final View view = proxy.view;
 			it.remove();
@@ -175,7 +175,7 @@ public class Container extends ViewGroup {
 
 			ItemProxy proxy = (ItemProxy) m.getValue();
 			final View view = proxy.view;
-			
+
 			it.remove();
 
 			headerViewpool.add(view);
@@ -235,13 +235,13 @@ public class Container extends ViewGroup {
 
 	private void doLayout(View view, Frame frame) {
 
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left
-				+ frame.width - viewPortX, frame.top + frame.height - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
+				+ frame.height - viewPortY);
 
 	}
 
 	public void setLayout(AbstractLayout lc) {
-		
+
 		if (lc == layout) {
 			return;
 		}
@@ -254,7 +254,7 @@ public class Container extends ViewGroup {
 
 		if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0)
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-		
+
 		if (this.itemAdapter != null) {
 			layout.setItems(itemAdapter);
 		}
@@ -293,12 +293,10 @@ public class Container extends ViewGroup {
 				// Create a copy of the incoming values because the source
 				// Layout
 				// may change the map inside its own class
-				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(
-						layout.getItemProxies(viewPortX, viewPortY));
+				HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX,
+						viewPortY));
 				LayoutChangeSet changeSet = layoutChanged(oldFrames, newFrames);
-				
-				
-				
+
 				animateChanges(changeSet);
 
 			}
@@ -306,7 +304,7 @@ public class Container extends ViewGroup {
 		} else {
 			requestLayout();
 		}
-		
+
 	}
 
 	/**
@@ -373,8 +371,8 @@ public class Container extends ViewGroup {
 	// }
 
 	public void layoutChanged() {
-		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(
-				layout.getItemProxies(viewPortX, viewPortY));
+		HashMap<Object, ItemProxy> newFrames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX,
+				viewPortY));
 		LayoutChangeSet changeSet = layoutChanged(frames, newFrames);
 		animateChanges(changeSet);
 	}
@@ -383,7 +381,7 @@ public class Container extends ViewGroup {
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 		}
-		
+
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 		for (Pair<ItemProxy, Frame> item : moved) {
 			ItemProxy proxy = item.first;
@@ -393,19 +391,11 @@ public class Container extends ViewGroup {
 
 		for (ItemProxy proxy : changeSet.removed) {
 			View v = proxy.view;
-			if (proxy.isHeader) {
-				// usedHeaderViews.remove(v);
-				// headerViewpool.add(v);
-			} else {
-				// usedViews.remove(v);
-				// viewpool.add(v);
-			}
 			removeView(v);
 		}
 	}
 
-	private LayoutChangeSet layoutChanged(
-			HashMap<? extends Object, ItemProxy> oldFrames,
+	private LayoutChangeSet layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
 		layoutAnimator.clear();
 		// cleanupViews();
@@ -420,19 +410,16 @@ public class Container extends ViewGroup {
 			proxy.frame.left -= viewPortX;
 			proxy.frame.top -= viewPortY;
 
-			if (oldFrames.get(m.getKey()) != null){
+			if (oldFrames.get(m.getKey()) != null) {
 				ItemProxy old = oldFrames.remove(m.getKey());
 				proxy.view = old.view;
-				newItem.view  = old.view;
+				newItem.view = old.view;
 				change.addToMoved(proxy, getActualFrame(proxy));
-			}
-			else{
+			} else {
 				change.addToAdded(proxy);
 			}
-				
 
 			// transitionToFrame(proxy);
-			
 
 		}
 
@@ -447,9 +434,7 @@ public class Container extends ViewGroup {
 
 		// layoutAnimator.start();
 		frames = newFrames;
-		
-		
-		
+
 		return change;
 	}
 
@@ -535,10 +520,8 @@ public class Container extends ViewGroup {
 
 					@Override
 					public void onAnimationUpdate(ValueAnimator animation) {
-						int translateX = (int) ((1 - animation
-								.getAnimatedFraction()) * velocityX / 350);
-						int translateY = (int) ((1 - animation
-								.getAnimatedFraction()) * velocityY / 350);
+						int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
+						int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
 
 						moveScreen(translateX, translateY);
 
@@ -585,18 +568,17 @@ public class Container extends ViewGroup {
 			ItemProxy desc = (ItemProxy) m.getValue();
 
 			preventLayout = true;
-			ItemProxy old = usedViews.get(desc.data) != null ? usedViews.get(desc.data) : usedHeaderViews.get(desc.data);
-			if (old == null){
+			ItemProxy old = usedViews.get(desc.data) != null ? usedViews.get(desc.data) : usedHeaderViews
+					.get(desc.data);
+			if (old == null) {
 				addAndMeasureViewIfNeeded(desc);
-			}
-			else{
+			} else {
 				desc.view = old.view;
 			}
-				
+
 			preventLayout = false;
 
 			View view = desc.view;
-			
 
 			doLayout(view, desc.frame);
 
