@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffdfdfdf"
+    android:orientation="vertical"
+    tools:context=".SimpleCollection" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        
+        android:orientation="horizontal" >
+
+        <org.freeflow.core.Container
+            android:id="@+id/container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" 
+            android:background="#BBD022"/>
+        
+        
+        <org.freeflow.examples.freeflowphotogrid.ControlLinearLayout
+            android:orientation="vertical"
+            android:id="@+id/control_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" 
+            android:background="#BAD3EB"
+            android:visibility="gone"/>
+        
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/layout_change"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Change Layout" />
+
+</LinearLayout>
