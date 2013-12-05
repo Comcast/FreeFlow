@@ -208,6 +208,9 @@ public class Container extends ViewGroup {
 			if (v == null || frame == null)
 				continue;
 
+			if (v instanceof StateListener)
+				((StateListener) v).ReportCurrentState(desc.state);
+
 			doLayout(v, frame);
 
 		}
@@ -386,6 +389,10 @@ public class Container extends ViewGroup {
 		for (Pair<ItemProxy, Frame> item : moved) {
 			ItemProxy proxy = item.first;
 			View v = proxy.view;
+
+			if (v instanceof StateListener)
+				((StateListener) v).ReportCurrentState(proxy.state);
+
 			layoutAnimator.transitionToFrame(item.second, item.first, v);
 		}
 
@@ -579,6 +586,9 @@ public class Container extends ViewGroup {
 			preventLayout = false;
 
 			View view = desc.view;
+
+			if (view instanceof StateListener)
+				((StateListener) view).ReportCurrentState(desc.state);
 
 			doLayout(view, desc.frame);
 
