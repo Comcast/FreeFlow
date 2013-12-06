@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.freeflow.core.Container;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
+import org.freeflow.core.LayoutChangeSet;
 
 import android.test.AndroidTestCase;
 import android.util.Log;
@@ -18,9 +19,10 @@ public class ContainerTest extends AndroidTestCase {
 		super.tearDown();
 	}
 	
-	public void testContainerDelta(){
-		Container container = new Container(getContext());
-		container.onMeasureCalled(100, 100);
+	/**
+	 * Tests if a view is within the viewport and is moved,
+	 */
+	public void testViewChangesWhenViewMovesWithinViewport(){
 		
 		HashMap<String, ItemProxy> oldMap = new HashMap<String, ItemProxy>();
 		HashMap<String, ItemProxy> newMap = new HashMap<String, ItemProxy>();
@@ -37,9 +39,13 @@ public class ContainerTest extends AndroidTestCase {
 		proxy.frame =  new Frame(20,20,40,40);
 		newMap.put(one, proxy2);
 		
-		System.out.print("YO!!");
-		Log.d("atest", ">> "+container.getMeasuredWidth());
+		Container container = new Container(getContext());
+		LayoutChangeSet changes = container.getViewChanges(oldMap, newMap);
 		
-		assertTrue(container.getMeasuredWidth()==100);
+		assertTrue(changes.getMoved().size() == 1);
+		assertTrue(changes.getAdded().size() == 0);
+		assertTrue(changes.getRemoved().size() == 0);
 	}
+	
+	
 }
