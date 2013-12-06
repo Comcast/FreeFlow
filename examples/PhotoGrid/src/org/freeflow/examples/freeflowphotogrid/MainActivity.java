@@ -12,8 +12,11 @@ import org.freeflow.layouts.VLayout;
 import org.freeflow.layouts.animations.ScaleAnimator;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -47,7 +50,7 @@ public class MainActivity extends Activity {
 		container = new Container(this);
 
 		// container.setOnTouchListener(this);
-		//container.setFocusable(true);
+		// container.setFocusable(true);
 		container.requestFocus();
 		hLayout = new HLayout();
 		hLayout.setItemWidth(100);
@@ -88,8 +91,7 @@ public class MainActivity extends Activity {
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
 		container.setLayoutAnimator(new ScaleAnimator());
-		
-		
+
 		frameLayout.addView(container);
 
 		changeButton = ((Button) frameLayout.findViewById(R.id.transitionButton));
@@ -146,12 +148,12 @@ public class MainActivity extends Activity {
 
 		@Override
 		public View getViewForSection(int section, int position, View convertView, ViewGroup parent) {
-			TextView tv = null;
+			myTv tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");
-				tv = (TextView) convertView;
+				tv = (myTv) convertView;
 			} else {
-				tv = new TextView(MainActivity.this);
+				tv = new myTv(MainActivity.this);
 			}
 
 			tv.setFocusable(false);
@@ -164,12 +166,12 @@ public class MainActivity extends Activity {
 
 		@Override
 		public View getHeaderViewForSection(int section, View convertView, ViewGroup parent) {
-			TextView tv = null;
+			myTv tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");
-				tv = (TextView) convertView;
+				tv = (myTv) convertView;
 			} else {
-				tv = new TextView(MainActivity.this);
+				tv = new myTv(MainActivity.this);
 			}
 
 			tv.setFocusable(false);
@@ -195,6 +197,38 @@ public class MainActivity extends Activity {
 			return null;
 		}
 
+	}
+
+	class myTv extends TextView {
+
+		public myTv(Context context) {
+			super(context);
+		}
+
+		public myTv(Context context, AttributeSet attrs) {
+			super(context, attrs);
+
+		}
+
+		public myTv(Context context, AttributeSet attrs, int defStyle) {
+			super(context, attrs, defStyle);
+
+		}
+
+		@Override
+		protected void onAttachedToWindow() {
+			super.onAttachedToWindow();
+
+			// Log.d(TAG, "attached: " + this.getText());
+
+		}
+
+		@Override
+		protected void onDetachedFromWindow() {
+			super.onDetachedFromWindow();
+
+			// Log.d(TAG, "detached: " + this.getText());
+		}
 	}
 
 }

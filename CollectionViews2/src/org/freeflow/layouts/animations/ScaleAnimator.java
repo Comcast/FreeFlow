@@ -18,6 +18,9 @@ public class ScaleAnimator extends LayoutAnimator {
 	@Override
 	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 
+		if(v == null)
+			return;
+		
 		if (v instanceof iFrameChangeListener) {
 			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
 			return;
