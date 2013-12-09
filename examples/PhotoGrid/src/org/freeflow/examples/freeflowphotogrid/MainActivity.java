@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
 
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
-		container.setLayoutAnimator(new ScaleAnimator());
+//		container.setLayoutAnimator(new ScaleAnimator());
 
 		frameLayout.addView(container);
 
