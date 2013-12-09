@@ -189,7 +189,15 @@ public class Container extends ViewGroup {
 			}
 		}
 
-		Frame vpFrame = newLayout.getItemProxyForItem(data).frame;
+		ItemProxy proxy = newLayout.getItemProxyForItem(data);
+
+		if (proxy == null) {
+			viewPortX = 0;
+			viewPortY = 0;
+			return;
+		}
+
+		Frame vpFrame = proxy.frame;
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
