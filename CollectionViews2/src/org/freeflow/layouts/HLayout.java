@@ -7,6 +7,8 @@ import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 
+import android.util.Log;
+
 public class HLayout extends AbstractLayout {
 
 	private boolean dataChanged = false;
@@ -42,6 +44,11 @@ public class HLayout extends AbstractLayout {
 
 	@Override
 	public void setItems(BaseSectionedAdapter adapter) {
+		if(adapter == this.itemsAdapter)
+			return;
+		
+		Log.d(TAG, "setItems called");
+		
 		this.itemsAdapter = adapter;
 		dataChanged = true;
 	}

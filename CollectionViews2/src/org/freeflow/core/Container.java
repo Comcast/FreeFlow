@@ -87,9 +87,6 @@ public class Container extends ViewGroup {
 
 			HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
-			if (this.itemAdapter != null) {
-				layout.setItems(itemAdapter);
-			}
 			// Create a copy of the incoming values because the source
 			// Layout
 			// may change the map inside its own class
@@ -224,8 +221,8 @@ public class Container extends ViewGroup {
 
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
-		view.setTranslationX(0);
-		view.setTranslationY(0);
+		// view.setTranslationX(0);
+		// view.setTranslationY(0);
 
 		Frame frame = proxy.frame;
 		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
@@ -241,6 +238,9 @@ public class Container extends ViewGroup {
 		if (lc == layout) {
 			return;
 		}
+
+		if (this.itemAdapter != null)
+			lc.setItems(itemAdapter);
 
 		computeViewPort(lc);
 
@@ -329,7 +329,7 @@ public class Container extends ViewGroup {
 		for (ItemProxy proxy : changeSet.removed) {
 			View v = proxy.view;
 
-			removeView(v);
+			removeViewInLayout(v);
 
 			if (proxy.isHeader) {
 				headerViewpool.add(v);
@@ -445,7 +445,7 @@ public class Container extends ViewGroup {
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			mVelocityTracker.recycle();
 			mVelocityTracker = null;
-			requestLayout();
+			// requestLayout();
 
 			return true;
 
@@ -473,11 +473,10 @@ public class Container extends ViewGroup {
 				});
 
 				animator.setDuration(500);
-				// animator.start();
+				animator.start();
 
 			}
 
-			requestLayout();
 			return true;
 		}
 
@@ -509,6 +508,8 @@ public class Container extends ViewGroup {
 		else if (viewPortY > layout.getContentHeight())
 			viewPortY = layout.getContentHeight();
 
+		Log.d(TAG, "viewport x = " + viewPortX + ", viewport Y = " + viewPortY);
+
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
@@ -518,20 +519,15 @@ public class Container extends ViewGroup {
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);
 			doLayout(proxy);
-			proxy.view.setTranslationX(movementX);
-			proxy.view.setTranslationY(movementY);
 		}
 
 		for (Pair<ItemProxy, Frame> proxyPair : changeSet.moved) {
-			// doLayout(proxyPair.first);
-			View v = proxyPair.first.view;
-			v.setTranslationX(v.getTranslationX() + movementX);
-			v.setTranslationY(v.getTranslationY() + movementY);
+			doLayout(proxyPair.first);
 		}
 
 		for (ItemProxy proxy : changeSet.removed) {
 			View v = proxy.view;
-			removeView(v);
+			removeViewInLayout(v);
 			if (proxy.isHeader) {
 				headerViewpool.add(v);
 			} else {
