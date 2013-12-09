@@ -8,7 +8,7 @@
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="org.freeflow.collectionviews2" />
+        android:targetPackage="org.freeflow" />
 
     <application
         android:icon="@drawable/ic_launcher"
