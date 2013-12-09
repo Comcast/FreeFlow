@@ -21,6 +21,11 @@ public class SimpleDataAdapter implements BaseSectionedAdapter {
 
 		public SimpleDataAdapter(Context context, int headerCount, int itemCount) {
 			this.context = context;
+			setData(headerCount, itemCount);
+		}
+		
+		public void setData(int headerCount, int itemCount){
+			sections.clear();
 			for (int i = 0; i < headerCount; i++) {
 				Section s = new Section();
 				s.setShouldDisplayHeader(true);
@@ -30,6 +35,7 @@ public class SimpleDataAdapter implements BaseSectionedAdapter {
 				}
 				sections.add(s);
 			}
+			
 		}
 
 		@Override
@@ -81,6 +87,10 @@ public class SimpleDataAdapter implements BaseSectionedAdapter {
 				return sections.get(index);
 
 			return null;
+		}
+		
+		public ArrayList<Section>  getSections(){
+			return sections;
 		}
 
 	}

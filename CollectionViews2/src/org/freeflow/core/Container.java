@@ -482,5 +482,9 @@ public class Container extends ViewGroup {
 	public LayoutAnimator getLayoutAnimator() {
 		return layoutAnimator;
 	}
+	
+	public HashMap<? extends Object,ItemProxy> getFrames(){
+		return frames;
+	}
 
 }
