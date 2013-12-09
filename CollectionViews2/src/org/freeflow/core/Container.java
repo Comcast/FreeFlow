@@ -91,7 +91,8 @@ public class Container extends ViewGroup {
 			// Layout
 			// may change the map inside its own class
 			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
-			changeSet = layoutChanged(oldFrames, frames);
+			layoutAnimator.clear();
+			changeSet = getViewChanges(oldFrames, frames);
 
 			for (ItemProxy frameDesc : changeSet.added) {
 				addAndMeasureViewIfNeeded(frameDesc);
@@ -342,9 +343,10 @@ public class Container extends ViewGroup {
 		changeSet = null;
 	}
 
-	private LayoutChangeSet layoutChanged(HashMap<? extends Object, ItemProxy> oldFrames,
+	
+	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
-		layoutAnimator.clear();
+		
 		// cleanupViews();
 		LayoutChangeSet change = new LayoutChangeSet();
 
@@ -513,8 +515,9 @@ public class Container extends ViewGroup {
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
-
-		changeSet = layoutChanged(oldFrames, frames);
+		
+		layoutAnimator.clear();
+		changeSet = getViewChanges(oldFrames, frames);
 
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);
