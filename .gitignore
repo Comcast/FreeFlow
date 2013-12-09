@@ -9,3 +9,9 @@ bin/res/drawable-mdpi/ic_launcher.png
 bin/res/drawable-xhdpi/ic_launcher.png
 bin/resources.ap_
 bin
+bin/*
+CollectionViews2/bin/*
+CollectionViews2/gen/*
+examples/PhotoGrid/gen/*
+examples/PhotoGrid/bin/*
+
