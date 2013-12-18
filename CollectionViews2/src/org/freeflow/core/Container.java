@@ -24,8 +24,6 @@ import android.view.ViewGroup;
 public class Container extends ViewGroup {
 
 	private static final String TAG = "Container";
-	// protected HashMap<Object, ItemProxy> usedViews;
-	// protected HashMap<Object, ItemProxy> usedHeaderViews;
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
 	protected HashMap<? extends Object, ItemProxy> frames = null;
@@ -34,6 +32,8 @@ public class Container extends ViewGroup {
 	protected AbstractLayout layout;
 	public int viewPortX = 0;
 	public int viewPortY = 0;
+
+	protected View headerView = null;
 
 	private LayoutChangeSet changeSet = null;
 
@@ -92,12 +92,12 @@ public class Container extends ViewGroup {
 			// Layout
 			// may change the map inside its own class
 			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
-			layoutAnimator.clear();
-			changeSet = getViewChanges(oldFrames, frames);
 
-			for (ItemProxy frameDesc : changeSet.added) {
-				addAndMeasureViewIfNeeded(frameDesc);
-			}
+			changeSet = getViewChanges(oldFrames, frames);
+			//
+			// for (ItemProxy frameDesc : changeSet.added) {
+			// addAndMeasureViewIfNeeded(frameDesc);
+			// }
 		}
 	}
 
@@ -241,7 +241,7 @@ public class Container extends ViewGroup {
 
 	private void animateChanges() {
 
-		for (ItemProxy proxy : changeSet.removed) {
+		for (ItemProxy proxy : changeSet.getRemoved()) {
 			View v = proxy.view;
 
 			removeViewInLayout(v);
@@ -283,6 +283,7 @@ public class Container extends ViewGroup {
 		LayoutChangeSet change = new LayoutChangeSet();
 
 		if (oldFrames == null) {
+			Log.d(TAG, "old frames is null");
 			for (ItemProxy proxy : newFrames.values()) {
 				change.addToAdded(proxy);
 			}
@@ -332,13 +333,15 @@ public class Container extends ViewGroup {
 	 *            Collection
 	 */
 	public void setAdapter(BaseSectionedAdapter adapter) {
+
+		Log.d(TAG, "setting adapter");
 		this.itemAdapter = adapter;
 		// reset all view caches etc
 		viewpool.clear();
 		headerViewpool.clear();
-		// usedHeaderViews = new HashMap<Object, ItemProxy>();
-		// usedViews = new HashMap<Object, ItemProxy>();
 		removeAllViews();
+		frames = null;
+
 		if (layout != null) {
 			layout.setItems(adapter);
 		}
@@ -482,9 +485,14 @@ public class Container extends ViewGroup {
 	public LayoutAnimator getLayoutAnimator() {
 		return layoutAnimator;
 	}
-	
-	public HashMap<? extends Object,ItemProxy> getFrames(){
+
+	public HashMap<? extends Object, ItemProxy> getFrames() {
 		return frames;
+	}
+
+	public void clearFrames() {
+		removeAllViews();
+		frames = null;
 	}
 
 }

@@ -35,8 +35,10 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
 
-				if (v == null)
+				if (v == null) {
 					animation.cancel();
+					return;
+				}
 
 				try {
 
