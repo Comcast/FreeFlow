@@ -94,6 +94,8 @@ public class Container extends ViewGroup {
 			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
 
 			changeSet = getViewChanges(oldFrames, frames);
+
+			animateChanges();
 			//
 			// for (ItemProxy frameDesc : changeSet.added) {
 			// addAndMeasureViewIfNeeded(frameDesc);
@@ -135,7 +137,7 @@ public class Container extends ViewGroup {
 			return;
 		}
 
-		animateChanges();
+		// animateChanges();
 	}
 
 	private void doLayout(ItemProxy proxy) {
