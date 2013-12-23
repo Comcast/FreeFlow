@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Section {
 
-	private ArrayList<Object> data;
-	private String sectionTitle;
-	private boolean displayHeader = false;
-	private int selectedIndex = 0;
+	protected ArrayList<Object> data;
+	protected String sectionTitle;
+	protected boolean displayHeader = false;
+	protected int selectedIndex = 0;
 
 	public Section() {
 		data = new ArrayList<Object>();
