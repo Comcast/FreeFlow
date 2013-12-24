@@ -19,14 +19,12 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 
-public class Container extends ViewGroup {
+public class Container extends AbsLayoutContainer{
 
 	private static final String TAG = "Container";
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
-	protected HashMap<? extends Object, ItemProxy> frames = null;
 	private boolean preventLayout = false;
 	protected BaseSectionedAdapter itemAdapter;
 	protected AbstractLayout layout;
@@ -48,20 +46,18 @@ public class Container extends ViewGroup {
 
 	public Container(Context context) {
 		super(context);
-		init(context);
 	}
 
 	public Container(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init(context);
 	}
 
 	public Container(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		init(context);
 	}
 
-	private void init(Context context) {
+	@Override
+	protected void init(Context context) {
 		// usedViews = new HashMap<Object, ItemProxy>();
 		// usedHeaderViews = new HashMap<Object, ItemProxy>();
 
@@ -70,6 +66,7 @@ public class Container extends ViewGroup {
 		frames = new HashMap<Object, ItemProxy>();
 
 		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		
 	}
 
 	@Override
@@ -118,6 +115,7 @@ public class Container extends ViewGroup {
 				throw new IllegalStateException("A container cannot be a direct child view to a container");
 
 			frameDesc.view = view;
+			prepareViewForAddition(view);
 			addViewInLayout(view, -1, params);
 		}
 
@@ -129,7 +127,11 @@ public class Container extends ViewGroup {
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
-
+	
+	private void prepareViewForAddition(View view){
+		view.setOnTouchListener(this);
+	}
+	
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
@@ -496,5 +498,9 @@ public class Container extends ViewGroup {
 		removeAllViews();
 		frames = null;
 	}
+	
+	
+	
+	
 
 }
