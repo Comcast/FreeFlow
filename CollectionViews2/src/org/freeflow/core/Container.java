@@ -38,8 +38,10 @@ public class Container extends AbsLayoutContainer{
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
+	
 	private int maxFlingVelocity;
-
+	private int touchSlop;
+	
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
@@ -68,6 +70,8 @@ public class Container extends AbsLayoutContainer{
 		frames = new HashMap<Object, ItemProxy>();
 
 		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+		
 		
 	}
 
@@ -438,13 +442,21 @@ public class Container extends AbsLayoutContainer{
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
 			
-			mTouchMode = TOUCH_MODE_SCROLL;
-
-			moveScreen(event.getX() - deltaX, event.getY() - deltaY);
-
-			deltaX = event.getX();
-			deltaY = event.getY();
-
+			float xDiff = event.getX() - deltaX;
+			float yDiff = event.getY() - deltaY;
+			
+			double distance = Math.sqrt( xDiff*xDiff + yDiff*yDiff);
+			
+			if(mTouchMode == TOUCH_MODE_DOWN){
+				if(distance > touchSlop){
+					mTouchMode = TOUCH_MODE_SCROLL;
+				}
+			}
+			if(mTouchMode == TOUCH_MODE_SCROLL){
+				moveScreen(event.getX() - deltaX, event.getY() - deltaY);
+				deltaX = event.getX();
+				deltaY = event.getY();
+			}
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -458,9 +470,9 @@ public class Container extends AbsLayoutContainer{
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
-			
+			Log.d(TAG, "Action Up");
 			if(mTouchMode == TOUCH_MODE_SCROLL){
-				
+				Log.d(TAG, "Scroll....");
 				mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
 
 				// frames = layoutController.getFrameDescriptors(viewPortX,
@@ -486,12 +498,12 @@ public class Container extends AbsLayoutContainer{
 					animator.start();
 
 				}
-				
-				
-				
+				mTouchMode = TOUCH_MODE_REST;
+				Log.d(TAG, "Setting to rest");
 			}
 			
 			else{
+				Log.d(TAG, "Select");
 				selectedItemProxy = beginTouchAt;
 				if(mOnItemSelectedListener != null){
 					mOnItemSelectedListener.onItemSelected(this, selectedItemProxy);
