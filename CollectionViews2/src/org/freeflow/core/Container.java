@@ -85,10 +85,17 @@ public class Container extends AbsLayoutContainer{
 
 	public void onMeasureCalled(int w, int h) {
 		setMeasuredDimension(w, h);
-
+		
 		if (layout != null) {
+			
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+			
+			if (this.itemAdapter != null)
+				layout.setItems(itemAdapter);
 
+			computeViewPort(layout);
+			
+			
 			HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 			// Create a copy of the incoming values because the source
@@ -167,14 +174,6 @@ public class Container extends AbsLayoutContainer{
 		if (lc == layout) {
 			return;
 		}
-
-		if (this.itemAdapter != null)
-			lc.setItems(itemAdapter);
-
-		lc.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-
-		computeViewPort(lc);
-
 		layout = lc;
 
 		requestLayout();
@@ -354,11 +353,7 @@ public class Container extends AbsLayoutContainer{
 		viewpool.clear();
 		headerViewpool.clear();
 		removeAllViews();
-		frames = null;
-
-		if (layout != null) {
-			layout.setItems(adapter);
-		}
+		requestLayout();
 	}
 
 	public AbstractLayout getLayoutController() {
