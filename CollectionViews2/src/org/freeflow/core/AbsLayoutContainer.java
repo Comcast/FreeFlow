@@ -10,8 +10,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
-public abstract class AbsLayoutContainer extends ViewGroup implements
-		OnTouchListener {
+public abstract class AbsLayoutContainer extends ViewGroup {
 
 	protected HashMap<? extends Object, ItemProxy> frames = null;
 
@@ -153,26 +152,5 @@ public abstract class AbsLayoutContainer extends ViewGroup implements
     public final OnItemSelectedListener getOnItemSelectedListener() {
         return mOnItemSelectedListener;
     }
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_UP:
-			for (ItemProxy proxy : frames.values()) {
-				if (proxy.view == v) {
-					v.setPressed(false);
-					if(proxy != selectedItemProxy){
-						selectedItemProxy = proxy;
-						if(mOnItemSelectedListener != null){
-							mOnItemSelectedListener.onItemSelected(AbsLayoutContainer.this, proxy);
-						}
-					}
-					performItemClick(v, proxy);
-				}
-			}
-		}
-		return true;
-	}
 
 }

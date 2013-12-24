@@ -1,11 +1,16 @@
 package org.freeflow.layouts;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.utils.ViewUtils;
+
+import android.graphics.Rect;
 
 public class HGridLayout extends AbstractLayout {
 
@@ -150,6 +155,12 @@ public class HGridLayout extends AbstractLayout {
 
 		return desc;
 	}
+	
+	@Override
+	public ItemProxy getItemAt(float x, float y){
+		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
+	}
+	
 
 	@Override
 	public Frame getOffScreenStartFrame() {
@@ -207,6 +218,8 @@ public class HGridLayout extends AbstractLayout {
 
 		return fd;
 	}
+	
+	
 
 	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {

@@ -6,6 +6,7 @@ import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.utils.ViewUtils;
 
 public class VGridLayout extends AbstractLayout {
 
@@ -160,6 +161,11 @@ public class VGridLayout extends AbstractLayout {
 		}
 
 		return desc;
+	}
+	
+	@Override
+	public ItemProxy getItemAt(float x, float y){
+		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
 	}
 
 	@Override

@@ -57,5 +57,7 @@ public abstract class AbstractLayout {
 	public abstract int getContentHeight();
 
 	public abstract void setHeaderItemDimensions(int hWidth, int hHeight);
+	
+	public abstract ItemProxy getItemAt(float x, float y);
 
 }

@@ -6,6 +6,7 @@ import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.utils.ViewUtils;
 
 public class VLayout extends AbstractLayout {
 
@@ -192,6 +193,11 @@ public class VLayout extends AbstractLayout {
 		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
 
 		return fd;
+	}
+	
+	@Override
+	public ItemProxy getItemAt(float x, float y){
+		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
 	}
 
 	@Override

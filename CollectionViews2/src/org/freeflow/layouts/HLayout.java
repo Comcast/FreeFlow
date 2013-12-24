@@ -6,6 +6,7 @@ import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.utils.ViewUtils;
 
 import android.util.Log;
 
@@ -144,6 +145,11 @@ public class HLayout extends AbstractLayout {
 		}
 
 		return desc;
+	}
+	
+	@Override
+	public ItemProxy getItemAt(float x, float y){
+		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
 	}
 
 	@Override

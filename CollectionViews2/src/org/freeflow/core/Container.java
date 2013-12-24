@@ -43,6 +43,8 @@ public class Container extends AbsLayoutContainer{
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
+	
+	private ItemProxy beginTouchAt;
 
 	public Container(Context context) {
 		super(context);
@@ -129,7 +131,7 @@ public class Container extends AbsLayoutContainer{
 	}
 	
 	private void prepareViewForAddition(View view){
-		view.setOnTouchListener(this);
+		//view.setOnTouchListener(this);
 	}
 	
 	@Override
@@ -173,6 +175,10 @@ public class Container extends AbsLayoutContainer{
 
 		requestLayout();
 
+	}
+	
+	public AbstractLayout getLayout(){
+		return layout;
 	}
 
 	private void computeViewPort(AbstractLayout newLayout) {
@@ -354,9 +360,61 @@ public class Container extends AbsLayoutContainer{
 	public AbstractLayout getLayoutController() {
 		return layout;
 	}
+	
+	/**
+     * Indicates that we are not in the middle of a touch gesture
+     */
+    static final int TOUCH_MODE_REST = -1;
+
+    /**
+     * Indicates we just received the touch event and we are waiting to see if the it is a tap or a
+     * scroll gesture.
+     */
+    static final int TOUCH_MODE_DOWN = 0;
+
+    /**
+     * Indicates the touch has been recognized as a tap and we are now waiting to see if the touch
+     * is a longpress
+     */
+    static final int TOUCH_MODE_TAP = 1;
+
+    /**
+     * Indicates we have waited for everything we can wait for, but the user's finger is still down
+     */
+    static final int TOUCH_MODE_DONE_WAITING = 2;
+
+    /**
+     * Indicates the touch gesture is a scroll
+     */
+    static final int TOUCH_MODE_SCROLL = 3;
+
+    /**
+     * Indicates the view is in the process of being flung
+     */
+    static final int TOUCH_MODE_FLING = 4;
+
+    /**
+     * Indicates the touch gesture is an overscroll - a scroll beyond the beginning or end.
+     */
+    static final int TOUCH_MODE_OVERSCROLL = 5;
+
+    /**
+     * Indicates the view is being flung outside of normal content bounds
+     * and will spring back.
+     */
+    static final int TOUCH_MODE_OVERFLING = 6;
+
+    /**
+     * One of TOUCH_MODE_REST, TOUCH_MODE_DOWN, TOUCH_MODE_TAP, TOUCH_MODE_SCROLL, or
+     * TOUCH_MODE_DONE_WAITING
+     */
+    int mTouchMode = TOUCH_MODE_REST;
+    
+	
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		super.onTouchEvent(event);
 		if (layout == null)
 			return false;
 		if (!layout.horizontalDragEnabled() && !layout.verticalDragEnabled())
@@ -369,12 +427,18 @@ public class Container extends AbsLayoutContainer{
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
+			beginTouchAt = layout.getItemAt(event.getX(), event.getY());
+			
 			deltaX = event.getX();
 			deltaY = event.getY();
+			
+			mTouchMode = TOUCH_MODE_DOWN;
 
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+			
+			mTouchMode = TOUCH_MODE_SCROLL;
 
 			moveScreen(event.getX() - deltaX, event.getY() - deltaY);
 
@@ -384,6 +448,9 @@ public class Container extends AbsLayoutContainer{
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+			
+			mTouchMode = TOUCH_MODE_REST;
+			
 			mVelocityTracker.recycle();
 			mVelocityTracker = null;
 			// requestLayout();
@@ -391,31 +458,46 @@ public class Container extends AbsLayoutContainer{
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
+			
+			if(mTouchMode == TOUCH_MODE_SCROLL){
+				
+				mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
 
-			mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
+				// frames = layoutController.getFrameDescriptors(viewPortX,
+				// viewPortY);
 
-			// frames = layoutController.getFrameDescriptors(viewPortX,
-			// viewPortY);
+				if (Math.abs(mVelocityTracker.getXVelocity()) > 100) {
+					final float velocityX = mVelocityTracker.getXVelocity();
+					final float velocityY = mVelocityTracker.getYVelocity();
+					ValueAnimator animator = ValueAnimator.ofFloat(1, 0);
+					animator.addUpdateListener(new AnimatorUpdateListener() {
 
-			if (Math.abs(mVelocityTracker.getXVelocity()) > 100) {
-				final float velocityX = mVelocityTracker.getXVelocity();
-				final float velocityY = mVelocityTracker.getYVelocity();
-				ValueAnimator animator = ValueAnimator.ofFloat(1, 0);
-				animator.addUpdateListener(new AnimatorUpdateListener() {
+						@Override
+						public void onAnimationUpdate(ValueAnimator animation) {
+							int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
+							int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
 
-					@Override
-					public void onAnimationUpdate(ValueAnimator animation) {
-						int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
-						int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
+							moveScreen(translateX, translateY);
 
-						moveScreen(translateX, translateY);
+						}
+					});
 
-					}
-				});
+					animator.setDuration(500);
+					animator.start();
 
-				animator.setDuration(500);
-				animator.start();
-
+				}
+				
+				
+				
+			}
+			
+			else{
+				selectedItemProxy = beginTouchAt;
+				if(mOnItemSelectedListener != null){
+					mOnItemSelectedListener.onItemSelected(this, selectedItemProxy);
+				}
+				
+				mTouchMode = TOUCH_MODE_REST;
 			}
 
 			return true;
