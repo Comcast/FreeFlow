@@ -23,11 +23,20 @@ import android.view.ViewConfiguration;
 public class Container extends AbsLayoutContainer{
 
 	private static final String TAG = "Container";
+	
+	// Classes for pooling views and headers
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
+	protected Class itemViewsClass;
+	protected Class headerViewsClass;
+	
+	// Not used yet, but we'll probably need to 
+	// prevent layout in <code>layout()</code> method
 	private boolean preventLayout = false;
+	
 	protected BaseSectionedAdapter itemAdapter;
 	protected AbstractLayout layout;
+	
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -75,12 +84,21 @@ public class Container extends AbsLayoutContainer{
 		
 	}
 
+	
+	private int currentWidth;
+	private int currentHeight;
+	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 		int w = MeasureSpec.getSize(widthMeasureSpec);
 		int h = MeasureSpec.getSize(heightMeasureSpec);
-		onMeasureCalled(w, h);
+		Log.d(TAG,  "Measure: "+w+", "+h);
+		
+		if(currentWidth != w || currentHeight != h || markLayoutDirty){
+			onMeasureCalled(w, h);
+		}
+		
 	}
 
 	public void onMeasureCalled(int w, int h) {
@@ -162,9 +180,6 @@ public class Container extends AbsLayoutContainer{
 
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
-		view.setTranslationX(0);
-		view.setTranslationY(0);
-
 		Frame frame = proxy.frame;
 		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
 				+ frame.height - viewPortY);
@@ -266,46 +281,26 @@ public class Container extends AbsLayoutContainer{
 		requestLayout();
 	}
 	
-	/**
-	 * This method is called after onMeasure
-	 */
-	private void animateChanges() {
-		
-		Log.d(TAG, "Animating changes....");
-
+	private void animateChanges(){
+		Log.d(TAG, "== animating changes");
+		layoutAnimator.animateChanges(changeSet, this);
+	}
+	
+	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim){
+		Log.d(TAG, "=== layout changes complete");
 		for (ItemProxy proxy : changeSet.getRemoved()) {
 			View v = proxy.view;
-
 			removeViewInLayout(v);
-
-			if (proxy.isHeader) {
-				headerViewpool.add(v);
-			} else {
-				viewpool.add(v);
-			}
+			returnItemToPoolIfNeeded(proxy);			
 		}
 
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 			doLayout(proxy);
 		}
-
-		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
-
-		for (Pair<ItemProxy, Frame> item : moved) {
-			ItemProxy proxy = ItemProxy.clone(item.first);
-			View v = proxy.view;
-
-			proxy.frame.left -= viewPortX;
-			proxy.frame.top -= viewPortY;
-
-			if (v instanceof StateListener)
-				((StateListener) v).ReportCurrentState(proxy.state);
-
-			layoutAnimator.transitionToFrame(item.second, proxy, v);
-		}
-
+		
 		changeSet = null;
+
 	}
 
 	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
@@ -363,13 +358,26 @@ public class Container extends AbsLayoutContainer{
 	public void setAdapter(BaseSectionedAdapter adapter) {
 
 		Log.d(TAG, "setting adapter");
+		markLayoutDirty = true;
+		
 		this.itemAdapter = adapter;
-		// reset all view caches etc
-		viewpool.clear();
-		headerViewpool.clear();
-		removeAllViews();
+		
+		// If the new adapter uses different types of views for display, flush 
+		// the view pools
+		View sampleItem = itemAdapter.getViewForSection(0, 0, null, this);
+		if(sampleItem != null && sampleItem.getClass() != itemViewsClass){
+			viewpool.clear();
+			itemViewsClass = sampleItem.getClass();
+		}
+		viewpool.add(sampleItem);
+		View sampleHeader  = itemAdapter.getHeaderViewForSection(0, null, this);
+		if( sampleHeader!= null  && sampleHeader.getClass() != headerViewsClass){
+			headerViewpool.clear();
+			headerViewsClass = sampleHeader.getClass();
+		}
+		headerViewpool.add(sampleHeader);
+		
 		requestLayout();
-		frames = null;
 	}
 
 	public AbstractLayout getLayoutController() {
@@ -571,16 +579,25 @@ public class Container extends AbsLayoutContainer{
 		}
 
 		for (ItemProxy proxy : changeSet.removed) {
-			View v = proxy.view;
-			removeViewInLayout(v);
-			if (proxy.isHeader) {
-				headerViewpool.add(v);
-			} else {
-				viewpool.add(v);
-			}
-
+			removeViewInLayout(proxy.view);
+			returnItemToPoolIfNeeded(proxy);
 		}
 
+	}
+	
+	protected void returnItemToPoolIfNeeded(ItemProxy proxy){
+		View v = proxy.view;
+		v.getMatrix().reset();
+		v.setAlpha(1);
+		if (proxy.isHeader) {
+			if(proxy.getClass() == headerViewsClass){
+				headerViewpool.add(v);
+			}
+		} else {
+			if(proxy.getClass() == itemViewsClass){
+				viewpool.add(v);
+			}
+		}
 	}
 
 	public BaseSectionedAdapter getAdapter() {

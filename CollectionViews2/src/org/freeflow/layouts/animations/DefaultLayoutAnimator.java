@@ -1,16 +1,29 @@
 package org.freeflow.layouts.animations;
 
+import java.util.ArrayList;
+
+import org.freeflow.core.Container;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
+import org.freeflow.core.LayoutChangeSet;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.os.Handler;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator extends LayoutAnimator {
 
+	public static final String TAG = "DefaultLayoutAnimator";
 	private int duration = 250;
 
 	public DefaultLayoutAnimator() {
@@ -19,6 +32,67 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	@Override
 	public void clear() {
 
+	}
+	
+
+	@Override
+	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
+		AnimatorSet set = new AnimatorSet();
+		ArrayList<Animator> fades = new ArrayList<Animator>();
+		for (ItemProxy proxy : changeSet.getRemoved()) {
+			fades.add(  ObjectAnimator.ofFloat(proxy.view, "alpha", 0) );
+		}
+		
+		
+		
+		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
+
+		for (Pair<ItemProxy, Frame> item : moved) {
+			ItemProxy proxy = ItemProxy.clone(item.first);
+			View v = proxy.view;
+
+			proxy.frame.left -= callback.viewPortX;
+			proxy.frame.top -= callback.viewPortY;
+
+//			if (v instanceof StateListener)
+//				((StateListener) v).ReportCurrentState(proxy.state);
+
+			transitionToFrame(item.second, proxy, v);
+			
+		}
+		
+		if(fades.size() != 0){
+			Log.d(TAG, "== playing seq: "+fades.size());
+			set.addListener(new AnimatorListener() {
+				
+				@Override
+				public void onAnimationStart(Animator animation) {
+				}
+				
+				@Override
+				public void onAnimationRepeat(Animator animation) {
+				}
+				
+				@Override
+				public void onAnimationEnd(Animator animation) {
+					callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
+				}
+				
+				@Override
+				public void onAnimationCancel(Animator animation) {
+				}
+			});
+			set.setDuration(600);
+			set.playSequentially(fades);
+			set.start();
+			
+		}
+		else{
+			Log.d(TAG, "== calling back animations completed");
+			callback.onLayoutChangeAnimationsCompleted(this);
+		}
+		
+		
 	}
 
 	@Override
@@ -75,4 +149,5 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public void setDuration(int duration) {
 		this.duration = duration;
 	}
+
 }
