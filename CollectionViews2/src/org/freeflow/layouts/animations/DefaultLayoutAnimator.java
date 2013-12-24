@@ -23,11 +23,6 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	@Override
 	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
-		if (v instanceof iFrameChangeListener) {
-			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
-			return;
-		}
-
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(duration);
 		anim.addUpdateListener(new AnimatorUpdateListener() {

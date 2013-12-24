@@ -21,11 +21,6 @@ public class ScaleAnimator extends LayoutAnimator {
 		if(v == null)
 			return;
 		
-		if (v instanceof iFrameChangeListener) {
-			((iFrameChangeListener) v).animateToFrame(of, nf, duration);
-			return;
-		}
-
 		int wSpec = MeasureSpec.makeMeasureSpec(nf.frame.width, MeasureSpec.EXACTLY);
 		int hSpec = MeasureSpec.makeMeasureSpec(nf.frame.height, MeasureSpec.EXACTLY);
 
