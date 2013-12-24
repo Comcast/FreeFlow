@@ -431,7 +431,7 @@ public class Container extends AbsLayoutContainer{
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-			beginTouchAt = layout.getItemAt(event.getX(), event.getY());
+			beginTouchAt = layout.getItemAt(viewPortX + event.getX(), viewPortY+event.getY());
 			
 			deltaX = event.getX();
 			deltaY = event.getY();
