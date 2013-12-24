@@ -85,7 +85,7 @@ public class Container extends AbsLayoutContainer{
 
 	public void onMeasureCalled(int w, int h) {
 		setMeasuredDimension(w, h);
-		
+		Log.d(TAG, "=== On Measure called==== ");
 		if (layout != null) {
 			
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -94,9 +94,14 @@ public class Container extends AbsLayoutContainer{
 				layout.setItems(itemAdapter);
 
 			computeViewPort(layout);
-			
-			
 			HashMap<? extends Object, ItemProxy> oldFrames = frames;
+			
+			if(markLayoutDirty){
+				markLayoutDirty = false;
+				if(mOnLayoutChangeListener != null){
+					mOnLayoutChangeListener.onLayoutChanging(oldLayout, layout);
+				}
+			}
 
 			// Create a copy of the incoming values because the source
 			// Layout
@@ -168,14 +173,18 @@ public class Container extends AbsLayoutContainer{
 			((StateListener) view).ReportCurrentState(proxy.state);
 
 	}
-
+	
+	private boolean markLayoutDirty = false;
+	private AbstractLayout oldLayout;
 	public void setLayout(AbstractLayout lc) {
 
 		if (lc == layout) {
 			return;
 		}
+		oldLayout = layout;
 		layout = lc;
-
+		markLayoutDirty = true;
+		Log.d(TAG, "=== setting layout ===");
 		requestLayout();
 
 	}
@@ -247,12 +256,22 @@ public class Container extends AbsLayoutContainer{
 		return of;
 
 	}
-
+	
+	/**
+	 * TODO:::: This should be renamed to
+	 * layoutInvalidated, since the layout 
+	 * isn't changed
+	 */
 	public void layoutChanged() {
 		requestLayout();
 	}
-
+	
+	/**
+	 * This method is called after onMeasure
+	 */
 	private void animateChanges() {
+		
+		Log.d(TAG, "Animating changes....");
 
 		for (ItemProxy proxy : changeSet.getRemoved()) {
 			View v = proxy.view;
@@ -330,10 +349,6 @@ public class Container extends AbsLayoutContainer{
 
 	@Override
 	public void requestLayout() {
-
-		if (preventLayout)
-			return;
-
 		super.requestLayout();
 	}
 
@@ -354,6 +369,7 @@ public class Container extends AbsLayoutContainer{
 		headerViewpool.clear();
 		removeAllViews();
 		requestLayout();
+		frames = null;
 	}
 
 	public AbstractLayout getLayoutController() {
@@ -588,8 +604,21 @@ public class Container extends AbsLayoutContainer{
 		frames = null;
 	}
 	
+	protected OnLayoutChangeListener mOnLayoutChangeListener;
 	
-	
-	
+	/**
+	 * Interface that all listeners interested in layout change
+	 * events must implement
+	 *
+	 */
+	public interface OnLayoutChangeListener{
+		/**
+		 * Called when the layout is about to change. Measurements based 
+		 * on the current data provider and current size have been completed.
+		 * @param oldLayout
+		 * @param newLayout
+		 */
+		public void onLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout);
+	}
 
 }
