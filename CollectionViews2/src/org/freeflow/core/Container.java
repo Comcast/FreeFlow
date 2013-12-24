@@ -587,7 +587,12 @@ public class Container extends AbsLayoutContainer{
 	
 	protected void returnItemToPoolIfNeeded(ItemProxy proxy){
 		View v = proxy.view;
-		v.getMatrix().reset();
+		v.setTranslationX(0);
+		v.setTranslationY(0);
+		v.setRotation(0);
+		v.setScaleX(1f);
+		v.setScaleY(1f);
+		
 		v.setAlpha(1);
 		if (proxy.isHeader) {
 			if(proxy.getClass() == headerViewsClass){
