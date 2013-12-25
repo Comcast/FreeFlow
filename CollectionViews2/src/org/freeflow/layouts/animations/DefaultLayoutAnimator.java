@@ -1,6 +1,8 @@
 package org.freeflow.layouts.animations;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import org.freeflow.core.Container;
 import org.freeflow.core.Frame;
@@ -26,6 +28,9 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public static final String TAG = "DefaultLayoutAnimator";
 	private int duration = 250;
 
+	protected LayoutChangeSet changeSet;
+	protected Container callback;
+
 	public DefaultLayoutAnimator() {
 	}
 
@@ -33,18 +38,96 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public void clear() {
 
 	}
-	
 
 	@Override
-	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
-		AnimatorSet set = new AnimatorSet();
-		ArrayList<Animator> fades = new ArrayList<Animator>();
-		for (ItemProxy proxy : changeSet.getRemoved()) {
-			fades.add(  ObjectAnimator.ofFloat(proxy.view, "alpha", 0) );
+	public void animateChanges(LayoutChangeSet changeSet,
+			final Container callback) {
+		this.changeSet = changeSet;
+		this.callback = callback;
+		
+		Comparator<ItemProxy> cmp = new Comparator<ItemProxy>() {
+
+			@Override
+			public int compare(ItemProxy lhs, ItemProxy rhs) {
+				return (lhs.itemSection*1000 + lhs.itemIndex) -  (rhs.itemSection*1000 + rhs.itemIndex);
+			}
+		};
+		
+		AnimatorSet lastAnim = null;
+		AnimatorSet firstAnim = null;
+		ArrayList<ItemProxy> removed  = changeSet.getRemoved();
+		if(removed.size()  >  0){
+			Collections.sort(removed,  cmp);
+			AnimatorSet disappearingSet = new AnimatorSet();
+			ArrayList<Animator> fades = new ArrayList<Animator>();
+			for (ItemProxy proxy : removed) {
+				fades.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 0));
+			}
+			disappearingSet.setDuration(300 / removed.size());
+			disappearingSet.playSequentially(fades);
+			lastAnim = disappearingSet;
+			firstAnim = disappearingSet;
 		}
 		
+		ArrayList<ItemProxy> added = changeSet.getAdded();
+		if(added.size() > 0){
+			Collections.sort(added, cmp);
+			AnimatorSet appearingSet = new AnimatorSet();
+			ArrayList<Animator> fadeIns = new ArrayList<Animator>();
+			for (ItemProxy proxy : added) {
+				proxy.view.setAlpha(0);
+				fadeIns.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 1));
+			}
+			appearingSet.playSequentially(fadeIns);
+			appearingSet.setDuration(300/added.size());
+			if(firstAnim == null){
+				firstAnim = appearingSet;
+			}
+			else{
+				appearingSet.setStartDelay(300);
+				lastAnim = appearingSet;
+			}
+		}
 		
+		if(firstAnim != null){
+			firstAnim.start();
+		}
+		else{
+			callback.onLayoutChangeAnimationsCompleted(this);
+		}
 		
+		if(lastAnim != null){
+			
+			lastAnim.addListener(new AnimatorListener() {
+
+			@Override
+			public void onAnimationStart(Animator animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animator animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				animateMovedViews();
+				callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
+			}
+
+			@Override
+			public void onAnimationCancel(Animator animation) {
+			}
+			
+		});
+			lastAnim.start();
+		}
+		else{
+			animateMovedViews();
+		}
+
+	}
+
+	protected void animateMovedViews() {
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 
 		for (Pair<ItemProxy, Frame> item : moved) {
@@ -54,49 +137,17 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			proxy.frame.left -= callback.viewPortX;
 			proxy.frame.top -= callback.viewPortY;
 
-//			if (v instanceof StateListener)
-//				((StateListener) v).ReportCurrentState(proxy.state);
+			// if (v instanceof StateListener)
+			// ((StateListener) v).ReportCurrentState(proxy.state);
 
 			transitionToFrame(item.second, proxy, v);
-			
+
 		}
-		
-		if(fades.size() != 0){
-			Log.d(TAG, "== playing seq: "+fades.size());
-			set.addListener(new AnimatorListener() {
-				
-				@Override
-				public void onAnimationStart(Animator animation) {
-				}
-				
-				@Override
-				public void onAnimationRepeat(Animator animation) {
-				}
-				
-				@Override
-				public void onAnimationEnd(Animator animation) {
-					callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
-				}
-				
-				@Override
-				public void onAnimationCancel(Animator animation) {
-				}
-			});
-			set.setDuration(600);
-			set.playSequentially(fades);
-			set.start();
-			
-		}
-		else{
-			Log.d(TAG, "== calling back animations completed");
-			callback.onLayoutChangeAnimationsCompleted(this);
-		}
-		
-		
 	}
 
 	@Override
-	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
+	public void transitionToFrame(final Frame of, final ItemProxy nf,
+			final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(duration);
 		anim.addUpdateListener(new AnimatorUpdateListener() {
@@ -111,23 +162,33 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 				try {
 
-					int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
+					int itemWidth = of.width
+							+ (int) ((nf.frame.width - of.width) * animation
+									.getAnimatedFraction());
 					int itemHeight = of.height
-							+ (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
-					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
+							+ (int) ((nf.frame.height - of.height) * animation
+									.getAnimatedFraction());
+					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth,
+							MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight,
+							MeasureSpec.EXACTLY);
 
 					v.measure(widthSpec, heightSpec);
 
 					Frame frame = new Frame();
 					Frame nff = nf.frame;
 
-					frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
-					frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
-					frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
-					frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
+					frame.left = (int) (of.left + (nff.left - of.left)
+							* animation.getAnimatedFraction());
+					frame.top = (int) (of.top + (nff.top - of.top)
+							* animation.getAnimatedFraction());
+					frame.width = (int) (of.width + (nff.width - of.width)
+							* animation.getAnimatedFraction());
+					frame.height = (int) (of.height + (nff.height - of.height)
+							* animation.getAnimatedFraction());
 
-					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+					v.layout(frame.left, frame.top, frame.left + frame.width,
+							frame.top + frame.height);
 				} catch (NullPointerException e) {
 					e.printStackTrace();
 					animation.cancel();

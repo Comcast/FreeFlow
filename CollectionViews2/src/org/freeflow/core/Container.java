@@ -20,23 +20,23 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-public class Container extends AbsLayoutContainer{
+public class Container extends AbsLayoutContainer {
 
 	private static final String TAG = "Container";
-	
+
 	// Classes for pooling views and headers
 	protected ArrayList<View> viewpool;
 	protected ArrayList<View> headerViewpool;
 	protected Class itemViewsClass;
 	protected Class headerViewsClass;
-	
-	// Not used yet, but we'll probably need to 
+
+	// Not used yet, but we'll probably need to
 	// prevent layout in <code>layout()</code> method
 	private boolean preventLayout = false;
-	
+
 	protected BaseSectionedAdapter itemAdapter;
 	protected AbstractLayout layout;
-	
+
 	public int viewPortX = 0;
 	public int viewPortY = 0;
 
@@ -47,14 +47,14 @@ public class Container extends AbsLayoutContainer{
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
-	
+
 	private int maxFlingVelocity;
 	private int touchSlop;
-	
+
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
-	
+
 	private ItemProxy beginTouchAt;
 
 	public Container(Context context) {
@@ -78,45 +78,44 @@ public class Container extends AbsLayoutContainer{
 		headerViewpool = new ArrayList<View>();
 		frames = new HashMap<Object, ItemProxy>();
 
-		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		maxFlingVelocity = ViewConfiguration.get(context)
+				.getScaledMaximumFlingVelocity();
 		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-		
-		
+
 	}
 
-	
 	private int currentWidth;
 	private int currentHeight;
-	
+
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 		int w = MeasureSpec.getSize(widthMeasureSpec);
 		int h = MeasureSpec.getSize(heightMeasureSpec);
-		Log.d(TAG,  "Measure: "+w+", "+h);
-		
-		if(currentWidth != w || currentHeight != h || markLayoutDirty){
+		Log.d(TAG, "Measure: " + w + ", " + h);
+
+		if (currentWidth != w || currentHeight != h || markLayoutDirty) {
 			onMeasureCalled(w, h);
 		}
-		
+
 	}
 
 	public void onMeasureCalled(int w, int h) {
 		setMeasuredDimension(w, h);
 		Log.d(TAG, "=== On Measure called==== ");
 		if (layout != null) {
-			
+
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
-			
+
 			if (this.itemAdapter != null)
 				layout.setItems(itemAdapter);
 
 			computeViewPort(layout);
 			HashMap<? extends Object, ItemProxy> oldFrames = frames;
-			
-			if(markLayoutDirty){
+
+			if (markLayoutDirty) {
 				markLayoutDirty = false;
-				if(mOnLayoutChangeListener != null){
+				if (mOnLayoutChangeListener != null) {
 					mOnLayoutChangeListener.onLayoutChanging(oldLayout, layout);
 				}
 			}
@@ -124,7 +123,8 @@ public class Container extends AbsLayoutContainer{
 			// Create a copy of the incoming values because the source
 			// Layout
 			// may change the map inside its own class
-			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+					viewPortX, viewPortY));
 
 			changeSet = getViewChanges(oldFrames, frames);
 
@@ -140,15 +140,19 @@ public class Container extends AbsLayoutContainer{
 		View view;
 		if (frameDesc.view == null) {
 			if (frameDesc.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
-						headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
+				view = itemAdapter.getHeaderViewForSection(
+						frameDesc.itemSection,
+						headerViewpool.size() > 0 ? headerViewpool.remove(0)
+								: null, this);
 			} else {
-				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
+				view = itemAdapter.getViewForSection(frameDesc.itemSection,
+						frameDesc.itemIndex,
 						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
 			}
 
 			if (view instanceof Container)
-				throw new IllegalStateException("A container cannot be a direct child view to a container");
+				throw new IllegalStateException(
+						"A container cannot be a direct child view to a container");
 
 			frameDesc.view = view;
 			prepareViewForAddition(view);
@@ -157,40 +161,42 @@ public class Container extends AbsLayoutContainer{
 
 		view = frameDesc.view;
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width,
+				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height,
+				MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
-	
-	private void prepareViewForAddition(View view){
-		//view.setOnTouchListener(this);
+
+	private void prepareViewForAddition(View view) {
+		// view.setOnTouchListener(this);
 	}
-	
+
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
+		Log.d(TAG, "== onLayout ==");
 		if (layout == null || frames == null || changeSet == null) {
 			return;
 		}
-
 		// animateChanges();
 	}
 
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
 		Frame frame = proxy.frame;
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
-				+ frame.height - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left
+				+ frame.width - viewPortX, frame.top + frame.height - viewPortY);
 
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(proxy.state);
 
 	}
-	
+
 	private boolean markLayoutDirty = false;
 	private AbstractLayout oldLayout;
+
 	public void setLayout(AbstractLayout lc) {
 
 		if (lc == layout) {
@@ -203,8 +209,8 @@ public class Container extends AbsLayoutContainer{
 		requestLayout();
 
 	}
-	
-	public AbstractLayout getLayout(){
+
+	public AbstractLayout getLayout() {
 		return layout;
 	}
 
@@ -219,7 +225,8 @@ public class Container extends AbsLayoutContainer{
 		int lowestSection = 99999;
 		int lowestPosition = 99999;
 		for (ItemProxy fd : frames.values()) {
-			if (fd.itemSection < lowestSection || (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
+			if (fd.itemSection < lowestSection
+					|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 				data = fd.data;
 				lowestSection = fd.itemSection;
 				lowestPosition = fd.itemIndex;
@@ -271,39 +278,44 @@ public class Container extends AbsLayoutContainer{
 		return of;
 
 	}
-	
+
 	/**
-	 * TODO:::: This should be renamed to
-	 * layoutInvalidated, since the layout 
+	 * TODO:::: This should be renamed to layoutInvalidated, since the layout
 	 * isn't changed
 	 */
 	public void layoutChanged() {
 		requestLayout();
 	}
-	
-	private void animateChanges(){
-		Log.d(TAG, "== animating changes");
-		layoutAnimator.animateChanges(changeSet, this);
-	}
-	
-	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim){
-		Log.d(TAG, "=== layout changes complete");
-		for (ItemProxy proxy : changeSet.getRemoved()) {
-			View v = proxy.view;
-			removeViewInLayout(v);
-			returnItemToPoolIfNeeded(proxy);			
-		}
 
+	private void animateChanges() {
+		
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 			doLayout(proxy);
 		}
 		
+		Log.d(TAG, "== animating changes: "+changeSet.toString());
+		preventLayout = true;
+		layoutAnimator.animateChanges(changeSet, this);
+	}
+
+	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
+		preventLayout = false;
+		Log.d(TAG, "=== layout changes complete");
+		for (ItemProxy proxy : changeSet.getRemoved()) {
+			View v = proxy.view;
+			removeViewInLayout(v);
+			returnItemToPoolIfNeeded(proxy);
+		}
+
+		
+
 		changeSet = null;
 
 	}
 
-	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
+	public LayoutChangeSet getViewChanges(
+			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
 
 		// cleanupViews();
@@ -344,7 +356,9 @@ public class Container extends AbsLayoutContainer{
 
 	@Override
 	public void requestLayout() {
-		super.requestLayout();
+		if (!preventLayout) {
+			super.requestLayout();
+		}
 	}
 
 	/**
@@ -359,81 +373,81 @@ public class Container extends AbsLayoutContainer{
 
 		Log.d(TAG, "setting adapter");
 		markLayoutDirty = true;
-		
+
 		this.itemAdapter = adapter;
-		
-		// If the new adapter uses different types of views for display, flush 
+
+		// If the new adapter uses different types of views for display, flush
 		// the view pools
 		View sampleItem = itemAdapter.getViewForSection(0, 0, null, this);
-		if(sampleItem != null && sampleItem.getClass() != itemViewsClass){
+		if (sampleItem != null && sampleItem.getClass() != itemViewsClass) {
 			viewpool.clear();
 			itemViewsClass = sampleItem.getClass();
 		}
 		viewpool.add(sampleItem);
-		View sampleHeader  = itemAdapter.getHeaderViewForSection(0, null, this);
-		if( sampleHeader!= null  && sampleHeader.getClass() != headerViewsClass){
+		View sampleHeader = itemAdapter.getHeaderViewForSection(0, null, this);
+		if (sampleHeader != null && sampleHeader.getClass() != headerViewsClass) {
 			headerViewpool.clear();
 			headerViewsClass = sampleHeader.getClass();
 		}
 		headerViewpool.add(sampleHeader);
-		
+
 		requestLayout();
 	}
 
 	public AbstractLayout getLayoutController() {
 		return layout;
 	}
-	
+
 	/**
-     * Indicates that we are not in the middle of a touch gesture
-     */
-    static final int TOUCH_MODE_REST = -1;
+	 * Indicates that we are not in the middle of a touch gesture
+	 */
+	static final int TOUCH_MODE_REST = -1;
 
-    /**
-     * Indicates we just received the touch event and we are waiting to see if the it is a tap or a
-     * scroll gesture.
-     */
-    static final int TOUCH_MODE_DOWN = 0;
+	/**
+	 * Indicates we just received the touch event and we are waiting to see if
+	 * the it is a tap or a scroll gesture.
+	 */
+	static final int TOUCH_MODE_DOWN = 0;
 
-    /**
-     * Indicates the touch has been recognized as a tap and we are now waiting to see if the touch
-     * is a longpress
-     */
-    static final int TOUCH_MODE_TAP = 1;
+	/**
+	 * Indicates the touch has been recognized as a tap and we are now waiting
+	 * to see if the touch is a longpress
+	 */
+	static final int TOUCH_MODE_TAP = 1;
 
-    /**
-     * Indicates we have waited for everything we can wait for, but the user's finger is still down
-     */
-    static final int TOUCH_MODE_DONE_WAITING = 2;
+	/**
+	 * Indicates we have waited for everything we can wait for, but the user's
+	 * finger is still down
+	 */
+	static final int TOUCH_MODE_DONE_WAITING = 2;
 
-    /**
-     * Indicates the touch gesture is a scroll
-     */
-    static final int TOUCH_MODE_SCROLL = 3;
+	/**
+	 * Indicates the touch gesture is a scroll
+	 */
+	static final int TOUCH_MODE_SCROLL = 3;
 
-    /**
-     * Indicates the view is in the process of being flung
-     */
-    static final int TOUCH_MODE_FLING = 4;
+	/**
+	 * Indicates the view is in the process of being flung
+	 */
+	static final int TOUCH_MODE_FLING = 4;
 
-    /**
-     * Indicates the touch gesture is an overscroll - a scroll beyond the beginning or end.
-     */
-    static final int TOUCH_MODE_OVERSCROLL = 5;
+	/**
+	 * Indicates the touch gesture is an overscroll - a scroll beyond the
+	 * beginning or end.
+	 */
+	static final int TOUCH_MODE_OVERSCROLL = 5;
 
-    /**
-     * Indicates the view is being flung outside of normal content bounds
-     * and will spring back.
-     */
-    static final int TOUCH_MODE_OVERFLING = 6;
+	/**
+	 * Indicates the view is being flung outside of normal content bounds and
+	 * will spring back.
+	 */
+	static final int TOUCH_MODE_OVERFLING = 6;
 
-    /**
-     * One of TOUCH_MODE_REST, TOUCH_MODE_DOWN, TOUCH_MODE_TAP, TOUCH_MODE_SCROLL, or
-     * TOUCH_MODE_DONE_WAITING
-     */
-    int mTouchMode = TOUCH_MODE_REST;
-    
-	
+	/**
+	 * One of TOUCH_MODE_REST, TOUCH_MODE_DOWN, TOUCH_MODE_TAP,
+	 * TOUCH_MODE_SCROLL, or TOUCH_MODE_DONE_WAITING
+	 */
+	int mTouchMode = TOUCH_MODE_REST;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -450,28 +464,29 @@ public class Container extends AbsLayoutContainer{
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-			beginTouchAt = layout.getItemAt(viewPortX + event.getX(), viewPortY+event.getY());
-			
+			beginTouchAt = layout.getItemAt(viewPortX + event.getX(), viewPortY
+					+ event.getY());
+
 			deltaX = event.getX();
 			deltaY = event.getY();
-			
+
 			mTouchMode = TOUCH_MODE_DOWN;
 
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			
+
 			float xDiff = event.getX() - deltaX;
 			float yDiff = event.getY() - deltaY;
-			
-			double distance = Math.sqrt( xDiff*xDiff + yDiff*yDiff);
-			
-			if(mTouchMode == TOUCH_MODE_DOWN){
-				if(distance > touchSlop){
+
+			double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+			if (mTouchMode == TOUCH_MODE_DOWN) {
+				if (distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
 				}
 			}
-			if(mTouchMode == TOUCH_MODE_SCROLL){
+			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				moveScreen(event.getX() - deltaX, event.getY() - deltaY);
 				deltaX = event.getX();
 				deltaY = event.getY();
@@ -479,9 +494,9 @@ public class Container extends AbsLayoutContainer{
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-			
+
 			mTouchMode = TOUCH_MODE_REST;
-			
+
 			mVelocityTracker.recycle();
 			mVelocityTracker = null;
 			// requestLayout();
@@ -490,7 +505,7 @@ public class Container extends AbsLayoutContainer{
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 			Log.d(TAG, "Action Up");
-			if(mTouchMode == TOUCH_MODE_SCROLL){
+			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				Log.d(TAG, "Scroll....");
 				mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
 
@@ -505,8 +520,10 @@ public class Container extends AbsLayoutContainer{
 
 						@Override
 						public void onAnimationUpdate(ValueAnimator animation) {
-							int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
-							int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
+							int translateX = (int) ((1 - animation
+									.getAnimatedFraction()) * velocityX / 350);
+							int translateY = (int) ((1 - animation
+									.getAnimatedFraction()) * velocityY / 350);
 
 							moveScreen(translateX, translateY);
 
@@ -520,14 +537,15 @@ public class Container extends AbsLayoutContainer{
 				mTouchMode = TOUCH_MODE_REST;
 				Log.d(TAG, "Setting to rest");
 			}
-			
-			else{
+
+			else {
 				Log.d(TAG, "Select");
 				selectedItemProxy = beginTouchAt;
-				if(mOnItemSelectedListener != null){
-					mOnItemSelectedListener.onItemSelected(this, selectedItemProxy);
+				if (mOnItemSelectedListener != null) {
+					mOnItemSelectedListener.onItemSelected(this,
+							selectedItemProxy);
 				}
-				
+
 				mTouchMode = TOUCH_MODE_REST;
 			}
 
@@ -564,7 +582,8 @@ public class Container extends AbsLayoutContainer{
 
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
-		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+				viewPortX, viewPortY));
 
 		layoutAnimator.clear();
 		changeSet = getViewChanges(oldFrames, frames);
@@ -584,22 +603,22 @@ public class Container extends AbsLayoutContainer{
 		}
 
 	}
-	
-	protected void returnItemToPoolIfNeeded(ItemProxy proxy){
+
+	protected void returnItemToPoolIfNeeded(ItemProxy proxy) {
 		View v = proxy.view;
 		v.setTranslationX(0);
 		v.setTranslationY(0);
 		v.setRotation(0);
 		v.setScaleX(1f);
 		v.setScaleY(1f);
-		
+
 		v.setAlpha(1);
 		if (proxy.isHeader) {
-			if(proxy.getClass() == headerViewsClass){
+			if (proxy.getClass() == headerViewsClass) {
 				headerViewpool.add(v);
 			}
 		} else {
-			if(proxy.getClass() == itemViewsClass){
+			if (proxy.getClass() == itemViewsClass) {
 				viewpool.add(v);
 			}
 		}
@@ -625,22 +644,24 @@ public class Container extends AbsLayoutContainer{
 		removeAllViews();
 		frames = null;
 	}
-	
+
 	protected OnLayoutChangeListener mOnLayoutChangeListener;
-	
+
 	/**
-	 * Interface that all listeners interested in layout change
-	 * events must implement
-	 *
+	 * Interface that all listeners interested in layout change events must
+	 * implement
+	 * 
 	 */
-	public interface OnLayoutChangeListener{
+	public interface OnLayoutChangeListener {
 		/**
-		 * Called when the layout is about to change. Measurements based 
-		 * on the current data provider and current size have been completed.
+		 * Called when the layout is about to change. Measurements based on the
+		 * current data provider and current size have been completed.
+		 * 
 		 * @param oldLayout
 		 * @param newLayout
 		 */
-		public void onLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout);
+		public void onLayoutChanging(AbstractLayout oldLayout,
+				AbstractLayout newLayout);
 	}
 
 }
