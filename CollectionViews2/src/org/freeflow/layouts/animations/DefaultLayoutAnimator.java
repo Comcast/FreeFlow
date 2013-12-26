@@ -123,6 +123,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		}
 		else{
 			animateMovedViews();
+			callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
 		}
 
 	}
@@ -145,7 +146,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		}
 	}
 
-	@Override
+	//@Override
 	public void transitionToFrame(final Frame of, final ItemProxy nf,
 			final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
