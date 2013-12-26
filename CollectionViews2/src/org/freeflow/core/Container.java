@@ -302,6 +302,7 @@ public class Container extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		preventLayout = false;
 		Log.d(TAG, "=== layout changes complete");
+		if(changeSet == null) return;
 		for (ItemProxy proxy : changeSet.getRemoved()) {
 			View v = proxy.view;
 			removeViewInLayout(v);
