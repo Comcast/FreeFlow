@@ -4,19 +4,19 @@ import org.freeflow.core.AbsLayoutContainer;
 import org.freeflow.core.AbsLayoutContainer.OnItemSelectedListener;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
-import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.VGridLayout;
 
-import com.arpitonline.ubercal.core.DaysInMonthAdapter;
-import com.arpitonline.ubercal.core.Month;
-import com.arpitonline.ubercal.core.YearAdapter;
-import com.arpitonline.utils.DisplayUtils;
-
-import android.os.Bundle;
 import android.app.Activity;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.Menu;
+
+import com.arpitonline.ubercal.core.DaysInMonthAdapter;
+import com.arpitonline.ubercal.core.YearAdapter;
 
 public class CalendarMain extends Activity implements OnItemSelectedListener {
 	
@@ -35,12 +35,11 @@ public class CalendarMain extends Activity implements OnItemSelectedListener {
 		
 		container = new Container(this);
 		
-		
-		Point size = DisplayUtils.getScreenSize(this);
+		Point size = getScreenSize(this);
 		
 		yearLayout = new VGridLayout();
 		yearLayout.setItemWidth(size.x/3);
-		yearLayout.setItemHeight(size.y/2);
+		yearLayout.setItemHeight(size.y/4);
 		
 		
 		monthLayout = new VGridLayout();
@@ -77,6 +76,16 @@ public class CalendarMain extends Activity implements OnItemSelectedListener {
 
 	@Override
 	public void onNothingSelected(AbsLayoutContainer parent) {
+	}
+	
+	public static Point getScreenSize(Activity act){
+		Rect rect = new Rect();
+		 act.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+		
+		Point size = new Point();
+		size.x = rect.width();
+		size.y = rect.height()-rect.top;
+		return size;
 	}
 
 }
