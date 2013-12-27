@@ -1,26 +1,49 @@
 package org.freeflow.layouts.animations;
 
+import java.util.ArrayList;
+
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
 public class ScaleAnimator extends DefaultLayoutAnimator {
-	
-	
+
 	private int duration = 250;
-	
+	private ArrayList<ViewPropertyAnimator> scaleSet = new ArrayList<ViewPropertyAnimator>();
+
 	public ScaleAnimator() {
+	}
+
+	protected void animateMovedViews() {
+		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
+
+		for (Pair<ItemProxy, Frame> item : moved) {
+			ItemProxy proxy = ItemProxy.clone(item.first);
+			View v = proxy.view;
+
+			proxy.frame.left -= callback.viewPortX;
+			proxy.frame.top -= callback.viewPortY;
+
+			// if (v instanceof StateListener)
+			// ((StateListener) v).ReportCurrentState(proxy.state);
+
+			transitionToFrame(item.second, proxy, v);
+
+		}
 	}
 
 	@Override
 	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 
-		if(v == null)
+		if (v == null)
 			return;
-		
+
 		int wSpec = MeasureSpec.makeMeasureSpec(nf.frame.width, MeasureSpec.EXACTLY);
 		int hSpec = MeasureSpec.makeMeasureSpec(nf.frame.height, MeasureSpec.EXACTLY);
 
@@ -47,7 +70,7 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 				v.setTranslationX(-tx);
 				v.setTranslationY(-ty);
 
-				v.animate().translationX(0).translationY(0).scaleX(1).scaleY(1).setDuration(duration)
+				scaleSet.add(v.animate().translationX(0).translationY(0).scaleX(1).scaleY(1).setDuration(duration)
 						.withEndAction(new Runnable() {
 
 							@Override
@@ -61,7 +84,7 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 								v.layout(nf.frame.left, nf.frame.top, nf.frame.left + nf.frame.width, nf.frame.top
 										+ nf.frame.height);
 							}
-						});
+						}));
 
 				return true;
 			}
@@ -70,7 +93,14 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 	}
 
 	@Override
-	public void clear() {
+	public void cancel() {
+		super.cancel();
+
+		for (ViewPropertyAnimator anim : scaleSet) {
+			anim.cancel();
+		}
+
+		scaleSet.clear();
 	}
 
 	@Override
