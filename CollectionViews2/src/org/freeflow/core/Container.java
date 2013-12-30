@@ -81,25 +81,27 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	private int currentWidth;
-	private int currentHeight;
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
-		int w = MeasureSpec.getSize(widthMeasureSpec);
-		int h = MeasureSpec.getSize(heightMeasureSpec);
-		Log.d(TAG, "Measure: " + w + ", " + h);
-
-		if (currentWidth != w || currentHeight != h || markLayoutDirty) {
-			onMeasureCalled(w, h);
+		
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		if (markLayoutDirty && getWidth() > 0 && getHeight() > 0) {
+			computeLayout();
 		}
 
 	}
+	
+	
+	protected void onSizeChanged (int w, int h, int oldw, int oldh){
+		super.onSizeChanged(w, h, oldw, oldh);
+		computeLayout();
+	}
 
-	public void onMeasureCalled(int w, int h) {
-		setMeasuredDimension(w, h);
-		Log.d(TAG, "=== On Measure called==== ");
+	public void computeLayout() {
+		
+		Log.d(TAG, "=== Computing layout ==== ");
+		
 		if (layout != null) {
 
 			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
@@ -362,6 +364,9 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	public void requestLayout() {
+		
+		Log.d(TAG, "== requesting layout ===");
+		
 		if (!preventLayout) {
 			super.requestLayout();
 		}
