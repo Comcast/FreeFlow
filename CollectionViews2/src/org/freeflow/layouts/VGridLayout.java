@@ -84,6 +84,7 @@ public class VGridLayout extends AbstractLayout {
 		int cols = width / itemWidth;
 
 		int topStart = 0;
+		if(itemsAdapter == null) return;
 
 		for (int i = 0; i < itemsAdapter.getNumberOfSections(); i++) {
 
