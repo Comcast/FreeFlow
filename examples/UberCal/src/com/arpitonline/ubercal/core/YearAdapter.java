@@ -1,6 +1,7 @@
 package com.arpitonline.ubercal.core;
 
 import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 
 import android.view.View;
@@ -52,6 +53,17 @@ public class YearAdapter implements BaseSectionedAdapter {
 				this.data.add(m);
 			}
 		}
+	}
+
+
+	@Override
+	public Class[] getViewTypes() {
+		return new Class[]{View.class};
+	}
+
+	@Override
+	public Class getViewType(ItemProxy proxy) {
+		return View.class;
 	}
 
 }

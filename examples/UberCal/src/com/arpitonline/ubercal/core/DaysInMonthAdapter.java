@@ -3,6 +3,7 @@ package com.arpitonline.ubercal.core;
 import java.util.ArrayList;
 
 import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 
 import com.arpitonline.ubercal.R;
@@ -80,6 +81,16 @@ public class DaysInMonthAdapter implements BaseSectionedAdapter {
 	
 	public class Day{
 		
+	}
+
+	@Override
+	public Class[] getViewTypes() {
+		return new Class[]{View.class};
+	}
+
+	@Override
+	public Class getViewType(ItemProxy proxy) {
+		return  View.class;
 	}
 
 }

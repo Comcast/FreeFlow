@@ -5,6 +5,7 @@ import org.freeflow.core.AbsLayoutContainer.OnItemSelectedListener;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.layouts.VGridLayout;
+import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 
 import android.app.Activity;
 import android.graphics.Point;
@@ -34,6 +35,9 @@ public class CalendarMain extends Activity implements OnItemSelectedListener {
 		super.onCreate(savedInstanceState);
 		
 		container = new Container(this);
+		
+		DefaultLayoutAnimator animator = new DefaultLayoutAnimator();
+		
 		
 		Point size = getScreenSize(this);
 		
