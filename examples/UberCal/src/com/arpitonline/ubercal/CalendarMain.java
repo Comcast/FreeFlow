@@ -37,7 +37,9 @@ public class CalendarMain extends Activity implements OnItemSelectedListener {
 		container = new Container(this);
 		
 		DefaultLayoutAnimator animator = new DefaultLayoutAnimator();
-		
+		animator.newCellsAdditionAnimationStartDelay  = 600;
+		animator.newCellsAdditionAnimationDurationPerCell = 50;
+		container.setLayoutAnimator(animator);
 		
 		Point size = getScreenSize(this);
 		
