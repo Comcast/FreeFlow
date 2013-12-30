@@ -32,7 +32,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	 * cumulative total of this animation playing on each cell
 	 */
 	public int newCellsAdditionAnimationDurationPerCell = 200;
-	
+
 	public int newCellsAdditionAnimationStartDelay = 0;
 
 	/**
@@ -41,12 +41,25 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	 * the cumulative total of this animation playing on each cell being removed
 	 */
 	public int oldCellsRemovalAnimationDuration = 200;
-	
+
 	public int oldCellsRemovalAnimationStartDelay = 0;
 
 	private int cellPositionTransitionAnimationDuration = 250;
-	
-	
+
+	/**
+	 * If set to true, this forces the animation sets to animate in the
+	 * following sequence: delete then add then move
+	 * 
+	 * If set to false, all sets will animate in parallel
+	 */
+	public boolean animateAllSetsSequentially = true;
+
+	/**
+	 * If set to true, this forces each view in a set to animate sequentially
+	 * 
+	 * If set to false, all views for a set will animate in parallel
+	 */
+	public boolean animateIndividualCellsSequentially = true;
 
 	protected Container callback;
 	protected AnimatorSet disappearingSet = null;
@@ -71,8 +84,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	}
 
 	@Override
-	public void animateChanges(LayoutChangeSet changeSet,
-			final Container callback) {
+	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
 
@@ -86,8 +98,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 			@Override
 			public int compare(ItemProxy lhs, ItemProxy rhs) {
-				return (lhs.itemSection * 1000 + lhs.itemIndex)
-						- (rhs.itemSection * 1000 + rhs.itemIndex);
+				return (lhs.itemSection * 1000 + lhs.itemIndex) - (rhs.itemSection * 1000 + rhs.itemIndex);
 			}
 		};
 
@@ -152,7 +163,12 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		}
 		disappearingSet.setDuration(oldCellsRemovalAnimationDuration);
 		disappearingSet.setStartDelay(oldCellsRemovalAnimationStartDelay);
-		disappearingSet.playSequentially(fades);
+
+		if (animateIndividualCellsSequentially)
+			disappearingSet.playSequentially(fades);
+		else
+			disappearingSet.playTogether(fades);
+
 		return disappearingSet;
 	}
 
@@ -166,7 +182,12 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			proxy.view.setAlpha(0);
 			fadeIns.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 1));
 		}
-		appearingSet.playSequentially(fadeIns);
+
+		if (animateIndividualCellsSequentially)
+			appearingSet.playSequentially(fadeIns);
+		else
+			appearingSet.playTogether(fadeIns);
+
 		appearingSet.setStartDelay(newCellsAdditionAnimationStartDelay);
 		appearingSet.setDuration(newCellsAdditionAnimationDurationPerCell);
 		return appearingSet;
@@ -174,8 +195,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	protected AnimatorSet getAnimationSequence() {
 
-		if (disappearingSet == null && appearingSet == null
-				&& movingSet == null)
+		if (disappearingSet == null && appearingSet == null && movingSet == null)
 			return null;
 
 		AnimatorSet allAnim = new AnimatorSet();
@@ -191,13 +211,15 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		if (movingSet != null)
 			all.add(movingSet);
 
-		allAnim.playTogether(all);
+		if (animateAllSetsSequentially)
+			allAnim.playSequentially(all);
+		else
+			allAnim.playTogether(all);
 
 		return allAnim;
 	}
 
-	protected AnimatorSet getItemsMovedAnimation(
-			ArrayList<Pair<ItemProxy, Frame>> moved) {
+	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<ItemProxy, Frame>> moved) {
 
 		AnimatorSet anim = new AnimatorSet();
 		ArrayList<Animator> moves = new ArrayList<Animator>();
@@ -217,13 +239,13 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			moves.add(transitionToFrame(item.second, proxy, v));
 
 		}
+
 		anim.playTogether(moves);
 		return anim;
 	}
 
 	// @Override
-	public ValueAnimator transitionToFrame(final Frame of, final ItemProxy nf,
-			final View v) {
+	public ValueAnimator transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
 		final float alpha = v.getAlpha();
@@ -234,36 +256,25 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 				try {
 
-					int itemWidth = of.width
-							+ (int) ((nf.frame.width - of.width) * animation
-									.getAnimatedFraction());
+					int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
 					int itemHeight = of.height
-							+ (int) ((nf.frame.height - of.height) * animation
-									.getAnimatedFraction());
-					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth,
-							MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight,
-							MeasureSpec.EXACTLY);
+							+ (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
+					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
 
 					v.measure(widthSpec, heightSpec);
 
 					Frame frame = new Frame();
 					Frame nff = nf.frame;
 
-					frame.left = (int) (of.left + (nff.left - of.left)
-							* animation.getAnimatedFraction());
-					frame.top = (int) (of.top + (nff.top - of.top)
-							* animation.getAnimatedFraction());
-					frame.width = (int) (of.width + (nff.width - of.width)
-							* animation.getAnimatedFraction());
-					frame.height = (int) (of.height + (nff.height - of.height)
-							* animation.getAnimatedFraction());
+					frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
+					frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
+					frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
+					frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
 
-					v.layout(frame.left, frame.top, frame.left + frame.width,
-							frame.top + frame.height);
+					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 
-					v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
-							+ alpha);
+					v.setAlpha((1 - alpha) * animation.getAnimatedFraction() + alpha);
 				} catch (NullPointerException e) {
 					e.printStackTrace();
 					animation.cancel();
