@@ -85,26 +85,28 @@ public class Container extends AbsLayoutContainer {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		
+		int beforeWidth = getWidth();
+		int beforeHeight = getHeight();
+		
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		if (markLayoutDirty && getWidth() > 0 && getHeight() > 0) {
-			computeLayout();
+		
+		
+		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
+		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
+		
+		if(beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty){
+			computeLayout(afterWidth, afterHeight);
 		}
-
-	}
-	
-	
-	protected void onSizeChanged (int w, int h, int oldw, int oldh){
-		super.onSizeChanged(w, h, oldw, oldh);
-		computeLayout();
 	}
 
-	public void computeLayout() {
+
+	public void computeLayout(int w, int h) {
 		
 		Log.d(TAG, "=== Computing layout ==== ");
 		
 		if (layout != null) {
 
-			layout.setDimensions(getMeasuredWidth(), getMeasuredHeight());
+			layout.setDimensions(w, h);
 
 			if (this.itemAdapter != null)
 				layout.setItems(itemAdapter);
