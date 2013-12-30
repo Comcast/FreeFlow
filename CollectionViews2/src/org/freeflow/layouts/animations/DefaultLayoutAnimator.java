@@ -8,6 +8,7 @@ import org.freeflow.core.Container;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.LayoutChangeSet;
+import org.freeflow.core.StateListener;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -15,18 +16,16 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public static final String TAG = "DefaultLayoutAnimator";
-	
+
 	/**
 	 * The duration of the "Appear" animation per new cell being added. 
 	 * Note that the total time of the "Appear" animation will be based on the cumulative 
@@ -42,9 +41,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public int oldCellsRemovalAnimationDuration = 200;
 	
 	
-	private int cellPositionTransitionAnimationDuration = 750;
+	private int cellPositionTransitionAnimationDuration = 250;
 
-	
 	protected Container callback;
 	protected AnimatorSet disappearingSet = null;
 	protected AnimatorSet appearingSet = null;
@@ -83,38 +81,29 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			}
 		};
 
-		AnimatorSet lastAnim = null;
-		AnimatorSet firstAnim = null;
 		ArrayList<ItemProxy> removed = changeSet.getRemoved();
 		if (removed.size() > 0) {
 			Collections.sort(removed, cmp);
 			disappearingSet = getItemsRemovedAnimation(changeSet.getRemoved());
-			
-			lastAnim = disappearingSet;
-			firstAnim = disappearingSet;
 		}
 
 		ArrayList<ItemProxy> added = changeSet.getAdded();
 		if (added.size() > 0) {
 			Collections.sort(added, cmp);
 			appearingSet = getItemsAddedAnimation(added);
-			if (firstAnim == null) {
-				firstAnim = appearingSet;
-			} else {
-				appearingSet.setStartDelay(300);
-				lastAnim = appearingSet;
-			}
 		}
 
-		if (firstAnim != null) {
-			firstAnim.start();
-		} else {
+		ArrayList<Animator> allAnimations = getAnimationSequence();
+		if(allAnimations.size()  == 0){
+			if(changeSet.getMoved().size() > 0){
+				animateMovedViews();
+			}
 			callback.onLayoutChangeAnimationsCompleted(this);
 		}
-
-		if (lastAnim != null) {
-
-			lastAnim.addListener(new AnimatorListener() {
+		else{
+			
+			AnimatorSet all = new AnimatorSet();
+			all.addListener(new AnimatorListener() {
 
 				@Override
 				public void onAnimationStart(Animator animation) {
@@ -135,12 +124,11 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 				}
 
 			});
-			lastAnim.start();
-		} else {
-			animateMovedViews();
-			callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
+			
+			
+			all.playSequentially(allAnimations);
+			all.start();
 		}
-
 	}
 	
 	
@@ -176,6 +164,18 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		return appearingSet;
 	}
 	
+	
+	protected ArrayList<Animator> getAnimationSequence(){
+		ArrayList<Animator> all = new ArrayList<Animator>();
+		if(disappearingSet != null){
+			all.add(disappearingSet);
+		}
+		if(appearingSet != null){
+			all.add(appearingSet);
+		}
+		return all;
+	}
+	
 	protected void animateMovedViews() {
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 
@@ -183,8 +183,14 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
 
+			if (v instanceof StateListener)
+				((StateListener) v).ReportCurrentState(proxy.state);
+
 			proxy.frame.left -= callback.viewPortX;
 			proxy.frame.top -= callback.viewPortY;
+
+			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
+			// callback.viewPortY);
 
 			// if (v instanceof StateListener)
 			// ((StateListener) v).ReportCurrentState(proxy.state);
