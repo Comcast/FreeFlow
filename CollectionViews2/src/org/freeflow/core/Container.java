@@ -24,11 +24,8 @@ public class Container extends AbsLayoutContainer {
 
 	private static final String TAG = "Container";
 
-	// Classes for pooling views and headers
-	protected ArrayList<View> viewpool;
-	protected ArrayList<View> headerViewpool;
-	protected Class itemViewsClass;
-	protected Class headerViewsClass;
+	// ViewPool class
+	protected ViewPool viewpool;
 
 	// Not used yet, but we'll probably need to
 	// prevent layout in <code>layout()</code> method
@@ -72,8 +69,7 @@ public class Container extends AbsLayoutContainer {
 		// usedViews = new HashMap<Object, ItemProxy>();
 		// usedHeaderViews = new HashMap<Object, ItemProxy>();
 
-		viewpool = new ArrayList<View>();
-		headerViewpool = new ArrayList<View>();
+		viewpool = new ViewPool();
 		frames = new HashMap<Object, ItemProxy>();
 
 		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
@@ -133,12 +129,13 @@ public class Container extends AbsLayoutContainer {
 	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
 		if (frameDesc.view == null) {
+
+			View convertView = viewpool.getViewFromPool(itemAdapter.getViewType(frameDesc));
+
 			if (frameDesc.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection,
-						headerViewpool.size() > 0 ? headerViewpool.remove(0) : null, this);
+				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection, convertView, this);
 			} else {
-				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex,
-						viewpool.size() > 0 ? viewpool.remove(0) : null, this);
+				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)
@@ -353,15 +350,6 @@ public class Container extends AbsLayoutContainer {
 			super.requestLayout();
 		}
 
-		// if (markLayoutDirty) {
-		// postDelayed(new Runnable() {
-		//
-		// @Override
-		// public void run() {
-		// requestLayout();
-		// }
-		// }, 1);
-		// }
 	}
 
 	/**
@@ -378,22 +366,7 @@ public class Container extends AbsLayoutContainer {
 		markLayoutDirty = true;
 
 		this.itemAdapter = adapter;
-
-		// If the new adapter uses different types of views for display, flush
-		// the view pools
-		View sampleItem = itemAdapter.getViewForSection(0, 0, null, this);
-		if (sampleItem != null && sampleItem.getClass() != itemViewsClass) {
-			viewpool.clear();
-			itemViewsClass = sampleItem.getClass();
-		}
-		viewpool.add(sampleItem);
-		View sampleHeader = itemAdapter.getHeaderViewForSection(0, null, this);
-		if (sampleHeader != null && sampleHeader.getClass() != headerViewsClass) {
-			headerViewpool.clear();
-			headerViewsClass = sampleHeader.getClass();
-		}
-		headerViewpool.add(sampleHeader);
-
+		viewpool.initializeViewPool(adapter.getViewTypeCount());
 		requestLayout();
 	}
 
@@ -610,15 +583,7 @@ public class Container extends AbsLayoutContainer {
 		v.setScaleY(1f);
 
 		v.setAlpha(1);
-		if (proxy.isHeader) {
-			if (proxy.getClass() == headerViewsClass) {
-				headerViewpool.add(v);
-			}
-		} else {
-			if (proxy.getClass() == itemViewsClass) {
-				viewpool.add(v);
-			}
-		}
+		viewpool.returnViewToPool(v, itemAdapter.getViewType(proxy));
 	}
 
 	public BaseSectionedAdapter getAdapter() {

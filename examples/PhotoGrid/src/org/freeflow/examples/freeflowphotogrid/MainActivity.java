@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Container;
+import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
@@ -90,7 +91,7 @@ public class MainActivity extends Activity {
 
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
-		//		container.setLayoutAnimator(new ScaleAnimator());
+		// container.setLayoutAnimator(new ScaleAnimator());
 
 		frameLayout.addView(container);
 
@@ -195,6 +196,19 @@ public class MainActivity extends Activity {
 				return sections.get(index);
 
 			return null;
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return 2;
+		}
+
+		@Override
+		public int getViewType(ItemProxy proxy) {
+			if (proxy.isHeader)
+				return 1;
+
+			return 0;
 		}
 
 	}
