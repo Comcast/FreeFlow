@@ -26,12 +26,28 @@ import android.view.animation.DecelerateInterpolator;
 public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public static final String TAG = "DefaultLayoutAnimator";
-	private int duration = 750;
+	
+	/**
+	 * The duration of the "Appear" animation per new cell being added. 
+	 * Note that the total time of the "Appear" animation will be based on the cumulative 
+	 * total of this animation playing on each cell
+	 */
+	public int newCellsAdditionAnimationDurationPerCell = 200;
+	
+	/**
+	 * The duration of the "Disappearing" animation per old cell being removed. 
+	 * Note that the total time of the "Disappearing" animation will be based on the cumulative 
+	 * total of this animation playing on each cell being removed
+	 */
+	public int oldCellsRemovalAnimationDuration = 200;
+	
+	
+	private int cellPositionTransitionAnimationDuration = 750;
 
 	
 	protected Container callback;
-	protected AnimatorSet disappearingSet;
-	protected AnimatorSet appearingSet;
+	protected AnimatorSet disappearingSet = null;
+	protected AnimatorSet appearingSet = null;
 	protected ArrayList<ValueAnimator> movingSet;
 
 	public DefaultLayoutAnimator() {
@@ -72,13 +88,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		ArrayList<ItemProxy> removed = changeSet.getRemoved();
 		if (removed.size() > 0) {
 			Collections.sort(removed, cmp);
-			disappearingSet = new AnimatorSet();
-			ArrayList<Animator> fades = new ArrayList<Animator>();
-			for (ItemProxy proxy : removed) {
-				fades.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 0));
-			}
-			disappearingSet.setDuration(300 / removed.size());
-			disappearingSet.playSequentially(fades);
+			disappearingSet = getItemsRemovedAnimation(changeSet.getRemoved());
+			
 			lastAnim = disappearingSet;
 			firstAnim = disappearingSet;
 		}
@@ -86,14 +97,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		ArrayList<ItemProxy> added = changeSet.getAdded();
 		if (added.size() > 0) {
 			Collections.sort(added, cmp);
-			appearingSet = new AnimatorSet();
-			ArrayList<Animator> fadeIns = new ArrayList<Animator>();
-			for (ItemProxy proxy : added) {
-				proxy.view.setAlpha(0);
-				fadeIns.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 1));
-			}
-			appearingSet.playSequentially(fadeIns);
-			appearingSet.setDuration(300 / added.size());
+			appearingSet = getItemsAddedAnimation(added);
 			if (firstAnim == null) {
 				firstAnim = appearingSet;
 			} else {
@@ -138,7 +142,40 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		}
 
 	}
-
+	
+	
+	/**
+	 * The animation to run on the items being removed
+	 * @param removed	An ArrayList of <code>ItemProxys</code> removed
+	 * @return The AnimatorSet of the removed objects
+	 */
+	protected AnimatorSet getItemsRemovedAnimation(ArrayList<ItemProxy> removed){
+		AnimatorSet disappearingSet = new AnimatorSet();
+		ArrayList<Animator> fades = new ArrayList<Animator>();
+		for (ItemProxy proxy : removed) {
+			fades.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 0));
+		}
+		disappearingSet.setDuration(oldCellsRemovalAnimationDuration);
+		disappearingSet.playSequentially(fades);
+		return disappearingSet;
+	}
+	
+	
+	/**
+	 * 
+	 */
+	protected AnimatorSet getItemsAddedAnimation(ArrayList<ItemProxy> added){
+		AnimatorSet appearingSet = new AnimatorSet();
+		ArrayList<Animator> fadeIns = new ArrayList<Animator>();
+		for (ItemProxy proxy : added) {
+			proxy.view.setAlpha(0);
+			fadeIns.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 1));
+		}
+		appearingSet.playSequentially(fadeIns);
+		appearingSet.setDuration(newCellsAdditionAnimationDurationPerCell);
+		return appearingSet;
+	}
+	
 	protected void animateMovedViews() {
 		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
 
@@ -160,7 +197,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	// @Override
 	public void transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
-		anim.setDuration(duration);
+		anim.setDuration(cellPositionTransitionAnimationDuration);
 		final float alpha = v.getAlpha();
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
@@ -209,7 +246,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	}
 
 	public void setDuration(int duration) {
-		this.duration = duration;
+		this.cellPositionTransitionAnimationDuration = duration;
 	}
 
 }
