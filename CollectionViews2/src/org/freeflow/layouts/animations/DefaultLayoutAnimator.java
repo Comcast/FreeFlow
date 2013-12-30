@@ -8,6 +8,7 @@ import org.freeflow.core.Container;
 import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.LayoutChangeSet;
+import org.freeflow.core.StateListener;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -26,9 +27,8 @@ import android.view.animation.DecelerateInterpolator;
 public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public static final String TAG = "DefaultLayoutAnimator";
-	private int duration = 750;
+	private int duration = 250;
 
-	
 	protected Container callback;
 	protected AnimatorSet disappearingSet;
 	protected AnimatorSet appearingSet;
@@ -146,8 +146,14 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
 
+			if (v instanceof StateListener)
+				((StateListener) v).ReportCurrentState(proxy.state);
+
 			proxy.frame.left -= callback.viewPortX;
 			proxy.frame.top -= callback.viewPortY;
+
+			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
+			// callback.viewPortY);
 
 			// if (v instanceof StateListener)
 			// ((StateListener) v).ReportCurrentState(proxy.state);

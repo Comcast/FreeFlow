@@ -52,6 +52,10 @@ public class Container extends AbsLayoutContainer {
 
 	private ItemProxy beginTouchAt;
 
+	private boolean markLayoutDirty = false;
+	private boolean markAdapterDirty = false;
+	private AbstractLayout oldLayout;
+
 	public Container(Context context) {
 		super(context);
 	}
@@ -179,9 +183,6 @@ public class Container extends AbsLayoutContainer {
 			((StateListener) view).ReportCurrentState(proxy.state);
 
 	}
-
-	private boolean markLayoutDirty = false;
-	private AbstractLayout oldLayout;
 
 	public void setLayout(AbstractLayout lc) {
 
@@ -312,9 +313,24 @@ public class Container extends AbsLayoutContainer {
 		LayoutChangeSet change = new LayoutChangeSet();
 
 		if (oldFrames == null) {
+			markAdapterDirty = false;
 			Log.d(TAG, "old frames is null");
 			for (ItemProxy proxy : newFrames.values()) {
 				change.addToAdded(proxy);
+			}
+
+			return change;
+		}
+
+		if (markAdapterDirty) {
+			Log.d(TAG, "old frames is null");
+			markAdapterDirty = false;
+			for (ItemProxy proxy : newFrames.values()) {
+				change.addToAdded(proxy);
+			}
+
+			for (ItemProxy proxy : oldFrames.values()) {
+				change.addToDeleted(proxy);
 			}
 
 			return change;
@@ -364,9 +380,10 @@ public class Container extends AbsLayoutContainer {
 
 		Log.d(TAG, "setting adapter");
 		markLayoutDirty = true;
+		markAdapterDirty = true;
 
 		this.itemAdapter = adapter;
-		viewpool.initializeViewPool(adapter.getViewTypeCount());
+		viewpool.initializeViewPool(adapter.getViewTypes());
 		requestLayout();
 	}
 
@@ -583,7 +600,7 @@ public class Container extends AbsLayoutContainer {
 		v.setScaleY(1f);
 
 		v.setAlpha(1);
-		viewpool.returnViewToPool(v, itemAdapter.getViewType(proxy));
+		viewpool.returnViewToPool(v);
 	}
 
 	public BaseSectionedAdapter getAdapter() {

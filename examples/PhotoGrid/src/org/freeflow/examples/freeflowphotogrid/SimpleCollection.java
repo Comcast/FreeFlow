@@ -122,16 +122,15 @@ public class SimpleCollection extends Activity implements BaseSectionedAdapter {
 	}
 
 	@Override
-	public int getViewTypeCount() {
-		return 2;
+	public Class[] getViewTypes() {
+		Class[] types = { View.class };
+
+		return types;
 	}
 
 	@Override
-	public int getViewType(ItemProxy proxy) {
-		if (proxy.isHeader)
-			return 1;
-
-		return 0;
+	public Class getViewType(ItemProxy proxy) {
+		return View.class;
 	}
 
 }

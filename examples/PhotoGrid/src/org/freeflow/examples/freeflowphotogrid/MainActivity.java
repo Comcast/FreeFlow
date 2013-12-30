@@ -199,16 +199,16 @@ public class MainActivity extends Activity {
 		}
 
 		@Override
-		public int getViewTypeCount() {
-			return 2;
+		public Class[] getViewTypes() {
+			Class[] types = { myTv.class, myTv.class };
+
+			return types;
 		}
 
 		@Override
-		public int getViewType(ItemProxy proxy) {
-			if (proxy.isHeader)
-				return 1;
+		public Class getViewType(ItemProxy proxy) {
 
-			return 0;
+			return myTv.class;
 		}
 
 	}

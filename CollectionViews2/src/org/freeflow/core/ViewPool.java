@@ -1,33 +1,34 @@
 package org.freeflow.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.view.View;
 
 public class ViewPool {
 
-	private ArrayList<View>[] viewPool;
+	private HashMap<Class, ArrayList<View>> viewPool;
 
 	public ViewPool() {
 	}
 
-	@SuppressWarnings("unchecked")
-	public void initializeViewPool(int viewTypeCount) {
-		viewPool = new ArrayList[viewTypeCount];
-		for (int i = 0; i < viewTypeCount; i++) {
-			viewPool[i] = new ArrayList<View>();
+	public void initializeViewPool(Class[] viewTypes) {
+		viewPool = new HashMap<Class, ArrayList<View>>();
+		for (int i = 0; i < viewTypes.length; i++) {
+			viewPool.put(viewTypes[i], new ArrayList<View>());
 		}
 	}
 
-	public void returnViewToPool(View view, int viewType) {
-		viewPool[viewType].add(view);
+	public void returnViewToPool(View view) {
+		if (viewPool.containsKey(view.getClass()))
+			viewPool.get(view.getClass()).add(view);
 	}
 
-	public View getViewFromPool(int viewType) {
-		if (viewPool[viewType].size() == 0)
+	public View getViewFromPool(Class viewType) {
+		if (viewPool.get(viewType) == null || viewPool.get(viewType).size() == 0)
 			return null;
 
-		return viewPool[viewType].remove(0);
+		return viewPool.get(viewType).remove(0);
 	}
 
 }
