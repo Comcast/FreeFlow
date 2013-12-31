@@ -81,29 +81,26 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		
+
 		int beforeWidth = getWidth();
 		int beforeHeight = getHeight();
-		
+
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		
-		
+
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
-		
-		if(beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty){
+
+		if (beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
 	}
 
-
 	public void computeLayout(int w, int h) {
-		
+
 		Log.d(TAG, "=== Computing layout ==== ");
-		
+
 		if (layout != null) {
 
 			layout.setDimensions(w, h);
@@ -277,6 +274,7 @@ public class Container extends AbsLayoutContainer {
 	 * isn't changed
 	 */
 	public void layoutChanged() {
+		markLayoutDirty = true;
 		requestLayout();
 	}
 
@@ -346,9 +344,13 @@ public class Container extends AbsLayoutContainer {
 			ItemProxy proxy = (ItemProxy) m.getValue();
 
 			if (oldFrames.get(m.getKey()) != null) {
+
 				ItemProxy old = oldFrames.remove(m.getKey());
-				proxy.view = old.view;
-				change.addToMoved(proxy, getActualFrame(proxy));
+
+//				if (!old.compareFrames(((ItemProxy) m.getValue()).frame)) {
+					proxy.view = old.view;
+					change.addToMoved(proxy, getActualFrame(proxy));
+//				}
 			} else {
 				change.addToAdded(proxy);
 			}
@@ -366,10 +368,9 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	public void requestLayout() {
-		
-		Log.d(TAG, "== requesting layout ===");
-		
+
 		if (!preventLayout) {
+			Log.d(TAG, "== requesting layout ===");
 			super.requestLayout();
 		}
 

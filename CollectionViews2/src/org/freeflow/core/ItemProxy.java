@@ -13,9 +13,9 @@ public class ItemProxy {
 	public View view;
 
 	public static ItemProxy clone(ItemProxy desc) {
-		if(desc == null)
+		if (desc == null)
 			return null;
-		
+
 		ItemProxy fd = new ItemProxy();
 		fd.itemIndex = desc.itemIndex;
 		fd.itemSection = desc.itemSection;
@@ -25,5 +25,24 @@ public class ItemProxy {
 		fd.state = desc.state;
 		fd.view = desc.view;
 		return fd;
+	}
+
+	public boolean compareFrames(Frame frame2) {
+		if (frame2 == null)
+			return false;
+
+		if (frame.left != frame2.left)
+			return false;
+
+		if (frame.top != frame2.top)
+			return false;
+
+		if (frame.width != frame2.width)
+			return false;
+
+		if (frame.height != frame2.height)
+			return false;
+
+		return true;
 	}
 }

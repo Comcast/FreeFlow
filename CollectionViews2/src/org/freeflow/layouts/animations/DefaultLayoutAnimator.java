@@ -248,7 +248,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public ValueAnimator transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
-		final float alpha = v.getAlpha();
+
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
 			@Override
@@ -274,7 +274,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
 
-					v.setAlpha((1 - alpha) * animation.getAnimatedFraction() + alpha);
+					// v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
+					// + alpha);
 				} catch (NullPointerException e) {
 					e.printStackTrace();
 					animation.cancel();
