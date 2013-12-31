@@ -346,11 +346,11 @@ public class Container extends AbsLayoutContainer {
 			if (oldFrames.get(m.getKey()) != null) {
 
 				ItemProxy old = oldFrames.remove(m.getKey());
+				proxy.view = old.view;
 
-//				if (!old.compareFrames(((ItemProxy) m.getValue()).frame)) {
-					proxy.view = old.view;
+				if (!old.compareFrames(((ItemProxy) m.getValue()).frame)) {
 					change.addToMoved(proxy, getActualFrame(proxy));
-//				}
+				}
 			} else {
 				change.addToAdded(proxy);
 			}
