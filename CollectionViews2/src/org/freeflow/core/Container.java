@@ -274,6 +274,7 @@ public class Container extends AbsLayoutContainer {
 	 * isn't changed
 	 */
 	public void layoutChanged() {
+		Log.d(TAG, "== layoutChanged");
 		markLayoutDirty = true;
 		requestLayout();
 	}
@@ -291,9 +292,6 @@ public class Container extends AbsLayoutContainer {
 		}
 		isAnimatingChanges = true;
 		
-		
-		layoutAnimator.cancel();
-
 		Log.d(TAG, "changeSet is null: " + (changeSet == null));
 
 		for (ItemProxy proxy : changeSet.getAdded()) {
