@@ -277,9 +277,21 @@ public class Container extends AbsLayoutContainer {
 		markLayoutDirty = true;
 		requestLayout();
 	}
+	
+	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-
+		
+		if(changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0){
+			return;
+		}
+		
+		if(isAnimatingChanges ){
+			layoutAnimator.cancel();
+		}
+		isAnimatingChanges = true;
+		
+		
 		layoutAnimator.cancel();
 
 		Log.d(TAG, "changeSet is null: " + (changeSet == null));
@@ -297,6 +309,7 @@ public class Container extends AbsLayoutContainer {
 
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
+		isAnimatingChanges = false;
 		Log.d(TAG, "=== layout changes complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
