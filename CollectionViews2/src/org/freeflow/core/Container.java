@@ -1,6 +1,5 @@
 package org.freeflow.core;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -274,13 +273,23 @@ public class Container extends AbsLayoutContainer {
 	 * isn't changed
 	 */
 	public void layoutChanged() {
+		Log.d(TAG, "== layoutChanged");
 		markLayoutDirty = true;
 		requestLayout();
 	}
 
+	protected boolean isAnimatingChanges = false;
+
 	private void animateChanges(LayoutChangeSet changeSet) {
 
-		layoutAnimator.cancel();
+		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
+			return;
+		}
+
+		if (isAnimatingChanges) {
+			layoutAnimator.cancel();
+		}
+		isAnimatingChanges = true;
 
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
@@ -295,6 +304,7 @@ public class Container extends AbsLayoutContainer {
 
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
+		isAnimatingChanges = false;
 		Log.d(TAG, "=== layout changes complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
@@ -302,9 +312,8 @@ public class Container extends AbsLayoutContainer {
 			returnItemToPoolIfNeeded(proxy);
 		}
 
-		
 		invalidate();
-		
+
 		// changeSet = null;
 
 	}
