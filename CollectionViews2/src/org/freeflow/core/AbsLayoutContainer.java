@@ -1,6 +1,9 @@
 package org.freeflow.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.freeflow.layouts.AbstractLayout;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -13,6 +16,8 @@ import android.view.accessibility.AccessibilityEvent;
 public abstract class AbsLayoutContainer extends ViewGroup {
 
 	protected HashMap<? extends Object, ItemProxy> frames = null;
+
+	protected ArrayList<FreeFlowEventListener> listeners = new ArrayList<FreeFlowEventListener>();
 
 	public AbsLayoutContainer(Context context) {
 		super(context);
@@ -35,7 +40,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 
 	// //////////////////CLICK BEHAVIOR //////
 	protected ItemProxy selectedItemProxy;
-	
+
 	public interface OnItemClickListener {
 
 		/**
@@ -105,52 +110,102 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 
 		return false;
 	}
-	
-	 OnItemSelectedListener mOnItemSelectedListener;
-	
+
+	OnItemSelectedListener mOnItemSelectedListener;
+
 	/**
-     * Interface definition for a callback to be invoked when
-     * an item in this view has been selected.
-     */
-    public interface OnItemSelectedListener {
-        /**
-         * <p>Callback method to be invoked when an item in this view has been
-         * selected. This callback is invoked only when the newly selected
-         * position is different from the previously selected position or if
-         * there was no selected item.</p>
-         *
-         * Impelmenters can call getItemAtPosition(position) if they need to access the
-         * data associated with the selected item.
-         *
-         * @param parent The AdapterView where the selection happened
-         * @param proxy The ItemProxy instance representing the item selected
-         * @param id The row id of the item that is selected
-         */
-        void onItemSelected(AbsLayoutContainer parent, ItemProxy proxy);
+	 * Interface definition for a callback to be invoked when an item in this
+	 * view has been selected.
+	 */
+	public interface OnItemSelectedListener {
+		/**
+		 * <p>
+		 * Callback method to be invoked when an item in this view has been
+		 * selected. This callback is invoked only when the newly selected
+		 * position is different from the previously selected position or if
+		 * there was no selected item.
+		 * </p>
+		 * 
+		 * Impelmenters can call getItemAtPosition(position) if they need to
+		 * access the data associated with the selected item.
+		 * 
+		 * @param parent
+		 *            The AdapterView where the selection happened
+		 * @param proxy
+		 *            The ItemProxy instance representing the item selected
+		 * @param id
+		 *            The row id of the item that is selected
+		 */
+		void onItemSelected(AbsLayoutContainer parent, ItemProxy proxy);
 
-        /**
-         * Callback method to be invoked when the selection disappears from this
-         * view. The selection can disappear for instance when touch is activated
-         * or when the adapter becomes empty.
-         *
-         * @param parent The AdapterView that now contains no selected item.
-         */
-        void onNothingSelected(AbsLayoutContainer parent);
-    }
+		/**
+		 * Callback method to be invoked when the selection disappears from this
+		 * view. The selection can disappear for instance when touch is
+		 * activated or when the adapter becomes empty.
+		 * 
+		 * @param parent
+		 *            The AdapterView that now contains no selected item.
+		 */
+		void onNothingSelected(AbsLayoutContainer parent);
+	}
 
-	
 	/**
-     * Register a callback to be invoked when an item in this AdapterView has
-     * been selected.
-     *
-     * @param listener The callback that will run
-     */
-    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
-        mOnItemSelectedListener = listener;
-    }
+	 * Register a callback to be invoked when an item in this AdapterView has
+	 * been selected.
+	 * 
+	 * @param listener
+	 *            The callback that will run
+	 */
+	public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+		mOnItemSelectedListener = listener;
+	}
 
-    public final OnItemSelectedListener getOnItemSelectedListener() {
-        return mOnItemSelectedListener;
-    }
+	public final OnItemSelectedListener getOnItemSelectedListener() {
+		return mOnItemSelectedListener;
+	}
+
+	public void addFreeFlowEventListener(FreeFlowEventListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeFreeFlowEventListener(FreeFlowEventListener listener) {
+		listeners.remove(listener);
+	}
+
+	protected void dispatchAnimationsStarted() {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.animationsStarted();
+		}
+	}
+
+	protected void dispatchAnimationsComplete() {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.animationsComplete();
+		}
+	}
+
+	protected void dispatchLayoutComplete() {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.layoutComplete();
+		}
+	}
+
+	protected void dispatchLayoutComputed() {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.layoutComputed();
+		}
+	}
+
+	protected void dispatchDataChanged() {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.dataChanged();
+		}
+	}
+
+	protected void dispatchLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout) {
+		for (FreeFlowEventListener listener : listeners) {
+			listener.onLayoutChanging(oldLayout, newLayout);
+		}
+	}
 
 }

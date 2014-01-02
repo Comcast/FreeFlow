@@ -1,6 +1,5 @@
 package org.freeflow.core;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -113,15 +112,14 @@ public class Container extends AbsLayoutContainer {
 
 			if (markLayoutDirty) {
 				markLayoutDirty = false;
-				if (mOnLayoutChangeListener != null) {
-					mOnLayoutChangeListener.onLayoutChanging(oldLayout, layout);
-				}
 			}
 
 			// Create a copy of the incoming values because the source
 			// Layout
 			// may change the map inside its own class
 			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+
+			dispatchLayoutComputed();
 
 			animateChanges(getViewChanges(oldFrames, frames));
 			//
@@ -168,10 +166,12 @@ public class Container extends AbsLayoutContainer {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		Log.d(TAG, "== onLayout ==");
 
-		if (layout == null || frames == null) {
-			return;
-		}
+		// if (layout == null || frames == null) {
+		// return;
+		// }
 		// animateChanges();
+
+		dispatchLayoutComplete();
 	}
 
 	private void doLayout(ItemProxy proxy) {
@@ -193,6 +193,9 @@ public class Container extends AbsLayoutContainer {
 
 		oldLayout = layout;
 		layout = lc;
+
+		dispatchLayoutChanging(oldLayout, lc);
+		dispatchDataChanged();
 
 		markLayoutDirty = true;
 
@@ -276,23 +279,22 @@ public class Container extends AbsLayoutContainer {
 	public void layoutChanged() {
 		Log.d(TAG, "== layoutChanged");
 		markLayoutDirty = true;
+		dispatchDataChanged();
 		requestLayout();
 	}
-	
+
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-		
-		if(changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0){
+
+		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
 			return;
 		}
-		
-		if(isAnimatingChanges ){
+
+		if (isAnimatingChanges) {
 			layoutAnimator.cancel();
 		}
 		isAnimatingChanges = true;
-		
-		Log.d(TAG, "changeSet is null: " + (changeSet == null));
 
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
@@ -301,6 +303,8 @@ public class Container extends AbsLayoutContainer {
 
 		Log.d(TAG, "== animating changes: " + changeSet.toString());
 		// preventLayout = true;
+
+		dispatchAnimationsStarted();
 
 		layoutAnimator.animateChanges(changeSet, this);
 	}
@@ -314,6 +318,10 @@ public class Container extends AbsLayoutContainer {
 			removeViewInLayout(v);
 			returnItemToPoolIfNeeded(proxy);
 		}
+
+		dispatchAnimationsComplete();
+
+		invalidate();
 
 		// changeSet = null;
 
@@ -402,7 +410,9 @@ public class Container extends AbsLayoutContainer {
 		markAdapterDirty = true;
 
 		this.itemAdapter = adapter;
-		viewpool.initializeViewPool(adapter.getViewTypes());
+		if (adapter != null)
+			viewpool.initializeViewPool(adapter.getViewTypes());
+
 		requestLayout();
 	}
 
@@ -641,24 +651,6 @@ public class Container extends AbsLayoutContainer {
 	public void clearFrames() {
 		removeAllViews();
 		frames = null;
-	}
-
-	protected OnLayoutChangeListener mOnLayoutChangeListener;
-
-	/**
-	 * Interface that all listeners interested in layout change events must
-	 * implement
-	 * 
-	 */
-	public interface OnLayoutChangeListener {
-		/**
-		 * Called when the layout is about to change. Measurements based on the
-		 * current data provider and current size have been completed.
-		 * 
-		 * @param oldLayout
-		 * @param newLayout
-		 */
-		public void onLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout);
 	}
 
 }
