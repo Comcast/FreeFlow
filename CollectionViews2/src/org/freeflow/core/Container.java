@@ -282,8 +282,6 @@ public class Container extends AbsLayoutContainer {
 
 		layoutAnimator.cancel();
 
-		Log.d(TAG, "changeSet is null: " + (changeSet == null));
-
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 			doLayout(proxy);
@@ -304,6 +302,9 @@ public class Container extends AbsLayoutContainer {
 			returnItemToPoolIfNeeded(proxy);
 		}
 
+		
+		invalidate();
+		
 		// changeSet = null;
 
 	}
