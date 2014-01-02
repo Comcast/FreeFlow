@@ -43,4 +43,8 @@ public class LayoutChangeSet {
 				"Moved: " + moved.size();
 	}
 
+	public boolean isEmpty() {
+		return (added.size() == 0 && removed.size() == 0 && moved.size() == 0);	
+	}
+
 }
