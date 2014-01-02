@@ -170,7 +170,7 @@ public class Container extends AbsLayoutContainer {
 		// return;
 		// }
 		// animateChanges();
-		
+
 		dispatchLayoutComplete();
 	}
 
@@ -410,7 +410,9 @@ public class Container extends AbsLayoutContainer {
 		markAdapterDirty = true;
 
 		this.itemAdapter = adapter;
-		viewpool.initializeViewPool(adapter.getViewTypes());
+		if (adapter != null)
+			viewpool.initializeViewPool(adapter.getViewTypes());
+
 		requestLayout();
 	}
 
