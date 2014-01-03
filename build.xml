@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="FreeFlow" default="test">
+	
+	<target name="clean" >
+		<ant dir="FreeFlowTests" target="clean" />
+	</target>
+	
+	<target name="debug" >
+		<ant dir="FreeFlowTests" target="debug" />
+	</target>
+	
+	<target name="installd" >
+		<ant dir="FreeFlowTests" target="installd" />
+	</target>
+	
+	<target name="test" >
+		<ant dir="FreeFlowTests" target="test" />
+	</target>
+	
+
+	
+	
+</project>
