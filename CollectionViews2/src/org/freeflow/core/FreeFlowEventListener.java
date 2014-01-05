@@ -16,7 +16,10 @@ public interface FreeFlowEventListener {
 	public void layoutComplete();
 
 	public void layoutComputed();
-
+	
+	/**
+	 * Dispatched when the underlying data has been changed
+	 */
 	public void dataChanged();
 
 	/**
