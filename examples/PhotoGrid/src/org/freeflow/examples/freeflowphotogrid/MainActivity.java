@@ -10,6 +10,7 @@ import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
+import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.ScaleAnimator;
 
 import android.app.Activity;
@@ -30,7 +31,7 @@ public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	Container container = null;
 	HLayout hLayout = null;
-	VLayout vLayout = null;
+	VLayout vLayout = null; 
 	VGridLayout vGridLayout = null;
 	HGridLayout hGridLayout = null;
 	HLayout hLayout1 = null;
@@ -52,6 +53,12 @@ public class MainActivity extends Activity {
 
 		// container.setOnTouchListener(this);
 		// container.setFocusable(true);
+		
+		DefaultLayoutAnimator anim = (DefaultLayoutAnimator) container.getLayoutAnimator();
+		anim.animateAllSetsSequentially = false;
+		anim.animateIndividualCellsSequentially = false;
+		
+		
 		container.requestFocus();
 		hLayout = new HLayout();
 		hLayout.setItemWidth(100);
@@ -235,7 +242,7 @@ public class MainActivity extends Activity {
 
 			// Log.d(TAG, "attached: " + this.getText());
 
-		}
+		} 
 
 		@Override
 		protected void onDetachedFromWindow() {

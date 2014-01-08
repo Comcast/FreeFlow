@@ -315,13 +315,13 @@ public class Container extends AbsLayoutContainer {
 		Log.d(TAG, "=== layout changes complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
-			removeViewInLayout(v);
+			removeView(v);
 			returnItemToPoolIfNeeded(proxy);
 		}
 
 		dispatchAnimationsComplete();
 
-		invalidate();
+		// invalidate();
 
 		// changeSet = null;
 
@@ -329,6 +329,11 @@ public class Container extends AbsLayoutContainer {
 
 	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
+		return getViewChanges(oldFrames, newFrames, false);
+	}
+
+	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
+			HashMap<? extends Object, ItemProxy> newFrames, boolean moveEvenIfSame) {
 
 		// cleanupViews();
 		LayoutChangeSet change = new LayoutChangeSet();
@@ -367,7 +372,7 @@ public class Container extends AbsLayoutContainer {
 				ItemProxy old = oldFrames.remove(m.getKey());
 				proxy.view = old.view;
 
-				if (!old.compareFrames(((ItemProxy) m.getValue()).frame)) {
+				if (moveEvenIfSame || !old.compareFrames(((ItemProxy) m.getValue()).frame)) {
 					change.addToMoved(proxy, getActualFrame(proxy));
 				}
 			} else {
@@ -502,11 +507,10 @@ public class Container extends AbsLayoutContainer {
 
 			double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 
-			if (mTouchMode == TOUCH_MODE_DOWN) {
-				if (distance > touchSlop) {
-					mTouchMode = TOUCH_MODE_SCROLL;
-				}
+			if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
+				mTouchMode = TOUCH_MODE_SCROLL;
 			}
+
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				moveScreen(event.getX() - deltaX, event.getY() - deltaY);
 				deltaX = event.getX();
@@ -598,11 +602,15 @@ public class Container extends AbsLayoutContainer {
 		else if (viewPortY > layout.getContentHeight())
 			viewPortY = layout.getContentHeight();
 
+		Log.d("blah", "vpx = " + viewPortX + ", vpy = " + viewPortY);
+
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
 
-		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames);
+		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames, true);
+
+		Log.d("blah", "added = " + changeSet.added.size() + ", moved = " + changeSet.moved.size());
 
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);

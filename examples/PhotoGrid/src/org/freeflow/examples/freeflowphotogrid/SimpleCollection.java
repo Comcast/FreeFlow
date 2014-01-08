@@ -8,14 +8,10 @@ import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VLayout;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 public class SimpleCollection extends Activity implements BaseSectionedAdapter {
