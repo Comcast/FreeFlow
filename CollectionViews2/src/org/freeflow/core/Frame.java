@@ -44,4 +44,12 @@ public class Frame {
 
 		return false;
 	}
+	
+	@Override
+	public String toString(){
+		return 	"Left:"+left+
+				" Top:"+top+
+				" Width:"+width+
+				" Height:"+height;
+	}
 }
