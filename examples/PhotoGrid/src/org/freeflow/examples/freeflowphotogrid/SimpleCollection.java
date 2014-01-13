@@ -64,7 +64,7 @@ public class SimpleCollection extends Activity implements BaseSectionedAdapter {
 	private void populateContainer() {
 
 		section = new Section();
-		section.setShouldDisplayHeader(false);
+		
 
 		for (int i = 0; i < colors.length; i++) {
 			section.addItem(colors[i]);
@@ -127,6 +127,11 @@ public class SimpleCollection extends Activity implements BaseSectionedAdapter {
 	@Override
 	public Class getViewType(ItemProxy proxy) {
 		return View.class;
+	}
+
+	@Override
+	public boolean shouldDisplaySectionHeaders() {
+		return false;
 	}
 
 }

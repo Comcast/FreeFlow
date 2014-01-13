@@ -29,7 +29,6 @@ public class DefaultSectionAdapter implements BaseSectionedAdapter {
 		sections.clear();
 		for (int i = 0; i < headerCount; i++) {
 			Section s = new Section();
-			s.setShouldDisplayHeader(true);
 			s.setSectionTitle("Section " + i);
 			for (int j = 0; j < itemCount; j++) {
 				s.addItem(new Object());
@@ -105,6 +104,11 @@ public class DefaultSectionAdapter implements BaseSectionedAdapter {
 	public Class getViewType(ItemProxy proxy) {
 
 		return TextView.class;
+	}
+
+	@Override
+	public boolean shouldDisplaySectionHeaders() {
+		return true;
 	}
 
 }

@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
 		public ImageAdapter() {
 			for (int i = 0; i < 10; i++) {
 				Section s = new Section();
-				s.setShouldDisplayHeader(true);
+				
 				s.setSectionTitle("Section " + i);
 				for (int j = 0; j < 10; j++) {
 					s.addItem(new Object());
@@ -216,6 +216,11 @@ public class MainActivity extends Activity {
 		public Class getViewType(ItemProxy proxy) {
 
 			return myTv.class;
+		}
+
+		@Override
+		public boolean shouldDisplaySectionHeaders() {
+			return true;
 		}
 
 	}

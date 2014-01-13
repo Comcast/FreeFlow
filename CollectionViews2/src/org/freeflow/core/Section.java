@@ -6,7 +6,6 @@ public class Section {
 
 	protected ArrayList<Object> data;
 	protected String sectionTitle;
-	protected boolean displayHeader = false;
 	protected int selectedIndex = 0;
 
 	public Section() {
@@ -35,14 +34,6 @@ public class Section {
 
 	public void addItem(Object item) {
 		data.add(item);
-	}
-
-	public void setShouldDisplayHeader(boolean displayHeader) {
-		this.displayHeader = displayHeader;
-	}
-
-	public boolean shouldDisplayHeader() {
-		return displayHeader;
 	}
 
 	public int getSelectedIndex() {

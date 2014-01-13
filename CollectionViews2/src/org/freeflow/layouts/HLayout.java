@@ -74,7 +74,7 @@ public class HLayout extends AbstractLayout {
 		for (int i = 0; i < itemsAdapter.getNumberOfSections(); i++) {
 			Section s = itemsAdapter.getSection(i);
 
-			if (s.shouldDisplayHeader()) {
+			if (itemsAdapter.shouldDisplaySectionHeaders()) {
 
 				if (headerWidth < 0) {
 					throw new IllegalStateException("headerWidth not set");

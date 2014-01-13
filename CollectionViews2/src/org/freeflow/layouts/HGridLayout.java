@@ -82,7 +82,7 @@ public class HGridLayout extends AbstractLayout {
 
 			Section s = itemsAdapter.getSection(i);
 
-			if (s.shouldDisplayHeader()) {
+			if (itemsAdapter.shouldDisplaySectionHeaders()) {
 				
 				if (headerWidth < 0) {
 					throw new IllegalStateException("headerWidth not set");

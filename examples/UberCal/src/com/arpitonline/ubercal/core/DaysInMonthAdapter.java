@@ -91,4 +91,9 @@ public class DaysInMonthAdapter implements BaseSectionedAdapter {
 		return View.class;
 	}
 
+	@Override
+	public boolean shouldDisplaySectionHeaders() {
+		return false;
+	}
+
 }
