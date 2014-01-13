@@ -46,8 +46,6 @@ public abstract class AbstractLayout {
 
 	public abstract ItemProxy getItemProxyForItem(Object item);
 
-	public abstract Frame getOffScreenStartFrame();
-
 	public abstract boolean horizontalDragEnabled();
 
 	public abstract boolean verticalDragEnabled();

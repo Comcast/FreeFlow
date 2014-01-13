@@ -160,18 +160,6 @@ public class HGridLayout extends AbstractLayout {
 	public ItemProxy getItemAt(float x, float y){
 		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
 	}
-	
-
-	@Override
-	public Frame getOffScreenStartFrame() {
-		Frame frame = new Frame();
-		frame.height = itemHeight;
-		frame.width = itemWidth;
-		frame.left = width;
-		frame.top = 0;
-
-		return frame;
-	}
 
 	@Override
 	public boolean horizontalDragEnabled() {

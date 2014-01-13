@@ -168,18 +168,7 @@ public class VGridLayout extends AbstractLayout {
 	public ItemProxy getItemAt(float x, float y){
 		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
 	}
-
-	@Override
-	public Frame getOffScreenStartFrame() {
-		Frame frame = new Frame();
-		frame.height = itemHeight;
-		frame.width = itemWidth;
-		frame.left = 0;
-		frame.top = height;
-
-		return frame;
-	}
-
+	
 	@Override
 	public boolean horizontalDragEnabled() {
 		return false;

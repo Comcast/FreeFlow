@@ -153,17 +153,6 @@ public class HLayout extends AbstractLayout {
 	}
 
 	@Override
-	public Frame getOffScreenStartFrame() {
-		Frame frame = new Frame();
-		frame.height = height;
-		frame.width = itemWidth;
-		frame.left = width;
-		frame.top = 0;
-
-		return frame;
-	}
-
-	@Override
 	public boolean horizontalDragEnabled() {
 		return true;
 	}

@@ -142,17 +142,6 @@ public class VLayout extends AbstractLayout {
 	}
 
 	@Override
-	public Frame getOffScreenStartFrame() {
-		Frame frame = new Frame();
-		frame.height = itemHeight;
-		frame.width = width;
-		frame.left = 0;
-		frame.top = height;
-
-		return frame;
-	}
-
-	@Override
 	public boolean horizontalDragEnabled() {
 		return false;
 	}
