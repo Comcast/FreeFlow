@@ -3,10 +3,11 @@ package org.freeflow.layouts;
 import java.util.HashMap;
 
 import org.freeflow.core.BaseSectionedAdapter;
-import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 import org.freeflow.utils.ViewUtils;
+
+import android.graphics.Rect;
 
 public class VLayout extends AbstractLayout {
 
@@ -80,14 +81,14 @@ public class VLayout extends AbstractLayout {
 				}
 				
 				ItemProxy header = new ItemProxy();
-				Frame hframe = new Frame();
+				Rect hframe = new Rect();
 				header.itemSection = i;
 				header.itemIndex = -1;
 				header.isHeader = true;
 				hframe.left = 0;
 				hframe.top = topStart;
-				hframe.width = headerWidth;
-				hframe.height = headerHeight;
+				hframe.right = headerWidth;
+				hframe.bottom = topStart + headerHeight;
 				header.frame = hframe;
 				header.data = s.getSectionTitle();
 				frameDescriptors.put(header.data, header);
@@ -97,13 +98,13 @@ public class VLayout extends AbstractLayout {
 
 			for (int j = 0; j < s.getDataCount(); j++) {
 				ItemProxy descriptor = new ItemProxy();
-				Frame frame = new Frame();
+				Rect frame = new Rect();
 				descriptor.itemSection = i;
 				descriptor.itemIndex = j;
 				frame.left = 0;
 				frame.top = j * itemHeight + topStart;
-				frame.width = width;
-				frame.height = itemHeight;
+				frame.right = width;
+				frame.bottom = frame.top + itemHeight;
 				descriptor.frame = frame;
 				descriptor.data = s.getData().get(j);
 				frameDescriptors.put(descriptor.data, descriptor);
@@ -170,7 +171,7 @@ public class VLayout extends AbstractLayout {
 		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
 		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
-		return (fd.frame.top + fd.frame.height) - height;
+		return (fd.frame.top + fd.frame.height()) - height;
 	}
 
 	@Override

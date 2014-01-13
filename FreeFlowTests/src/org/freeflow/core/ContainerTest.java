@@ -9,6 +9,7 @@ import org.freeflow.layouts.VLayout;
 import org.freeflow.teststub.MainActivity;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
@@ -135,12 +136,12 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 		String one = "one";
 		ItemProxy proxy = new ItemProxy();
 		proxy.data = one;
-		proxy.frame = new Frame(0,0, 20, 20);
+		proxy.frame = new Rect(0,0, 20, 20);
 		oldMap.put(one, proxy);
 		
 		ItemProxy proxy2 = new ItemProxy();
 		proxy.data = one;
-		proxy.frame =  new Frame(20,20,40,40);
+		proxy.frame =  new Rect(20,20,20+40,20+40);
 		newMap.put(one, proxy2);
 		
 		Container container = new Container(getActivity());

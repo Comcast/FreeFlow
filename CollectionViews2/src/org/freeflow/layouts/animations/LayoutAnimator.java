@@ -1,12 +1,7 @@
 package org.freeflow.layouts.animations;
 
 import org.freeflow.core.Container;
-import org.freeflow.core.Frame;
-import org.freeflow.core.ItemProxy;
 import org.freeflow.core.LayoutChangeSet;
-
-import android.text.GetChars;
-import android.view.View;
 
 public abstract class LayoutAnimator {
 

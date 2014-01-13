@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.freeflow.core.Container;
-import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.LayoutChangeSet;
 import org.freeflow.core.StateListener;
@@ -16,6 +15,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.graphics.Rect;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -44,7 +44,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public int oldCellsRemovalAnimationStartDelay = 0;
 
-	public int cellPositionTransitionAnimationDuration = 250;
+	public int cellPositionTransitionAnimationDuration = 2500;
 
 	/**
 	 * If set to true, this forces the animation sets to animate in the
@@ -87,6 +87,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
+		
+		Log.d(TAG, "Changes: "+changeSet.toString());
 
 		cancel();
 
@@ -219,11 +221,11 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		return allAnim;
 	}
 
-	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<ItemProxy, Frame>> moved) {
+	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<ItemProxy, Rect>> moved) {
 
 		AnimatorSet anim = new AnimatorSet();
 		ArrayList<Animator> moves = new ArrayList<Animator>();
-		for (Pair<ItemProxy, Frame> item : moved) {
+		for (Pair<ItemProxy, Rect> item : moved) {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
 
@@ -245,7 +247,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	}
 
 	// @Override
-	public ValueAnimator transitionToFrame(final Frame of, final ItemProxy nf, final View v) {
+	public ValueAnimator transitionToFrame(final Rect of, final ItemProxy nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
 
@@ -256,27 +258,30 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 				try {
 
-					int itemWidth = of.width + (int) ((nf.frame.width - of.width) * animation.getAnimatedFraction());
-					int itemHeight = of.height
-							+ (int) ((nf.frame.height - of.height) * animation.getAnimatedFraction());
+					int itemWidth = of.width() + (int) ((nf.frame.width() - of.width()) * animation.getAnimatedFraction());
+					int itemHeight = of.height()
+							+ (int) ((nf.frame.height() - of.height()) * animation.getAnimatedFraction());
 					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
 					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
 
 					v.measure(widthSpec, heightSpec);
 
-					Frame frame = new Frame();
-					Frame nff = nf.frame;
+					Rect frame = new Rect();
+					Rect nff = nf.frame;
 
 					frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
 					frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
-					frame.width = (int) (of.width + (nff.width - of.width) * animation.getAnimatedFraction());
-					frame.height = (int) (of.height + (nff.height - of.height) * animation.getAnimatedFraction());
+					frame.right = frame.left +  (int) (of.width() + (nff.width() - of.width()) * animation.getAnimatedFraction());
+					frame.bottom = frame.top +  (int) (of.height() + (nff.height() - of.height()) * animation.getAnimatedFraction());
 
-					v.layout(frame.left, frame.top, frame.left + frame.width, frame.top + frame.height);
+					v.layout(frame.left, frame.top, frame.left + frame.width(), frame.top + frame.height());
 
+					//v.layout(nf.frame.left, nf.frame.top, nf.frame.right, nf.frame.bottom);
+					
 					// v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
 					// + alpha);
 				} catch (NullPointerException e) {
+					Log.e(TAG, "Nullpointer exception");
 					e.printStackTrace();
 					animation.cancel();
 				}

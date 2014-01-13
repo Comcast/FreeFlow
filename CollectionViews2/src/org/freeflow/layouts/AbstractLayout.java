@@ -3,9 +3,7 @@ package org.freeflow.layouts;
 import java.util.HashMap;
 
 import org.freeflow.core.BaseSectionedAdapter;
-import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
-import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutAnimator;
 
 public abstract class AbstractLayout {

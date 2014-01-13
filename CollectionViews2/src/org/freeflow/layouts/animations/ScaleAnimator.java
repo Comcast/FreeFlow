@@ -2,15 +2,12 @@ package org.freeflow.layouts.animations;
 
 import java.util.ArrayList;
 
-import org.freeflow.core.Frame;
 import org.freeflow.core.ItemProxy;
 
-import android.util.Log;
+import android.graphics.Rect;
 import android.util.Pair;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 
 public class ScaleAnimator extends DefaultLayoutAnimator {
 
@@ -21,9 +18,9 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 	}
 
 	protected void animateMovedViews() {
-		ArrayList<Pair<ItemProxy, Frame>> moved = changeSet.getMoved();
+		ArrayList<Pair<ItemProxy, Rect>> moved = changeSet.getMoved();
 
-		for (Pair<ItemProxy, Frame> item : moved) {
+		for (Pair<ItemProxy, Rect> item : moved) {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
 

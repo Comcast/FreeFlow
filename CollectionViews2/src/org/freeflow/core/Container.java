@@ -11,6 +11,7 @@ import org.freeflow.layouts.animations.LayoutAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -146,13 +147,13 @@ public class Container extends AbsLayoutContainer {
 
 			frameDesc.view = view;
 			prepareViewForAddition(view);
-			addViewInLayout(view, -1, params);
+			addView(view, getChildCount(), params);
 		}
 
 		view = frameDesc.view;
-
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width, MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height, MeasureSpec.EXACTLY);
+		
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(), MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(), MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(frameDesc.state);
@@ -176,9 +177,9 @@ public class Container extends AbsLayoutContainer {
 
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
-		Frame frame = proxy.frame;
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width - viewPortX, frame.top
-				+ frame.height - viewPortY);
+		Rect frame = proxy.frame;
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width() - viewPortX, frame.top
+				+ frame.height() - viewPortY);
 
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(proxy.state);
@@ -234,7 +235,7 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		Frame vpFrame = proxy.frame;
+		Rect vpFrame = proxy.frame;
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
@@ -256,17 +257,17 @@ public class Container extends AbsLayoutContainer {
 	 *            The proxy to get the <code>Frame</code> for
 	 * @return The Frame for the proxy or null if that view doesn't exist
 	 */
-	public Frame getActualFrame(final ItemProxy proxy) {
+	public Rect getActualFrame(final ItemProxy proxy) {
 		View v = proxy.view;
 		if (v == null) {
 			return null;
 		}
 
-		Frame of = new Frame();
+		Rect of = new Rect();
 		of.left = (int) (v.getLeft() + v.getTranslationX());
 		of.top = (int) (v.getTop() + v.getTranslationY());
-		of.width = v.getWidth();
-		of.height = v.getHeight();
+		of.right = of.left + v.getWidth();
+		of.bottom = of.bottom + v.getHeight();
 
 		return of;
 
@@ -302,11 +303,29 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		Log.d(TAG, "== animating changes: " + changeSet.toString());
-		// preventLayout = true;
+		
 
 		dispatchAnimationsStarted();
 
 		layoutAnimator.animateChanges(changeSet, this);
+//		
+//		for (Pair<ItemProxy, Rect> item : changeSet.getMoved()) {
+//			ItemProxy proxy = ItemProxy.clone(item.first);
+//			View v = proxy.view;
+//			proxy.view.layout(proxy.frame.left, proxy.frame.top, proxy.frame.right, proxy.frame.bottom);
+//		}
+//		
+//		
+//		for (ItemProxy proxy : changeSet.getRemoved()) {
+//			View v = proxy.view;
+//			
+//			removeView(v);
+//			
+//			returnItemToPoolIfNeeded(proxy);
+//		}
+//		
+//		requestLayout();
+		
 	}
 
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
@@ -320,8 +339,7 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		dispatchAnimationsComplete();
-
-		// invalidate();
+		
 
 		// changeSet = null;
 
@@ -372,7 +390,8 @@ public class Container extends AbsLayoutContainer {
 				ItemProxy old = oldFrames.remove(m.getKey());
 				proxy.view = old.view;
 
-				if (moveEvenIfSame || !old.compareFrames(((ItemProxy) m.getValue()).frame)) {
+				//if (moveEvenIfSame || !old.compareRect(((ItemProxy) m.getValue()).frame)) {
+				if (moveEvenIfSame || !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
 					change.addToMoved(proxy, getActualFrame(proxy));
 				}
 			} else {
@@ -617,11 +636,12 @@ public class Container extends AbsLayoutContainer {
 			doLayout(proxy);
 		}
 
-		for (Pair<ItemProxy, Frame> proxyPair : changeSet.moved) {
+		for (Pair<ItemProxy, Rect> proxyPair : changeSet.moved) {
 			doLayout(proxyPair.first);
 		}
 
 		for (ItemProxy proxy : changeSet.removed) {
+			proxy.view.setAlpha(0.3f);
 			removeViewInLayout(proxy.view);
 			returnItemToPoolIfNeeded(proxy);
 		}

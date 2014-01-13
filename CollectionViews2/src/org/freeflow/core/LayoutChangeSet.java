@@ -2,18 +2,19 @@ package org.freeflow.core;
 
 import java.util.ArrayList;
 
+import android.graphics.Rect;
 import android.util.Pair;
 
 public class LayoutChangeSet {
-	protected ArrayList<Pair<ItemProxy, Frame>> moved = new ArrayList<Pair<ItemProxy, Frame>>();
+	protected ArrayList<Pair<ItemProxy, Rect>> moved = new ArrayList<Pair<ItemProxy, Rect>>();
 	protected ArrayList<ItemProxy> removed = new ArrayList<ItemProxy>();
 	protected ArrayList<ItemProxy> added = new ArrayList<ItemProxy>();
 
 	public LayoutChangeSet() {
 	}
 
-	public void addToMoved(ItemProxy proxy, Frame oldFrame) {
-		moved.add(new Pair<ItemProxy, Frame>(proxy, oldFrame));
+	public void addToMoved(ItemProxy proxy, Rect oldFrame) {
+		moved.add(new Pair<ItemProxy, Rect>(proxy, oldFrame));
 	}
 
 	public void addToDeleted(ItemProxy proxy) {
@@ -32,7 +33,7 @@ public class LayoutChangeSet {
 		return removed;
 	}
 
-	public ArrayList<Pair<ItemProxy, Frame>> getMoved() {
+	public ArrayList<Pair<ItemProxy, Rect>> getMoved() {
 		return moved;
 	}
 
