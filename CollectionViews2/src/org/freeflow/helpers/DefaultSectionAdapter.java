@@ -13,14 +13,14 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-public class SimpleDataAdapter implements BaseSectionedAdapter {
+public class DefaultSectionAdapter implements BaseSectionedAdapter {
 
 	private ArrayList<Section> sections = new ArrayList<Section>();
 	private Context context;
 	public int headerHeight = 20;
 	public int itemHeight = 20;
 
-	public SimpleDataAdapter(Context context, int headerCount, int itemCount) {
+	public DefaultSectionAdapter(Context context, int headerCount, int itemCount) {
 		this.context = context;
 		setData(headerCount, itemCount);
 	}

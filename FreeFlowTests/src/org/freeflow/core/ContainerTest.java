@@ -4,11 +4,7 @@ import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.freeflow.core.Container;
-import org.freeflow.core.Frame;
-import org.freeflow.core.ItemProxy;
-import org.freeflow.core.LayoutChangeSet;
-import org.freeflow.helpers.SimpleDataAdapter;
+import org.freeflow.helpers.DefaultSectionAdapter;
 import org.freeflow.layouts.VLayout;
 import org.freeflow.teststub.MainActivity;
 
@@ -56,7 +52,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 				vLayout.setItemHeight(300);
 				container.setLayout(vLayout);
 				
-				final SimpleDataAdapter adapter = new SimpleDataAdapter(main, 1, 2);
+				final DefaultSectionAdapter adapter = new DefaultSectionAdapter(main, 1, 2);
 				container.setAdapter(adapter);
 				
 				
@@ -106,7 +102,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 				vLayout.setItemHeight(300);
 				container.setLayout(vLayout);
 				
-				SimpleDataAdapter adapter = new SimpleDataAdapter(main, 1, 2);
+				DefaultSectionAdapter adapter = new DefaultSectionAdapter(main, 1, 2);
 				container.setAdapter(adapter);
 				
 				
@@ -116,7 +112,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 					@Override
 					public boolean onPreDraw() {
 						
-						assertEquals(3, container.getChildCount());
+						assertEquals("Correct number of children were not created", 3, container.getChildCount());
 						lock.countDown();
 						return false;
 					}
