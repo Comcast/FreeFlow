@@ -44,7 +44,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public int oldCellsRemovalAnimationStartDelay = 0;
 
-	public int cellPositionTransitionAnimationDuration = 2500;
+	public int cellPositionTransitionAnimationDuration = 250;
 
 	/**
 	 * If set to true, this forces the animation sets to animate in the
