@@ -87,8 +87,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
-		
-		Log.d(TAG, "Changes: "+changeSet.toString());
+
+		Log.d(TAG, "Changes: " + changeSet.toString());
 
 		cancel();
 
@@ -234,6 +234,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 			proxy.frame.left -= callback.viewPortX;
 			proxy.frame.top -= callback.viewPortY;
+			proxy.frame.right -= callback.viewPortX;
+			proxy.frame.bottom -= callback.viewPortY;
 
 			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
 			// callback.viewPortY);
@@ -258,7 +260,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 				try {
 
-					int itemWidth = of.width() + (int) ((nf.frame.width() - of.width()) * animation.getAnimatedFraction());
+					int itemWidth = of.width()
+							+ (int) ((nf.frame.width() - of.width()) * animation.getAnimatedFraction());
 					int itemHeight = of.height()
 							+ (int) ((nf.frame.height() - of.height()) * animation.getAnimatedFraction());
 					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
@@ -271,13 +274,16 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 					frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
 					frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
-					frame.right = frame.left +  (int) (of.width() + (nff.width() - of.width()) * animation.getAnimatedFraction());
-					frame.bottom = frame.top +  (int) (of.height() + (nff.height() - of.height()) * animation.getAnimatedFraction());
+					frame.right = frame.left
+							+ (int) (of.width() + (nff.width() - of.width()) * animation.getAnimatedFraction());
+					frame.bottom = frame.top
+							+ (int) (of.height() + (nff.height() - of.height()) * animation.getAnimatedFraction());
 
-					v.layout(frame.left, frame.top, frame.left + frame.width(), frame.top + frame.height());
+					v.layout(frame.left, frame.top, frame.right, frame.bottom);
 
-					//v.layout(nf.frame.left, nf.frame.top, nf.frame.right, nf.frame.bottom);
-					
+					// v.layout(nf.frame.left, nf.frame.top, nf.frame.right,
+					// nf.frame.bottom);
+
 					// v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
 					// + alpha);
 				} catch (NullPointerException e) {
