@@ -500,49 +500,60 @@ public class Container extends AbsLayoutContainer {
 		super.onTouchEvent(event);
 		if (layout == null)
 			return false;
-		if (!layout.horizontalDragEnabled() && !layout.verticalDragEnabled())
-			return false;
-
-		if (mVelocityTracker == null)
+		
+		boolean canScroll = false;
+		if(layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()){
+			canScroll = true;
+		}
+		if(layout.verticalDragEnabled() && layout.getContentHeight() > getHeight()){
+			canScroll = true;
+		}
+		
+		if (mVelocityTracker == null && canScroll){
 			mVelocityTracker = VelocityTracker.obtain();
-
-		mVelocityTracker.addMovement(event);
-
+			mVelocityTracker.addMovement(event);
+		}
+		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
 			beginTouchAt = layout.getItemAt(viewPortX + event.getX(), viewPortY + event.getY());
-
-			deltaX = event.getX();
-			deltaY = event.getY();
-
+			if(canScroll){
+				deltaX = event.getX();
+				deltaY = event.getY();
+			}
 			mTouchMode = TOUCH_MODE_DOWN;
 
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+			
+			if(canScroll){
+				float xDiff = event.getX() - deltaX;
+				float yDiff = event.getY() - deltaY;
 
-			float xDiff = event.getX() - deltaX;
-			float yDiff = event.getY() - deltaY;
+				double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 
-			double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+				if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
+					mTouchMode = TOUCH_MODE_SCROLL;
+				}
 
-			if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
-				mTouchMode = TOUCH_MODE_SCROLL;
+				if (mTouchMode == TOUCH_MODE_SCROLL) {
+					moveScreen(event.getX() - deltaX, event.getY() - deltaY);
+					deltaX = event.getX();
+					deltaY = event.getY();
+				}
 			}
-
-			if (mTouchMode == TOUCH_MODE_SCROLL) {
-				moveScreen(event.getX() - deltaX, event.getY() - deltaY);
-				deltaX = event.getX();
-				deltaY = event.getY();
-			}
+			
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 
 			mTouchMode = TOUCH_MODE_REST;
 
-			mVelocityTracker.recycle();
-			mVelocityTracker = null;
+			if(canScroll){
+				mVelocityTracker.recycle();
+				mVelocityTracker = null;
+			}
+			
 			// requestLayout();
 
 			return true;
