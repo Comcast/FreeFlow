@@ -182,7 +182,7 @@ public class HGridLayout extends AbstractLayout {
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
 		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
-		return (fd.frame.left + fd.frame.width()) - width;
+		return (fd.frame.left + fd.frame.width());
 	}
 
 	@Override
@@ -190,7 +190,7 @@ public class HGridLayout extends AbstractLayout {
 		if (itemsAdapter == null)
 			return 0;
 
-		return 0;
+		return height;
 	}
 
 	@Override

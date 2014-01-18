@@ -8,6 +8,7 @@ import org.freeflow.core.Section;
 import org.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 public class VLayout extends AbstractLayout {
 
@@ -154,7 +155,8 @@ public class VLayout extends AbstractLayout {
 
 	@Override
 	public int getContentWidth() {
-		return 0;
+		Log.d(TAG, "width== : "+width);
+		return width;
 	}
 
 	@Override
@@ -171,7 +173,7 @@ public class VLayout extends AbstractLayout {
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
 		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
-		return (fd.frame.top + fd.frame.height()) - height;
+		return (fd.frame.top + fd.frame.height());
 	}
 
 	@Override

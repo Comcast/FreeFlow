@@ -37,7 +37,10 @@ public class Container extends AbsLayoutContainer {
 
 	public int viewPortX = 0;
 	public int viewPortY = 0;
-
+	
+	protected int scrollableWidth;
+	protected int scrollableHeight;
+	
 	protected View headerView = null;
 
 	private VelocityTracker mVelocityTracker = null;
@@ -242,11 +245,14 @@ public class Container extends AbsLayoutContainer {
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
 
-		if (viewPortX > newLayout.getContentWidth())
-			viewPortX = newLayout.getContentWidth();
+		scrollableWidth = layout.getContentWidth()-getWidth();
+		scrollableHeight = layout.getContentHeight()-getHeight();
+		
+		if (viewPortX > scrollableWidth)
+			viewPortX = scrollableWidth;
 
-		if (viewPortY > newLayout.getContentHeight())
-			viewPortY = newLayout.getContentHeight();
+		if (viewPortY > scrollableHeight)
+			viewPortY = scrollableHeight;
 
 	}
 
@@ -504,6 +510,7 @@ public class Container extends AbsLayoutContainer {
 			return false;
 		
 		boolean canScroll = false;
+		
 		if(layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()){
 			canScroll = true;
 		}
@@ -651,16 +658,19 @@ public class Container extends AbsLayoutContainer {
 		} else {
 			movementY = 0;
 		}
-
+		
+		scrollableWidth = layout.getContentWidth()-getWidth();
+		scrollableHeight = layout.getContentHeight()-getHeight();
+		
 		if (viewPortX < 0)
 			viewPortX = 0;
-		else if (viewPortX > layout.getContentWidth())
-			viewPortX = layout.getContentWidth();
+		else if (viewPortX > scrollableWidth)
+			viewPortX = scrollableWidth;
 
 		if (viewPortY < 0)
 			viewPortY = 0;
-		else if (viewPortY > layout.getContentHeight())
-			viewPortY = layout.getContentHeight();
+		else if (viewPortY > scrollableHeight)
+			viewPortY = scrollableHeight;
 
 		Log.d("blah", "vpx = " + viewPortX + ", vpy = " + viewPortY);
 

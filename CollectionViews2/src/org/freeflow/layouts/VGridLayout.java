@@ -13,14 +13,14 @@ public class VGridLayout extends AbstractLayout {
 
 	private boolean dataChanged = false;
 	private static final String TAG = "VGridLayout";
-	private int itemHeight = -1;
-	private int itemWidth = -1;
-	private int headerWidth = -1;
-	private int headerHeight = -1;
-	private int width = -1;
-	private int height = -1;
-	private BaseSectionedAdapter itemsAdapter;
-	private HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
+	protected int itemHeight = -1;
+	protected int itemWidth = -1;
+	protected int headerWidth = -1;
+	protected int headerHeight = -1;
+	protected int width = -1;
+	protected int height = -1;
+	protected BaseSectionedAdapter itemsAdapter;
+	protected HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
@@ -199,7 +199,7 @@ public class VGridLayout extends AbstractLayout {
 
 	@Override
 	public int getContentWidth() {
-		return 0;
+		return width;
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class VGridLayout extends AbstractLayout {
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
 		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
-		return (fd.frame.top + fd.frame.height()) - height;
+		return (fd.frame.top + fd.frame.height());
 	}
 
 	@Override
