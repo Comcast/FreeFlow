@@ -6,17 +6,14 @@ import java.util.Map.Entry;
 
 import org.freeflow.core.ItemProxy;
 
-import android.graphics.Rect;
-
 public class ViewUtils {
-	public static ItemProxy getItemAt(HashMap<Object, ItemProxy> frameDescriptors, int x, int y){
-		Iterator<Entry<Object, ItemProxy>> it = frameDescriptors.entrySet().iterator();
-		
+	public static ItemProxy getItemAt(HashMap<? extends Object, ItemProxy> frameDescriptors, int x, int y){
+
+		Iterator<? extends Object> it=  frameDescriptors.entrySet().iterator();
+			
 		while (it.hasNext()) {
-	    	Entry<Object, ItemProxy> pair = it.next();
-	        Rect f = pair.getValue().frame;
-	    	
-	    	if(f.contains((int)x, (int)y)) return pair.getValue();
+			Entry<Object, ItemProxy> pair = (Entry<Object, ItemProxy>) it.next();
+			if(pair.getValue().frame.contains((int)x, (int)y)) return pair.getValue();
 	      
 	    }
 		return null;

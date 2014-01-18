@@ -7,6 +7,7 @@ import java.util.Map;
 import org.freeflow.layouts.AbstractLayout;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutAnimator;
+import org.freeflow.utils.ViewUtils;
 
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -517,7 +518,7 @@ public class Container extends AbsLayoutContainer {
 		}
 		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			beginTouchAt = layout.getItemAt(viewPortX + event.getX(), viewPortY + event.getY());
+			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()), (int)( viewPortY + event.getY()));
 			if(canScroll){
 				deltaX = event.getX();
 				deltaY = event.getY();
