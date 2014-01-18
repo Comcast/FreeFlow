@@ -24,6 +24,20 @@ public class VGridLayout extends AbstractLayout {
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
+	
+	/**
+	 * Setting itemFrameInsetX and itemFrameInsetY shrinks the computed frames
+	 * of the layout by the values specified. Use this to create gaps between 
+	 * the items laid out by this class
+	 */
+	public int itemFrameInsetX = 0;
+	
+	/**
+	 * Setting itemFrameInsetX and itemFrameInsetY shrinks the computed frames
+	 * of the layout by the values specified. Use this to create gaps between 
+	 * the items laid out by this class
+	 */
+	public int itemFrameInsetY = 0;
 
 	public void setItemHeight(int itemHeight) {
 		if (itemHeight == this.itemHeight)
@@ -125,6 +139,9 @@ public class VGridLayout extends AbstractLayout {
 				frame.top = (j / cols) * itemHeight + topStart;
 				frame.right = frame.left + itemWidth;
 				frame.bottom = frame.top + itemHeight;
+				
+				frame.inset(itemFrameInsetX, itemFrameInsetY);
+				
 				descriptor.frame = frame;
 				descriptor.data = s.getDataAtIndex(j);
 				frameDescriptors.put(descriptor.data, descriptor);
