@@ -12,8 +12,12 @@ public class Section {
 		data = new ArrayList<Object>();
 	}
 
-	public ArrayList<Object> getData() {
+	private ArrayList<Object> getData() {
 		return data;
+	}
+	
+	public Object getDataAtIndex(int index){
+		return data.get(index);
 	}
 
 	public int getDataCount() {

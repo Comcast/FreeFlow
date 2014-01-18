@@ -24,7 +24,7 @@ public class YearAdapter implements BaseSectionedAdapter {
 	public View getViewForSection(int section, int position, View convertView,
 			ViewGroup parent) {
 		
-		Month m = (Month) yearSection.getData().get(position);
+		Month m = (Month) yearSection.getDataAtIndex(position);
 		return m.getView(parent); 
 	}
 

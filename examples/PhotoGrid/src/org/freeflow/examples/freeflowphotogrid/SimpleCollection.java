@@ -96,7 +96,7 @@ public class SimpleCollection extends Activity implements BaseSectionedAdapter {
 		else
 			v = (View) convertView;
 
-		v.setBackgroundColor((Integer) SimpleCollection.this.section.getData().get(position));
+		v.setBackgroundColor((Integer) SimpleCollection.this.section.getDataAtIndex(position));
 
 		return v;
 	}

@@ -115,7 +115,7 @@ public class HGridLayout extends AbstractLayout {
 				frame.right = frame.left + itemWidth;
 				frame.bottom = frame.top + itemHeight;
 				descriptor.frame = frame;
-				descriptor.data = s.getData().get(j);
+				descriptor.data = s.getDataAtIndex(j);
 				frameDescriptors.put(descriptor.data, descriptor);
 			}
 			int mod = 0;
@@ -179,7 +179,7 @@ public class HGridLayout extends AbstractLayout {
 		if (s.getDataCount() == 0)
 			return 0;
 
-		Object lastFrameData = s.getData().get(s.getDataCount() - 1);
+		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
 		ItemProxy fd = frameDescriptors.get(lastFrameData);
 
 		return (fd.frame.left + fd.frame.width()) - width;
