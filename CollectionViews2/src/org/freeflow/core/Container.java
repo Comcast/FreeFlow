@@ -511,6 +511,8 @@ public class Container extends AbsLayoutContainer {
 		
 		if (mVelocityTracker == null && canScroll){
 			mVelocityTracker = VelocityTracker.obtain();
+		}
+		if(mVelocityTracker != null){
 			mVelocityTracker.addMovement(event);
 		}
 		
