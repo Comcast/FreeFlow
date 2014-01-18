@@ -46,7 +46,8 @@ public class Container extends AbsLayoutContainer {
 
 	private int maxFlingVelocity;
 	private int touchSlop;
-
+	private Runnable mTouchModeReset;
+	
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
@@ -524,11 +525,9 @@ public class Container extends AbsLayoutContainer {
 				deltaY = event.getY();
 			}
 			mTouchMode = TOUCH_MODE_DOWN;
-
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			
 			if(canScroll){
 				float xDiff = event.getX() - deltaX;
 				float yDiff = event.getY() - deltaY;
@@ -549,7 +548,6 @@ public class Container extends AbsLayoutContainer {
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-
 			mTouchMode = TOUCH_MODE_REST;
 
 			if(canScroll){
@@ -596,12 +594,41 @@ public class Container extends AbsLayoutContainer {
 
 			else {
 				Log.d(TAG, "Select");
-				selectedItemProxy = beginTouchAt;
-				if (mOnItemSelectedListener != null) {
-					mOnItemSelectedListener.onItemSelected(this, selectedItemProxy);
+				if (mTouchModeReset != null) {
+                    removeCallbacks(mTouchModeReset);
+                }
+				if(beginTouchAt != null && beginTouchAt.view != null){
+					beginTouchAt.view.setPressed(true);
+					
+					mTouchModeReset = new Runnable() {
+	                    @Override
+	                    public void run() {
+	                        mTouchModeReset = null;
+	                        mTouchMode = TOUCH_MODE_REST;
+	                        beginTouchAt.view.setPressed(false);
+	                        
+	                        if (mOnItemSelectedListener != null) {
+	        					mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
+	        				}
+	                        
+	                        //setPressed(false);
+//	                        if (!mDataChanged && isAttachedToWindow()) {
+//	                            performClick.run();
+//	                        }
+	                    }
+	                };
+	                selectedItemProxy = beginTouchAt;
+					postDelayed(mTouchModeReset,
+	                        ViewConfiguration.getPressedStateDuration());
+					mTouchMode = TOUCH_MODE_TAP;
 				}
-
-				mTouchMode = TOUCH_MODE_REST;
+				
+				else{
+					mTouchMode = TOUCH_MODE_REST;
+				}
+				
+                
+                
 			}
 
 			return true;
@@ -694,5 +721,11 @@ public class Container extends AbsLayoutContainer {
 		removeAllViews();
 		frames = null;
 	}
+	
+	@Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
 
 }
