@@ -612,11 +612,13 @@ public class Container extends AbsLayoutContainer {
 	                    public void run() {
 	                        mTouchModeReset = null;
 	                        mTouchMode = TOUCH_MODE_REST;
-	                        beginTouchAt.view.setPressed(false);
-	                        
+	                        if(beginTouchAt != null && beginTouchAt.view != null){
+	                        	beginTouchAt.view.setPressed(false);
+	                        }
 	                        if (mOnItemSelectedListener != null) {
 	        					mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
 	        				}
+	                        
 	                        
 	                        //setPressed(false);
 //	                        if (!mDataChanged && isAttachedToWindow()) {
@@ -643,6 +645,10 @@ public class Container extends AbsLayoutContainer {
 
 		return false;
 
+	}
+	
+	public ItemProxy getSelectedItemProxy(){
+		return selectedItemProxy;
 	}
 
 	private void moveScreen(float movementX, float movementY) {
