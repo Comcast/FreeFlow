@@ -623,7 +623,6 @@ public class Container extends AbsLayoutContainer {
 					mTouchMode = TOUCH_MODE_SCROLL;
 
 					if (mPendingCheckForTap != null) {
-						Log.d(TAG, "killing check for TAP");
 						removeCallbacks(mPendingCheckForTap);
 						mPendingCheckForTap = null;
 					}
@@ -652,10 +651,7 @@ public class Container extends AbsLayoutContainer {
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
-			
-			Log.d(TAG, "Touch => " + TouchDebugUtils.getMotionEventString(event.getAction())+" , "+TouchDebugUtils.getTouchModeString(mTouchMode));
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
-				Log.d(TAG, "Scroll....");
 				mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
 
 				// frames = layoutController.getFrameDescriptors(viewPortX,
@@ -687,11 +683,6 @@ public class Container extends AbsLayoutContainer {
 				Log.d(TAG, "Setting to rest");
 			}
 			else if(mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_DONE_WAITING){
-				//if(mChoiceActionMode != null){
-					// do nothing
-					//return;
-				//}
-				Log.d(TAG, "Select");
 				if (mTouchModeReset != null) {
 					removeCallbacks(mTouchModeReset);
 				}
@@ -937,11 +928,8 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	boolean performLongPress() {
-		Log.d(TAG, "performLongPress");
 		// CHOICE_MODE_MULTIPLE_MODAL takes over long press.
 		if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
-			Log.d(TAG, "mChoiceActionMode => " + mChoiceActionMode);
-
 			if (mChoiceActionMode == null
 					&& (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
 				setItemChecked(beginTouchAt.itemSection,
@@ -1018,6 +1006,7 @@ public class Container extends AbsLayoutContainer {
 
 			// Ending selection mode means deselecting everything.
 			clearChoices();
+			updateOnScreenCheckedViews();
 
 			// rememberSyncState();
 			requestLayout();
@@ -1045,8 +1034,10 @@ public class Container extends AbsLayoutContainer {
 		 * 
 		 * @param mode
 		 *            The {@link ActionMode} providing the selection mode
+		 * @param section
+		 *            The Section of the item that was checked
 		 * @param position
-		 *            Adapter position of the item that was checked or unchecked
+		 *            Adapter position of the item in the section that was checked or unchecked
 		 * @param id
 		 *            Adapter ID of the item that was checked or unchecked
 		 * @param checked
@@ -1081,7 +1072,7 @@ public class Container extends AbsLayoutContainer {
 				|| mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
 
 			Log.d(TAG, "Setting checked: "+sectionIndex+"/"+positionInSection+": "+value);
-			setChecked(sectionIndex, positionInSection, value);
+			setCheckedValue(sectionIndex, positionInSection, value);
 			if (mChoiceActionMode != null) {
 				final long id = itemAdapter.getItemId(sectionIndex,
 						positionInSection);
@@ -1090,7 +1081,7 @@ public class Container extends AbsLayoutContainer {
 						value);
 			}
 		} else {
-				setChecked(sectionIndex, positionInSection, value);
+				setCheckedValue(sectionIndex, positionInSection, value);
 		}
 
 		// if (!mInLayout && !mBlockLayoutRequests) {
@@ -1098,18 +1089,6 @@ public class Container extends AbsLayoutContainer {
 			// rememberSyncState();
 			requestLayout();
 		//}
-	}
-
-	@Override
-	public boolean performClick() {
-		Log.d(TAG, "perform click!");
-		return super.performClick();
-	}
-
-	@Override
-	public boolean performLongClick() {
-		Log.d(TAG, "perform long click!");
-		return super.performLongClick();
 	}
 
 	class Position2D {
@@ -1123,7 +1102,6 @@ public class Container extends AbsLayoutContainer {
 
 		@Override
 		public boolean equals(Object o) {
-			Log.d(TAG, "checking: "+o);
 			if (o.getClass() != Position2D.class) {
 				return false;
 			}
@@ -1140,7 +1118,6 @@ public class Container extends AbsLayoutContainer {
 	
 	@Override
 	public boolean performItemClick(View view, int section, int position, long id) {
-		Log.d(TAG, "----> perform item click!");
 		boolean handled = false;
 		boolean dispatchItemClick = true;
 		if (mChoiceMode != CHOICE_MODE_NONE) {
@@ -1151,8 +1128,7 @@ public class Container extends AbsLayoutContainer {
 					|| (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
 				boolean checked = isChecked(section, position);
 				checked = !checked;
-				Log.d(TAG, "Setting checked: "+section+"/"+position+": "+checked);
-				setChecked(section, position, checked);
+				setCheckedValue(section, position, checked);
 				
 				if (mChoiceActionMode != null) {
 					mMultiChoiceModeCallback.onItemCheckedStateChanged(
@@ -1163,7 +1139,7 @@ public class Container extends AbsLayoutContainer {
 			} else if (mChoiceMode == CHOICE_MODE_SINGLE) {
 				boolean checked = !isChecked(section, position);
 				if (checked) {
-					setChecked(section, position, checked);
+					setCheckedValue(section, position, checked);
 				}
 				checkedStateChanged = true;
 			}
@@ -1182,22 +1158,10 @@ public class Container extends AbsLayoutContainer {
 	}
 	
 	 private class PerformClick implements Runnable {
-	        int mClickMotionPosition;
-
 	        @Override
 	        public void run() {
 	            //if (mDataChanged) return;
-
-	            final BaseSectionedAdapter adapter = itemAdapter;
-	            final int motionPosition = mClickMotionPosition;
-	            View view = beginTouchAt.view;
-	            
-//	            if (adapter != null && mItemCount > 0 &&
-//	                    motionPosition != INVALID_POSITION &&
-//	                    motionPosition < adapter.getCount() && sameWindow()) {
-//	                final View view = getChildAt(motionPosition - mFirstPosition);
-//	                // If there is no view, something bad happened (the view scrolled off the
-//	                // screen, etc.) and we should cancel the click
+	            View view = beginTouchAt.view;	            
 	                if (view != null) {
 	                    performItemClick(view, beginTouchAt.itemSection, beginTouchAt.itemIndex, itemAdapter.getItemId(beginTouchAt.itemSection, beginTouchAt.itemIndex));
 	                }
@@ -1212,7 +1176,6 @@ public class Container extends AbsLayoutContainer {
      * choice mode is active.
      */
     private void updateOnScreenCheckedViews() {
-    	Log.d(TAG, "--->> updateOnScreenChecked");
     	Iterator<?> it = frames.entrySet().iterator();
     	View child = null;
 		while (it.hasNext()) {
@@ -1238,11 +1201,11 @@ public class Container extends AbsLayoutContainer {
     	return false;
     }
     
-    public void setChecked(int sectionIndex, int positionInSection, boolean val){
-    	
-    	
-    	Log.d(TAG, "sectionIndex: "+sectionIndex+", position: "+positionInSection+": "+val);
-    	
+    /**
+     * Updates the internal ArrayMap keeping track of checked states. Will
+     * not update the check UI. 
+     */
+    protected void setCheckedValue(int sectionIndex, int positionInSection, boolean val){
     	int foundAtIndex = -1;
     	for(int i=0; i<mCheckStates.size(); i++){
     		Position2D p = mCheckStates.keyAt(i);
