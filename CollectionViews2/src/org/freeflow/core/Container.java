@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.freeflow.debug.TouchDebugUtils;
 import org.freeflow.layouts.AbstractLayout;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutAnimator;
@@ -66,7 +67,7 @@ public class Container extends AbsLayoutContainer {
 	
 	// This flag controls whether onTap/onLongPress/onTouch trigger 
 	// the ActionMode
-	private boolean mDataChanged = false;
+	//private boolean mDataChanged = false;
 
 	private ContextMenuInfo mContextMenuInfo = null;
 
@@ -512,47 +513,47 @@ public class Container extends AbsLayoutContainer {
 	/**
 	 * Indicates that we are not in the middle of a touch gesture
 	 */
-	static final int TOUCH_MODE_REST = -1;
+	public static final int TOUCH_MODE_REST = -1;
 
 	/**
 	 * Indicates we just received the touch event and we are waiting to see if
 	 * the it is a tap or a scroll gesture.
 	 */
-	static final int TOUCH_MODE_DOWN = 0;
+	public static final int TOUCH_MODE_DOWN = 0;
 
 	/**
 	 * Indicates the touch has been recognized as a tap and we are now waiting
 	 * to see if the touch is a longpress
 	 */
-	static final int TOUCH_MODE_TAP = 1;
+	public static final int TOUCH_MODE_TAP = 1;
 
 	/**
 	 * Indicates we have waited for everything we can wait for, but the user's
 	 * finger is still down
 	 */
-	static final int TOUCH_MODE_DONE_WAITING = 2;
+	public static final int TOUCH_MODE_DONE_WAITING = 2;
 
 	/**
 	 * Indicates the touch gesture is a scroll
 	 */
-	static final int TOUCH_MODE_SCROLL = 3;
+	public static final int TOUCH_MODE_SCROLL = 3;
 
 	/**
 	 * Indicates the view is in the process of being flung
 	 */
-	static final int TOUCH_MODE_FLING = 4;
+	public static final int TOUCH_MODE_FLING = 4;
 
 	/**
 	 * Indicates the touch gesture is an overscroll - a scroll beyond the
 	 * beginning or end.
 	 */
-	static final int TOUCH_MODE_OVERSCROLL = 5;
+	public static final int TOUCH_MODE_OVERSCROLL = 5;
 
 	/**
 	 * Indicates the view is being flung outside of normal content bounds and
 	 * will spring back.
 	 */
-	static final int TOUCH_MODE_OVERFLING = 6;
+	public static final int TOUCH_MODE_OVERFLING = 6;
 
 	/**
 	 * One of TOUCH_MODE_REST, TOUCH_MODE_DOWN, TOUCH_MODE_TAP,
@@ -562,8 +563,6 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-
-		Log.d(TAG, "touch event: " + event.getAction());
 
 		super.onTouchEvent(event);
 		if (layout == null)
@@ -651,7 +650,8 @@ public class Container extends AbsLayoutContainer {
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
-			Log.d(TAG, "Action Up");
+			
+			Log.d(TAG, "Touch => " + TouchDebugUtils.getMotionEventString(event.getAction())+" , "+TouchDebugUtils.getTouchModeString(mTouchMode));
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				Log.d(TAG, "Scroll....");
 				mVelocityTracker.computeCurrentVelocity(maxFlingVelocity);
@@ -684,8 +684,11 @@ public class Container extends AbsLayoutContainer {
 				mTouchMode = TOUCH_MODE_REST;
 				Log.d(TAG, "Setting to rest");
 			}
-
-			else {
+			else if(mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_DONE_WAITING){
+				//if(mChoiceActionMode != null){
+					// do nothing
+					//return;
+				//}
 				Log.d(TAG, "Select");
 				if (mTouchModeReset != null) {
 					removeCallbacks(mTouchModeReset);
@@ -700,6 +703,7 @@ public class Container extends AbsLayoutContainer {
 							mTouchMode = TOUCH_MODE_REST;
 							if (beginTouchAt != null
 									&& beginTouchAt.view != null) {
+								Log.d(TAG, "setting pressed back to false in reset");
 								beginTouchAt.view.setPressed(false);
 							}
 							if (mOnItemSelectedListener != null) {
@@ -708,10 +712,10 @@ public class Container extends AbsLayoutContainer {
 							}
 
 							// setPressed(false);
-							if (!mDataChanged) {
+							//if (!mDataChanged) {
 								mPerformClick = new PerformClick();
 								mPerformClick.run();
-							}
+							//}
 						}
 					};
 					selectedItemProxy = beginTouchAt;
@@ -839,35 +843,6 @@ public class Container extends AbsLayoutContainer {
 		mCheckStates.clear();
 	}
 
-	final class CheckForTap implements Runnable {
-		@Override
-		public void run() {
-			Log.d(TAG, "Step1 TAP");
-			if (mTouchMode == TOUCH_MODE_DOWN) {
-				mTouchMode = TOUCH_MODE_TAP;
-				if (beginTouchAt != null && beginTouchAt.view != null) {
-					Log.d(TAG, "showing pressed by tap");
-					beginTouchAt.view.setPressed(true);
-					// setPressed(true);
-				}
-
-				refreshDrawableState();
-				final int longPressTimeout = ViewConfiguration
-						.getLongPressTimeout();
-				final boolean longClickable = isLongClickable();
-
-				if (longClickable) {
-					if (mPendingCheckForLongPress == null) {
-						mPendingCheckForLongPress = new CheckForLongPress();
-					}
-					postDelayed(mPendingCheckForLongPress, longPressTimeout);
-				} else {
-					mTouchMode = TOUCH_MODE_DONE_WAITING;
-				}
-			}
-		}
-	}
-
 	public void setChoiceMode(int choiceMode) {
 		mChoiceMode = choiceMode;
 		if (mChoiceActionMode != null) {
@@ -904,12 +879,37 @@ public class Container extends AbsLayoutContainer {
 		}
 		mMultiChoiceModeCallback.setWrapped(listener);
 	}
+	
+	final class CheckForTap implements Runnable {
+		@Override
+		public void run() {
+			if (mTouchMode == TOUCH_MODE_DOWN) {
+				mTouchMode = TOUCH_MODE_TAP;
+				if (beginTouchAt != null && beginTouchAt.view != null) {
+					beginTouchAt.view.setPressed(true);
+					// setPressed(true);
+				}
+
+				refreshDrawableState();
+				final int longPressTimeout = ViewConfiguration
+						.getLongPressTimeout();
+				final boolean longClickable = isLongClickable();
+
+				if (longClickable) {
+					if (mPendingCheckForLongPress == null) {
+						mPendingCheckForLongPress = new CheckForLongPress();
+					}
+					postDelayed(mPendingCheckForLongPress, longPressTimeout);
+				} else {
+					mTouchMode = TOUCH_MODE_DONE_WAITING;
+				}
+			}
+		}
+	}
 
 	private class CheckForLongPress implements Runnable {
 		@Override
 		public void run() {
-			Log.d(TAG, "----> LongPress!!!");
-
 			if (beginTouchAt == null) {
 				// Assuming child that was being long pressed
 				// is no longer valid
@@ -920,9 +920,9 @@ public class Container extends AbsLayoutContainer {
 			final View child = beginTouchAt.view;
 			if (child != null) {
 				boolean handled = false;
-				 if (!mDataChanged) {
+				 //if (!mDataChanged) {
 					 handled = performLongPress();
-				 }
+				 //}
 				if (handled) {
 					mTouchMode = TOUCH_MODE_REST;
 					// setPressed(false);
@@ -944,6 +944,7 @@ public class Container extends AbsLayoutContainer {
 					&& (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
 				setItemChecked(beginTouchAt.itemSection,
 						beginTouchAt.itemIndex, true);
+				updateOnScreenCheckedViews();
 				performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 			}
 			return true;
@@ -964,6 +965,7 @@ public class Container extends AbsLayoutContainer {
 			handled = super.showContextMenuForChild(this);
 		}
 		if (handled) {
+			updateOnScreenCheckedViews();
 			performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 		}
 		return handled;
@@ -1076,8 +1078,7 @@ public class Container extends AbsLayoutContainer {
 		if (mChoiceMode == CHOICE_MODE_MULTIPLE
 				|| mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
 
-			boolean oldValue = isChecked(sectionIndex, positionInSection);
-					Log.d(TAG, "updating mCheckedStates in setItemChecked"); 
+			Log.d(TAG, "Setting checked: "+sectionIndex+"/"+positionInSection+": "+value);
 			setChecked(sectionIndex, positionInSection, value);
 			if (mChoiceActionMode != null) {
 				final long id = itemAdapter.getItemId(sectionIndex,
@@ -1091,7 +1092,7 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		// if (!mInLayout && !mBlockLayoutRequests) {
-			mDataChanged = true;
+			//mDataChanged = true;
 			// rememberSyncState();
 			requestLayout();
 		//}
@@ -1140,9 +1141,6 @@ public class Container extends AbsLayoutContainer {
 		Log.d(TAG, "----> perform item click!");
 		boolean handled = false;
 		boolean dispatchItemClick = true;
-
-		Position2D pos = new Position2D(section, position);
-
 		if (mChoiceMode != CHOICE_MODE_NONE) {
 			handled = true;
 			boolean checkedStateChanged = false;
@@ -1151,6 +1149,7 @@ public class Container extends AbsLayoutContainer {
 					|| (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
 				boolean checked = isChecked(section, position);
 				checked = !checked;
+				Log.d(TAG, "Setting checked: "+section+"/"+position+": "+checked);
 				setChecked(section, position, checked);
 				
 				if (mChoiceActionMode != null) {
@@ -1162,7 +1161,7 @@ public class Container extends AbsLayoutContainer {
 			} else if (mChoiceMode == CHOICE_MODE_SINGLE) {
 				boolean checked = !isChecked(section, position);
 				if (checked) {
-					
+					setChecked(section, position, checked);
 				}
 				checkedStateChanged = true;
 			}
@@ -1211,17 +1210,15 @@ public class Container extends AbsLayoutContainer {
      * choice mode is active.
      */
     private void updateOnScreenCheckedViews() {
-    	
+    	Log.d(TAG, "--->> updateOnScreenChecked");
     	Iterator<?> it = frames.entrySet().iterator();
-    	Position2D pos = new Position2D(-1,-1);
-		View child = null;
+    	View child = null;
 		while (it.hasNext()) {
 			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
-			pos.section = pairs.getValue().itemSection;
-			pos.positionInSection = pairs.getValue().itemIndex;
 			child = pairs.getValue().view;
-			boolean isChecked = mCheckStates.containsKey(pos) ? mCheckStates.get(pos) : false;
+			boolean isChecked = isChecked(pairs.getValue().itemSection, pairs.getValue().itemIndex);
 			if (child instanceof Checkable) {
+				Log.d(TAG, "Setting checked UI : "+pairs.getValue().itemSection+", "+ pairs.getValue().itemIndex+": "+isChecked);
                 ((Checkable) child).setChecked(isChecked);
             } else {
                 child.setActivated(isChecked);
