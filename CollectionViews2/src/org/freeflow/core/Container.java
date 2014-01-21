@@ -37,10 +37,10 @@ public class Container extends AbsLayoutContainer {
 
 	public int viewPortX = 0;
 	public int viewPortY = 0;
-	
+
 	protected int scrollableWidth;
 	protected int scrollableHeight;
-	
+
 	protected View headerView = null;
 
 	private VelocityTracker mVelocityTracker = null;
@@ -50,7 +50,7 @@ public class Container extends AbsLayoutContainer {
 	private int maxFlingVelocity;
 	private int touchSlop;
 	private Runnable mTouchModeReset;
-	
+
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
@@ -156,7 +156,7 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		view = frameDesc.view;
-		
+
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(), MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(), MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
@@ -183,8 +183,7 @@ public class Container extends AbsLayoutContainer {
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
 		Rect frame = proxy.frame;
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width() - viewPortX, frame.top
-				+ frame.height() - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.right - viewPortX, frame.bottom - viewPortY);
 
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(proxy.state);
@@ -245,9 +244,9 @@ public class Container extends AbsLayoutContainer {
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
 
-		scrollableWidth = layout.getContentWidth()-getWidth();
-		scrollableHeight = layout.getContentHeight()-getHeight();
-		
+		scrollableWidth = layout.getContentWidth() - getWidth();
+		scrollableHeight = layout.getContentHeight() - getHeight();
+
 		if (viewPortX > scrollableWidth)
 			viewPortX = scrollableWidth;
 
@@ -274,8 +273,8 @@ public class Container extends AbsLayoutContainer {
 		Rect of = new Rect();
 		of.left = (int) (v.getLeft() + v.getTranslationX());
 		of.top = (int) (v.getTop() + v.getTranslationY());
-		of.right = of.left + v.getWidth();
-		of.bottom = of.bottom + v.getHeight();
+		of.right = (int) (v.getRight() + v.getTranslationX());
+		of.bottom = (int) (v.getBottom() + v.getTranslationY());
 
 		return of;
 
@@ -311,29 +310,12 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		Log.d(TAG, "== animating changes: " + changeSet.toString());
-		
 
 		dispatchAnimationsStarted();
 
 		layoutAnimator.animateChanges(changeSet, this);
-//		
-//		for (Pair<ItemProxy, Rect> item : changeSet.getMoved()) {
-//			ItemProxy proxy = ItemProxy.clone(item.first);
-//			View v = proxy.view;
-//			proxy.view.layout(proxy.frame.left, proxy.frame.top, proxy.frame.right, proxy.frame.bottom);
-//		}
-//		
-//		
-//		for (ItemProxy proxy : changeSet.getRemoved()) {
-//			View v = proxy.view;
-//			
-//			removeView(v);
-//			
-//			returnItemToPoolIfNeeded(proxy);
-//		}
-//		
-//		requestLayout();
-		
+	
+
 	}
 
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
@@ -347,7 +329,6 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		dispatchAnimationsComplete();
-		
 
 		// changeSet = null;
 
@@ -398,7 +379,8 @@ public class Container extends AbsLayoutContainer {
 				ItemProxy old = oldFrames.remove(m.getKey());
 				proxy.view = old.view;
 
-				//if (moveEvenIfSame || !old.compareRect(((ItemProxy) m.getValue()).frame)) {
+				// if (moveEvenIfSame || !old.compareRect(((ItemProxy)
+				// m.getValue()).frame)) {
 				if (moveEvenIfSame || !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
 					change.addToMoved(proxy, getActualFrame(proxy));
 				}
@@ -508,26 +490,27 @@ public class Container extends AbsLayoutContainer {
 		super.onTouchEvent(event);
 		if (layout == null)
 			return false;
-		
+
 		boolean canScroll = false;
-		
-		if(layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()){
+
+		if (layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()) {
 			canScroll = true;
 		}
-		if(layout.verticalDragEnabled() && layout.getContentHeight() > getHeight()){
+		if (layout.verticalDragEnabled() && layout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
-		
-		if (mVelocityTracker == null && canScroll){
+
+		if (mVelocityTracker == null && canScroll) {
 			mVelocityTracker = VelocityTracker.obtain();
 		}
-		if(mVelocityTracker != null){
+		if (mVelocityTracker != null) {
 			mVelocityTracker.addMovement(event);
 		}
-		
+
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()), (int)( viewPortY + event.getY()));
-			if(canScroll){
+			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()),
+					(int) (viewPortY + event.getY()));
+			if (canScroll) {
 				deltaX = event.getX();
 				deltaY = event.getY();
 			}
@@ -535,7 +518,7 @@ public class Container extends AbsLayoutContainer {
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			if(canScroll){
+			if (canScroll) {
 				float xDiff = event.getX() - deltaX;
 				float yDiff = event.getY() - deltaY;
 
@@ -551,17 +534,17 @@ public class Container extends AbsLayoutContainer {
 					deltaY = event.getY();
 				}
 			}
-			
+
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			mTouchMode = TOUCH_MODE_REST;
 
-			if(canScroll){
+			if (canScroll) {
 				mVelocityTracker.recycle();
 				mVelocityTracker = null;
 			}
-			
+
 			// requestLayout();
 
 			return true;
@@ -602,42 +585,38 @@ public class Container extends AbsLayoutContainer {
 			else {
 				Log.d(TAG, "Select");
 				if (mTouchModeReset != null) {
-                    removeCallbacks(mTouchModeReset);
-                }
-				if(beginTouchAt != null && beginTouchAt.view != null){
+					removeCallbacks(mTouchModeReset);
+				}
+				if (beginTouchAt != null && beginTouchAt.view != null) {
 					beginTouchAt.view.setPressed(true);
-					
+
 					mTouchModeReset = new Runnable() {
-	                    @Override
-	                    public void run() {
-	                        mTouchModeReset = null;
-	                        mTouchMode = TOUCH_MODE_REST;
-	                        if(beginTouchAt != null && beginTouchAt.view != null){
-	                        	beginTouchAt.view.setPressed(false);
-	                        }
-	                        if (mOnItemSelectedListener != null) {
-	        					mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
-	        				}
-	                        
-	                        
-	                        //setPressed(false);
-//	                        if (!mDataChanged && isAttachedToWindow()) {
-//	                            performClick.run();
-//	                        }
-	                    }
-	                };
-	                selectedItemProxy = beginTouchAt;
-					postDelayed(mTouchModeReset,
-	                        ViewConfiguration.getPressedStateDuration());
+						@Override
+						public void run() {
+							mTouchModeReset = null;
+							mTouchMode = TOUCH_MODE_REST;
+							if (beginTouchAt != null && beginTouchAt.view != null) {
+								beginTouchAt.view.setPressed(false);
+							}
+							if (mOnItemSelectedListener != null) {
+								mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
+							}
+
+							// setPressed(false);
+							// if (!mDataChanged && isAttachedToWindow()) {
+							// performClick.run();
+							// }
+						}
+					};
+					selectedItemProxy = beginTouchAt;
+					postDelayed(mTouchModeReset, ViewConfiguration.getPressedStateDuration());
 					mTouchMode = TOUCH_MODE_TAP;
 				}
-				
-				else{
+
+				else {
 					mTouchMode = TOUCH_MODE_REST;
 				}
-				
-                
-                
+
 			}
 
 			return true;
@@ -646,8 +625,8 @@ public class Container extends AbsLayoutContainer {
 		return false;
 
 	}
-	
-	public ItemProxy getSelectedItemProxy(){
+
+	public ItemProxy getSelectedItemProxy() {
 		return selectedItemProxy;
 	}
 
@@ -664,10 +643,10 @@ public class Container extends AbsLayoutContainer {
 		} else {
 			movementY = 0;
 		}
-		
-		scrollableWidth = layout.getContentWidth()-getWidth();
-		scrollableHeight = layout.getContentHeight()-getHeight();
-		
+
+		scrollableWidth = layout.getContentWidth() - getWidth();
+		scrollableHeight = layout.getContentHeight() - getHeight();
+
 		if (viewPortX < 0)
 			viewPortX = 0;
 		else if (viewPortX > scrollableWidth)
@@ -737,11 +716,10 @@ public class Container extends AbsLayoutContainer {
 		removeAllViews();
 		frames = null;
 	}
-	
-	@Override
-    public boolean shouldDelayChildPressedState() {
-        return true;
-    }
 
+	@Override
+	public boolean shouldDelayChildPressedState() {
+		return true;
+	}
 
 }

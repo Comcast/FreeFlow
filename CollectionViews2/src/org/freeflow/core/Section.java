@@ -16,6 +16,10 @@ public class Section {
 		return data;
 	}
 	
+	public void clearData() {
+		data.clear();
+	}
+	
 	public Object getDataAtIndex(int index){
 		return data.get(index);
 	}
