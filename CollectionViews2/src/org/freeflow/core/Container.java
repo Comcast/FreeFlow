@@ -13,13 +13,22 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Rect;
+import android.support.v4.util.SimpleArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.HapticFeedbackConstants;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.Checkable;
 
 public class Container extends AbsLayoutContainer {
 
@@ -37,10 +46,10 @@ public class Container extends AbsLayoutContainer {
 
 	public int viewPortX = 0;
 	public int viewPortY = 0;
-	
+
 	protected int scrollableWidth;
 	protected int scrollableHeight;
-	
+
 	protected View headerView = null;
 
 	private VelocityTracker mVelocityTracker = null;
@@ -49,8 +58,45 @@ public class Container extends AbsLayoutContainer {
 
 	private int maxFlingVelocity;
 	private int touchSlop;
+
 	private Runnable mTouchModeReset;
+	private Runnable mPerformClick;
+	private Runnable mPendingCheckForTap;
+	private Runnable mPendingCheckForLongPress;
 	
+	// This flag controls whether onTap/onLongPress/onTouch trigger 
+	// the ActionMode
+	private boolean mDataChanged = false;
+
+	private ContextMenuInfo mContextMenuInfo = null;
+
+	private SimpleArrayMap<Position2D, Boolean> mCheckStates = null;
+
+	ActionMode mChoiceActionMode;
+	MultiChoiceModeWrapper mMultiChoiceModeCallback;
+
+	/**
+	 * Normal list that does not indicate choices
+	 */
+	public static final int CHOICE_MODE_NONE = 0;
+
+	/**
+	 * The list allows up to one choice
+	 */
+	public static final int CHOICE_MODE_SINGLE = 1;
+
+	/**
+	 * The list allows multiple choices
+	 */
+	public static final int CHOICE_MODE_MULTIPLE = 2;
+
+	/**
+	 * The list allows multiple choices in a modal selection mode
+	 */
+	public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
+
+	int mChoiceMode = CHOICE_MODE_NONE;
+
 	private LayoutParams params = new LayoutParams(0, 0);
 
 	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
@@ -81,7 +127,8 @@ public class Container extends AbsLayoutContainer {
 		viewpool = new ViewPool();
 		frames = new HashMap<Object, ItemProxy>();
 
-		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
+		maxFlingVelocity = ViewConfiguration.get(context)
+				.getScaledMaximumFlingVelocity();
 		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
 	}
@@ -97,7 +144,8 @@ public class Container extends AbsLayoutContainer {
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-		if (beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty) {
+		if (beforeWidth != afterWidth || beforeHeight != afterHeight
+				|| markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
 	}
@@ -123,7 +171,8 @@ public class Container extends AbsLayoutContainer {
 			// Create a copy of the incoming values because the source
 			// Layout
 			// may change the map inside its own class
-			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+					viewPortX, viewPortY));
 
 			dispatchLayoutComputed();
 
@@ -139,16 +188,20 @@ public class Container extends AbsLayoutContainer {
 		View view;
 		if (frameDesc.view == null) {
 
-			View convertView = viewpool.getViewFromPool(itemAdapter.getViewType(frameDesc));
+			View convertView = viewpool.getViewFromPool(itemAdapter
+					.getViewType(frameDesc));
 
 			if (frameDesc.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection, convertView, this);
+				view = itemAdapter.getHeaderViewForSection(
+						frameDesc.itemSection, convertView, this);
 			} else {
-				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex, convertView, this);
+				view = itemAdapter.getViewForSection(frameDesc.itemSection,
+						frameDesc.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)
-				throw new IllegalStateException("A container cannot be a direct child view to a container");
+				throw new IllegalStateException(
+						"A container cannot be a direct child view to a container");
 
 			frameDesc.view = view;
 			prepareViewForAddition(view);
@@ -156,9 +209,11 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		view = frameDesc.view;
-		
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(), MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(), MeasureSpec.EXACTLY);
+
+		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(),
+				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(),
+				MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(frameDesc.state);
@@ -171,20 +226,16 @@ public class Container extends AbsLayoutContainer {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		Log.d(TAG, "== onLayout ==");
-
-		// if (layout == null || frames == null) {
-		// return;
-		// }
-		// animateChanges();
-
+		//mDataChanged = false;
 		dispatchLayoutComplete();
 	}
 
 	private void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
 		Rect frame = proxy.frame;
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left + frame.width() - viewPortX, frame.top
-				+ frame.height() - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.left
+				+ frame.width() - viewPortX, frame.top + frame.height()
+				- viewPortY);
 
 		if (view instanceof StateListener)
 			((StateListener) view).ReportCurrentState(proxy.state);
@@ -225,7 +276,8 @@ public class Container extends AbsLayoutContainer {
 		int lowestSection = 99999;
 		int lowestPosition = 99999;
 		for (ItemProxy fd : frames.values()) {
-			if (fd.itemSection < lowestSection || (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
+			if (fd.itemSection < lowestSection
+					|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 				data = fd.data;
 				lowestSection = fd.itemSection;
 				lowestPosition = fd.itemIndex;
@@ -245,9 +297,9 @@ public class Container extends AbsLayoutContainer {
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
 
-		scrollableWidth = layout.getContentWidth()-getWidth();
-		scrollableHeight = layout.getContentHeight()-getHeight();
-		
+		scrollableWidth = layout.getContentWidth() - getWidth();
+		scrollableHeight = layout.getContentHeight() - getHeight();
+
 		if (viewPortX > scrollableWidth)
 			viewPortX = scrollableWidth;
 
@@ -296,7 +348,8 @@ public class Container extends AbsLayoutContainer {
 
 	private void animateChanges(LayoutChangeSet changeSet) {
 
-		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
+		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
+				&& changeSet.moved.size() == 0) {
 			return;
 		}
 
@@ -311,29 +364,29 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		Log.d(TAG, "== animating changes: " + changeSet.toString());
-		
 
 		dispatchAnimationsStarted();
 
 		layoutAnimator.animateChanges(changeSet, this);
-//		
-//		for (Pair<ItemProxy, Rect> item : changeSet.getMoved()) {
-//			ItemProxy proxy = ItemProxy.clone(item.first);
-//			View v = proxy.view;
-//			proxy.view.layout(proxy.frame.left, proxy.frame.top, proxy.frame.right, proxy.frame.bottom);
-//		}
-//		
-//		
-//		for (ItemProxy proxy : changeSet.getRemoved()) {
-//			View v = proxy.view;
-//			
-//			removeView(v);
-//			
-//			returnItemToPoolIfNeeded(proxy);
-//		}
-//		
-//		requestLayout();
-		
+		//
+		// for (Pair<ItemProxy, Rect> item : changeSet.getMoved()) {
+		// ItemProxy proxy = ItemProxy.clone(item.first);
+		// View v = proxy.view;
+		// proxy.view.layout(proxy.frame.left, proxy.frame.top,
+		// proxy.frame.right, proxy.frame.bottom);
+		// }
+		//
+		//
+		// for (ItemProxy proxy : changeSet.getRemoved()) {
+		// View v = proxy.view;
+		//
+		// removeView(v);
+		//
+		// returnItemToPoolIfNeeded(proxy);
+		// }
+		//
+		// requestLayout();
+
 	}
 
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
@@ -347,19 +400,21 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		dispatchAnimationsComplete();
-		
 
 		// changeSet = null;
 
 	}
 
-	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
+	public LayoutChangeSet getViewChanges(
+			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
-	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
-			HashMap<? extends Object, ItemProxy> newFrames, boolean moveEvenIfSame) {
+	public LayoutChangeSet getViewChanges(
+			HashMap<? extends Object, ItemProxy> oldFrames,
+			HashMap<? extends Object, ItemProxy> newFrames,
+			boolean moveEvenIfSame) {
 
 		// cleanupViews();
 		LayoutChangeSet change = new LayoutChangeSet();
@@ -398,8 +453,10 @@ public class Container extends AbsLayoutContainer {
 				ItemProxy old = oldFrames.remove(m.getKey());
 				proxy.view = old.view;
 
-				//if (moveEvenIfSame || !old.compareRect(((ItemProxy) m.getValue()).frame)) {
-				if (moveEvenIfSame || !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
+				// if (moveEvenIfSame || !old.compareRect(((ItemProxy)
+				// m.getValue()).frame)) {
+				if (moveEvenIfSame
+						|| !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
 					change.addToMoved(proxy, getActualFrame(proxy));
 				}
 			} else {
@@ -505,37 +562,57 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+
+		Log.d(TAG, "touch event: " + event.getAction());
+
 		super.onTouchEvent(event);
 		if (layout == null)
 			return false;
-		
+
 		boolean canScroll = false;
-		
-		if(layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()){
+
+		if (layout.horizontalDragEnabled()
+				&& this.layout.getContentWidth() > getWidth()) {
 			canScroll = true;
 		}
-		if(layout.verticalDragEnabled() && layout.getContentHeight() > getHeight()){
+		if (layout.verticalDragEnabled()
+				&& layout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
-		
-		if (mVelocityTracker == null && canScroll){
+
+		if (mVelocityTracker == null && canScroll) {
 			mVelocityTracker = VelocityTracker.obtain();
 		}
-		if(mVelocityTracker != null){
+		if (mVelocityTracker != null) {
 			mVelocityTracker.addMovement(event);
 		}
-		
+
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()), (int)( viewPortY + event.getY()));
-			if(canScroll){
+			beginTouchAt = ViewUtils.getItemAt(frames,
+					(int) (viewPortX + event.getX()),
+					(int) (viewPortY + event.getY()));
+
+			if (canScroll) {
 				deltaX = event.getX();
 				deltaY = event.getY();
 			}
 			mTouchMode = TOUCH_MODE_DOWN;
+
+			if (mPendingCheckForTap != null) {
+				removeCallbacks(mPendingCheckForTap);
+				mPendingCheckForLongPress = null;
+			}
+
+			if (beginTouchAt != null) {
+				mPendingCheckForTap = new CheckForTap();
+			}
+			postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
+
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			if(canScroll){
+
+			if (canScroll) {
 				float xDiff = event.getX() - deltaX;
 				float yDiff = event.getY() - deltaY;
 
@@ -543,6 +620,13 @@ public class Container extends AbsLayoutContainer {
 
 				if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
+
+					if (mPendingCheckForTap != null) {
+						Log.d(TAG, "killing check for TAP");
+						removeCallbacks(mPendingCheckForTap);
+						mPendingCheckForTap = null;
+					}
+
 				}
 
 				if (mTouchMode == TOUCH_MODE_SCROLL) {
@@ -551,17 +635,17 @@ public class Container extends AbsLayoutContainer {
 					deltaY = event.getY();
 				}
 			}
-			
+
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			mTouchMode = TOUCH_MODE_REST;
 
-			if(canScroll){
+			if (canScroll) {
 				mVelocityTracker.recycle();
 				mVelocityTracker = null;
 			}
-			
+
 			// requestLayout();
 
 			return true;
@@ -583,8 +667,10 @@ public class Container extends AbsLayoutContainer {
 
 						@Override
 						public void onAnimationUpdate(ValueAnimator animation) {
-							int translateX = (int) ((1 - animation.getAnimatedFraction()) * velocityX / 350);
-							int translateY = (int) ((1 - animation.getAnimatedFraction()) * velocityY / 350);
+							int translateX = (int) ((1 - animation
+									.getAnimatedFraction()) * velocityX / 350);
+							int translateY = (int) ((1 - animation
+									.getAnimatedFraction()) * velocityY / 350);
 
 							moveScreen(translateX, translateY);
 
@@ -602,42 +688,42 @@ public class Container extends AbsLayoutContainer {
 			else {
 				Log.d(TAG, "Select");
 				if (mTouchModeReset != null) {
-                    removeCallbacks(mTouchModeReset);
-                }
-				if(beginTouchAt != null && beginTouchAt.view != null){
+					removeCallbacks(mTouchModeReset);
+				}
+				if (beginTouchAt != null && beginTouchAt.view != null) {
 					beginTouchAt.view.setPressed(true);
-					
+
 					mTouchModeReset = new Runnable() {
-	                    @Override
-	                    public void run() {
-	                        mTouchModeReset = null;
-	                        mTouchMode = TOUCH_MODE_REST;
-	                        if(beginTouchAt != null && beginTouchAt.view != null){
-	                        	beginTouchAt.view.setPressed(false);
-	                        }
-	                        if (mOnItemSelectedListener != null) {
-	        					mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
-	        				}
-	                        
-	                        
-	                        //setPressed(false);
-//	                        if (!mDataChanged && isAttachedToWindow()) {
-//	                            performClick.run();
-//	                        }
-	                    }
-	                };
-	                selectedItemProxy = beginTouchAt;
+						@Override
+						public void run() {
+							mTouchModeReset = null;
+							mTouchMode = TOUCH_MODE_REST;
+							if (beginTouchAt != null
+									&& beginTouchAt.view != null) {
+								beginTouchAt.view.setPressed(false);
+							}
+							if (mOnItemSelectedListener != null) {
+								mOnItemSelectedListener.onItemSelected(
+										Container.this, selectedItemProxy);
+							}
+
+							// setPressed(false);
+							if (!mDataChanged) {
+								mPerformClick = new PerformClick();
+								mPerformClick.run();
+							}
+						}
+					};
+					selectedItemProxy = beginTouchAt;
 					postDelayed(mTouchModeReset,
-	                        ViewConfiguration.getPressedStateDuration());
+							ViewConfiguration.getPressedStateDuration());
 					mTouchMode = TOUCH_MODE_TAP;
 				}
-				
-				else{
+
+				else {
 					mTouchMode = TOUCH_MODE_REST;
 				}
-				
-                
-                
+
 			}
 
 			return true;
@@ -646,8 +732,8 @@ public class Container extends AbsLayoutContainer {
 		return false;
 
 	}
-	
-	public ItemProxy getSelectedItemProxy(){
+
+	public ItemProxy getSelectedItemProxy() {
 		return selectedItemProxy;
 	}
 
@@ -664,10 +750,10 @@ public class Container extends AbsLayoutContainer {
 		} else {
 			movementY = 0;
 		}
-		
-		scrollableWidth = layout.getContentWidth()-getWidth();
-		scrollableHeight = layout.getContentHeight()-getHeight();
-		
+
+		scrollableWidth = layout.getContentWidth() - getWidth();
+		scrollableHeight = layout.getContentHeight() - getHeight();
+
 		if (viewPortX < 0)
 			viewPortX = 0;
 		else if (viewPortX > scrollableWidth)
@@ -682,11 +768,13 @@ public class Container extends AbsLayoutContainer {
 
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
-		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+				viewPortX, viewPortY));
 
 		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames, true);
 
-		Log.d("blah", "added = " + changeSet.added.size() + ", moved = " + changeSet.moved.size());
+		Log.d("blah", "added = " + changeSet.added.size() + ", moved = "
+				+ changeSet.moved.size());
 
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);
@@ -737,11 +825,441 @@ public class Container extends AbsLayoutContainer {
 		removeAllViews();
 		frames = null;
 	}
+
+	@Override
+	public boolean shouldDelayChildPressedState() {
+		return true;
+	}
+
+	public int getCheckedItemCount() {
+		return mCheckStates.size();
+	}
+
+	public void clearChoices() {
+		mCheckStates.clear();
+	}
+
+	final class CheckForTap implements Runnable {
+		@Override
+		public void run() {
+			Log.d(TAG, "Step1 TAP");
+			if (mTouchMode == TOUCH_MODE_DOWN) {
+				mTouchMode = TOUCH_MODE_TAP;
+				if (beginTouchAt != null && beginTouchAt.view != null) {
+					Log.d(TAG, "showing pressed by tap");
+					beginTouchAt.view.setPressed(true);
+					// setPressed(true);
+				}
+
+				refreshDrawableState();
+				final int longPressTimeout = ViewConfiguration
+						.getLongPressTimeout();
+				final boolean longClickable = isLongClickable();
+
+				if (longClickable) {
+					if (mPendingCheckForLongPress == null) {
+						mPendingCheckForLongPress = new CheckForLongPress();
+					}
+					postDelayed(mPendingCheckForLongPress, longPressTimeout);
+				} else {
+					mTouchMode = TOUCH_MODE_DONE_WAITING;
+				}
+			}
+		}
+	}
+
+	public void setChoiceMode(int choiceMode) {
+		mChoiceMode = choiceMode;
+		if (mChoiceActionMode != null) {
+			mChoiceActionMode.finish();
+			mChoiceActionMode = null;
+		}
+		if (mChoiceMode != CHOICE_MODE_NONE) {
+			if (mCheckStates == null) {
+				Log.d(TAG, "Creating mCheckStates");
+				mCheckStates = new SimpleArrayMap<Container.Position2D, Boolean>();
+			}
+			if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+				clearChoices();
+				setLongClickable(true);
+			}
+		}
+	}
+
+	boolean isLongClickable = false;
+
+	@Override
+	public void setLongClickable(boolean b) {
+		isLongClickable = b;
+	}
+
+	@Override
+	public boolean isLongClickable() {
+		return isLongClickable;
+	}
+
+	public void setMultiChoiceModeListener(MultiChoiceModeListener listener) {
+		if (mMultiChoiceModeCallback == null) {
+			mMultiChoiceModeCallback = new MultiChoiceModeWrapper();
+		}
+		mMultiChoiceModeCallback.setWrapped(listener);
+	}
+
+	private class CheckForLongPress implements Runnable {
+		@Override
+		public void run() {
+			Log.d(TAG, "----> LongPress!!!");
+
+			if (beginTouchAt == null) {
+				// Assuming child that was being long pressed
+				// is no longer valid
+				return;
+			}
+
+			mCheckStates.clear();
+			final View child = beginTouchAt.view;
+			if (child != null) {
+				boolean handled = false;
+				 if (!mDataChanged) {
+					 handled = performLongPress();
+				 }
+				if (handled) {
+					mTouchMode = TOUCH_MODE_REST;
+					// setPressed(false);
+					child.setPressed(false);
+				} else {
+					mTouchMode = TOUCH_MODE_DONE_WAITING;
+				}
+			}
+		}
+	}
+
+	boolean performLongPress() {
+		Log.d(TAG, "performLongPress");
+		// CHOICE_MODE_MULTIPLE_MODAL takes over long press.
+		if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+			Log.d(TAG, "mChoiceActionMode => " + mChoiceActionMode);
+
+			if (mChoiceActionMode == null
+					&& (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
+				setItemChecked(beginTouchAt.itemSection,
+						beginTouchAt.itemIndex, true);
+				performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+			}
+			return true;
+		}
+
+		boolean handled = false;
+		final long longPressId = itemAdapter.getItemId(
+				beginTouchAt.itemSection, beginTouchAt.itemSection);
+		if (mOnItemLongClickListener != null) {
+			handled = mOnItemLongClickListener.onItemLongClick(this,
+					beginTouchAt.view, beginTouchAt.itemSection,
+					beginTouchAt.itemIndex, longPressId);
+		}
+		if (!handled) {
+			mContextMenuInfo = createContextMenuInfo(beginTouchAt.view,
+					beginTouchAt.itemSection, beginTouchAt.itemIndex,
+					longPressId);
+			handled = super.showContextMenuForChild(this);
+		}
+		if (handled) {
+			performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+		}
+		return handled;
+	}
+
+	ContextMenuInfo createContextMenuInfo(View view, int sectionIndex,
+			int positionInSection, long id) {
+		return new AbsLayoutContainerContextMenuInfo(view, sectionIndex,
+				positionInSection, id);
+	}
+
+	class MultiChoiceModeWrapper implements MultiChoiceModeListener {
+
+		private MultiChoiceModeListener mWrapped;
+
+		public void setWrapped(MultiChoiceModeListener wrapped) {
+			mWrapped = wrapped;
+		}
+
+		public boolean hasWrappedCallback() {
+			return mWrapped != null;
+		}
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			if (mWrapped.onCreateActionMode(mode, menu)) {
+				// Initialize checked graphic state?
+				setLongClickable(false);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return mWrapped.onPrepareActionMode(mode, menu);
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			return mWrapped.onActionItemClicked(mode, item);
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mWrapped.onDestroyActionMode(mode);
+			mChoiceActionMode = null;
+
+			// Ending selection mode means deselecting everything.
+			clearChoices();
+
+			// rememberSyncState();
+			requestLayout();
+
+			setLongClickable(true);
+		}
+
+		@Override
+		public void onItemCheckedStateChanged(ActionMode mode, int section,
+				int position, long id, boolean checked) {
+			mWrapped.onItemCheckedStateChanged(mode, section, position, id,
+					checked);
+
+			// If there are no items selected we no longer need the selection
+			// mode.
+			if (getCheckedItemCount() == 0) {
+				mode.finish();
+			}
+		}
+	}
+
+	public interface MultiChoiceModeListener extends ActionMode.Callback {
+		/**
+		 * Called when an item is checked or unchecked during selection mode.
+		 * 
+		 * @param mode
+		 *            The {@link ActionMode} providing the selection mode
+		 * @param position
+		 *            Adapter position of the item that was checked or unchecked
+		 * @param id
+		 *            Adapter ID of the item that was checked or unchecked
+		 * @param checked
+		 *            <code>true</code> if the item is now checked,
+		 *            <code>false</code> if the item is now unchecked.
+		 */
+		public void onItemCheckedStateChanged(ActionMode mode, int section,
+				int position, long id, boolean checked);
+	}
+
+	public void setItemChecked(int sectionIndex, int positionInSection,
+			boolean value) {
+		if (mChoiceMode == CHOICE_MODE_NONE) {
+			return;
+		}
+
+		// Start selection mode if needed. We don't need to if we're unchecking
+		// something.
+		if (value && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL
+				&& mChoiceActionMode == null) {
+			if (mMultiChoiceModeCallback == null
+					|| !mMultiChoiceModeCallback.hasWrappedCallback()) {
+				throw new IllegalStateException(
+						"Container: attempted to start selection mode "
+								+ "for CHOICE_MODE_MULTIPLE_MODAL but no choice mode callback was "
+								+ "supplied. Call setMultiChoiceModeListener to set a callback.");
+			}
+			mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
+		}
+
+		if (mChoiceMode == CHOICE_MODE_MULTIPLE
+				|| mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+
+			boolean oldValue = isChecked(sectionIndex, positionInSection);
+					Log.d(TAG, "updating mCheckedStates in setItemChecked"); 
+			setChecked(sectionIndex, positionInSection, value);
+			if (mChoiceActionMode != null) {
+				final long id = itemAdapter.getItemId(sectionIndex,
+						positionInSection);
+				mMultiChoiceModeCallback.onItemCheckedStateChanged(
+						mChoiceActionMode, sectionIndex, positionInSection, id,
+						value);
+			}
+		} else {
+				setChecked(sectionIndex, positionInSection, value);
+		}
+
+		// if (!mInLayout && !mBlockLayoutRequests) {
+			mDataChanged = true;
+			// rememberSyncState();
+			requestLayout();
+		//}
+	}
+
+	@Override
+	public boolean performClick() {
+		Log.d(TAG, "perform click!");
+		return super.performClick();
+	}
+
+	@Override
+	public boolean performLongClick() {
+		Log.d(TAG, "perform long click!");
+		return super.performLongClick();
+	}
+
+	class Position2D {
+		public int section;
+		public int positionInSection;
+
+		public Position2D(int section, int position) {
+			this.section = section;
+			this.positionInSection = position;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			Log.d(TAG, "checking: "+o);
+			if (o.getClass() != Position2D.class) {
+				return false;
+			}
+			Position2D p = (Position2D) o;
+			return ((p.section == section) && (p.positionInSection == positionInSection));
+		}
+		
+		@Override
+		public String toString(){
+			return "Section: "+section+" index: "+positionInSection;
+		}
+
+	}
 	
 	@Override
-    public boolean shouldDelayChildPressedState() {
-        return true;
-    }
+	public boolean performItemClick(View view, int section, int position, long id) {
+		Log.d(TAG, "----> perform item click!");
+		boolean handled = false;
+		boolean dispatchItemClick = true;
 
+		Position2D pos = new Position2D(section, position);
+
+		if (mChoiceMode != CHOICE_MODE_NONE) {
+			handled = true;
+			boolean checkedStateChanged = false;
+
+			if (mChoiceMode == CHOICE_MODE_MULTIPLE
+					|| (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode != null)) {
+				boolean checked = isChecked(section, position);
+				checked = !checked;
+				setChecked(section, position, checked);
+				
+				if (mChoiceActionMode != null) {
+					mMultiChoiceModeCallback.onItemCheckedStateChanged(
+							mChoiceActionMode, section, position, id, checked);
+					dispatchItemClick = false;
+				}
+				checkedStateChanged = true;
+			} else if (mChoiceMode == CHOICE_MODE_SINGLE) {
+				boolean checked = !isChecked(section, position);
+				if (checked) {
+					
+				}
+				checkedStateChanged = true;
+			}
+
+			if (checkedStateChanged) {
+				updateOnScreenCheckedViews();
+			}
+		}
+
+		if (dispatchItemClick) {
+
+			handled |= super.performItemClick(view, section, position, id);
+		}
+
+		return handled;
+	}
+	
+	 private class PerformClick implements Runnable {
+	        int mClickMotionPosition;
+
+	        @Override
+	        public void run() {
+	            //if (mDataChanged) return;
+
+	            final BaseSectionedAdapter adapter = itemAdapter;
+	            final int motionPosition = mClickMotionPosition;
+	            View view = beginTouchAt.view;
+	            
+//	            if (adapter != null && mItemCount > 0 &&
+//	                    motionPosition != INVALID_POSITION &&
+//	                    motionPosition < adapter.getCount() && sameWindow()) {
+//	                final View view = getChildAt(motionPosition - mFirstPosition);
+//	                // If there is no view, something bad happened (the view scrolled off the
+//	                // screen, etc.) and we should cancel the click
+	                if (view != null) {
+	                    performItemClick(view, beginTouchAt.itemSection, beginTouchAt.itemIndex, itemAdapter.getItemId(beginTouchAt.itemSection, beginTouchAt.itemIndex));
+	                }
+//	            }
+	        }
+	    }
+	
+	
+	/**
+     * Perform a quick, in-place update of the checked or activated state
+     * on all visible item views. This should only be called when a valid
+     * choice mode is active.
+     */
+    private void updateOnScreenCheckedViews() {
+    	
+    	Iterator<?> it = frames.entrySet().iterator();
+    	Position2D pos = new Position2D(-1,-1);
+		View child = null;
+		while (it.hasNext()) {
+			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
+			pos.section = pairs.getValue().itemSection;
+			pos.positionInSection = pairs.getValue().itemIndex;
+			child = pairs.getValue().view;
+			boolean isChecked = mCheckStates.containsKey(pos) ? mCheckStates.get(pos) : false;
+			if (child instanceof Checkable) {
+                ((Checkable) child).setChecked(isChecked);
+            } else {
+                child.setActivated(isChecked);
+            }
+		}
+    }
+    
+    public boolean isChecked(int sectionIndex, int positionInSection){
+    	for(int i=0; i<mCheckStates.size(); i++){
+    		Position2D p = mCheckStates.keyAt(i);
+    		if(p.section == sectionIndex && p.positionInSection == positionInSection){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    public void setChecked(int sectionIndex, int positionInSection, boolean val){
+    	
+    	
+    	Log.d(TAG, "sectionIndex: "+sectionIndex+", position: "+positionInSection+": "+val);
+    	
+    	int foundAtIndex = -1;
+    	for(int i=0; i<mCheckStates.size(); i++){
+    		Position2D p = mCheckStates.keyAt(i);
+    		if(p.section == sectionIndex && p.positionInSection == positionInSection){
+    			foundAtIndex = i;
+    			break;
+    		}
+    	}
+    	if(foundAtIndex > -1 && val == false){
+    			mCheckStates.removeAt(foundAtIndex);
+    	}
+    	else if (foundAtIndex == -1 && val == true){
+    		Position2D pos = new Position2D(sectionIndex, positionInSection);
+        	mCheckStates.put(pos, true);
+    	}
+    	
+    }
 
 }
