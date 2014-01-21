@@ -205,7 +205,7 @@ public class Container extends AbsLayoutContainer {
 						"A container cannot be a direct child view to a container");
 
 			frameDesc.view = view;
-			prepareViewForAddition(view);
+			prepareViewForAddition(view, frameDesc);
 			addView(view, getChildCount(), params);
 		}
 
@@ -220,8 +220,10 @@ public class Container extends AbsLayoutContainer {
 			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
 
-	private void prepareViewForAddition(View view) {
-		// view.setOnTouchListener(this);
+	private void prepareViewForAddition(View view, ItemProxy proxy) {
+		if(view instanceof Checkable){
+			((Checkable)view).setChecked(isChecked(proxy.itemSection, proxy.itemIndex));
+		}
 	}
 
 	@Override
