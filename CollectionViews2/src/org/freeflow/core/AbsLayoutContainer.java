@@ -2,11 +2,14 @@ package org.freeflow.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.freeflow.layouts.AbstractLayout;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ContextMenu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -98,13 +101,13 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 	 * @return True if there was an assigned OnItemClickListener that was
 	 *         called, false otherwise is returned.
 	 */
-	public boolean performItemClick(View view, ItemProxy proxy) {
+	public boolean performItemClick(View view, int sectionIndex, int positionInSection, long id) {
 		if (mOnItemClickListener != null) {
 			// playSoundEffect(SoundEffectConstants.CLICK);
 			if (view != null) {
 				view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
 			}
-			mOnItemClickListener.onItemClick(this, proxy);
+			mOnItemClickListener.onItemClick(this, getItemProxyForVisibleItemAt(sectionIndex, positionInSection));
 			return true;
 		}
 
@@ -206,6 +209,87 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		for (FreeFlowEventListener listener : listeners) {
 			listener.onLayoutChanging(oldLayout, newLayout);
 		}
+	}
+	
+	OnItemLongClickListener mOnItemLongClickListener;
+	
+	/**
+     * Interface definition for a callback to be invoked when an item in this
+     * view has been clicked and held.
+     */
+    public interface OnItemLongClickListener {
+        /**
+         * Callback method to be invoked when an item in this view has been
+         * clicked and held.
+         *
+         * Implementers can call getItemAtPosition(position) if they need to access
+         * the data associated with the selected item.
+         *
+         * @param parent The AbsListView where the click happened
+         * @param view The view within the AbsListView that was clicked
+         * @param position The position of the view in the list
+         * @param id The row id of the item that was clicked
+         *
+         * @return true if the callback consumed the long click, false otherwise
+         */
+        boolean onItemLongClick(AbsLayoutContainer parent, View view, int sectionIndex, int positionInSection, long id);
+    }
+    
+    /**
+     * Register a callback to be invoked when an item in this AdapterView has
+     * been clicked and held
+     *
+     * @param listener The callback that will run
+     */
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        if (!isLongClickable()) {
+            setLongClickable(true);
+        }
+        mOnItemLongClickListener = listener;
+    }
+
+    /**
+     * @return The callback to be invoked with an item in this AdapterView has
+     *         been clicked and held, or null id no callback as been set.
+     */
+    public final OnItemLongClickListener getOnItemLongClickListener() {
+        return mOnItemLongClickListener;
+    }
+
+    public static class AbsLayoutContainerContextMenuInfo implements ContextMenu.ContextMenuInfo {
+    	
+        public View targetView;
+        public int sectionIndex;
+        public int positionInSection;
+        public long id;
+        
+        public AbsLayoutContainerContextMenuInfo(View targetView, int sectionIndex, int positionInSection, long id) {
+            this.targetView = targetView;
+            this.sectionIndex = sectionIndex;
+            this.positionInSection = positionInSection;
+            this.id = id;
+        }
+    }
+    
+    /**
+     * Returns the ItemProxy instance of a view at position if that
+     * view is visible or null if thats not currently visible
+     * @param 	section 	The section index of the item 
+     * @param	position	The position of the item in the particular section
+     * @return	The <code>ItemProxy</code> instance representing that section and index. The proxy is guaranteed to have a view associated with it 
+     */
+	public ItemProxy getItemProxyForVisibleItemAt(int section, int position) {
+		Iterator<?> it = frames.entrySet().iterator();
+		ItemProxy proxy = null;
+		while (it.hasNext()) {
+			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
+			proxy = pairs.getValue();
+			if (proxy.itemSection == section
+					&& proxy.itemIndex == position) {
+				return proxy;
+			}
+		}
+		return null;
 	}
 
 }
