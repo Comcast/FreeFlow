@@ -252,9 +252,9 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	public ValueAnimator transitionToFrame(final Rect of, final ItemProxy nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
-
-		Log.d(TAG, "of width = " + of.width() + ", nf width = " + nf.frame.width());
-		Log.d(TAG, "of height = " + of.height() + ", nf height = " + nf.frame.height());
+//
+//		Log.d(TAG, "of width = " + of.width() + ", nf width = " + nf.frame.width());
+//		Log.d(TAG, "of height = " + of.height() + ", nf height = " + nf.frame.height());
 
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 

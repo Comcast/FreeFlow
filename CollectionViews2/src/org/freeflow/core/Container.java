@@ -299,22 +299,21 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		if (isAnimatingChanges) {
-			layoutAnimator.cancel();
-		}
-		isAnimatingChanges = true;
-
 		for (ItemProxy proxy : changeSet.getAdded()) {
 			addAndMeasureViewIfNeeded(proxy);
 			doLayout(proxy);
 		}
+
+		if (isAnimatingChanges) {
+			layoutAnimator.cancel();
+		}
+		isAnimatingChanges = true;
 
 		Log.d(TAG, "== animating changes: " + changeSet.toString());
 
 		dispatchAnimationsStarted();
 
 		layoutAnimator.animateChanges(changeSet, this);
-	
 
 	}
 
@@ -657,15 +656,11 @@ public class Container extends AbsLayoutContainer {
 		else if (viewPortY > scrollableHeight)
 			viewPortY = scrollableHeight;
 
-		Log.d("blah", "vpx = " + viewPortX + ", vpy = " + viewPortY);
-
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
 
 		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames, true);
-
-		Log.d("blah", "added = " + changeSet.added.size() + ", moved = " + changeSet.moved.size());
 
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);
