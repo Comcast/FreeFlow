@@ -71,7 +71,7 @@ public class VLayout extends AbstractLayout {
 
 			Section s = itemsAdapter.getSection(i);
 
-			if (itemsAdapter.shouldDisplaySectionHeaders()	) {
+			if (itemsAdapter.shouldDisplaySectionHeaders()) {
 
 				if (headerWidth < 0) {
 					throw new IllegalStateException("headerWidth not set");
@@ -80,7 +80,7 @@ public class VLayout extends AbstractLayout {
 				if (headerHeight < 0) {
 					throw new IllegalStateException("headerHeight not set");
 				}
-				
+
 				ItemProxy header = new ItemProxy();
 				Rect hframe = new Rect();
 				header.itemSection = i;
@@ -155,7 +155,6 @@ public class VLayout extends AbstractLayout {
 
 	@Override
 	public int getContentWidth() {
-		Log.d(TAG, "width== : "+width);
 		return width;
 	}
 
@@ -186,10 +185,10 @@ public class VLayout extends AbstractLayout {
 
 		return fd;
 	}
-	
+
 	@Override
-	public ItemProxy getItemAt(float x, float y){
-		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
+	public ItemProxy getItemAt(float x, float y) {
+		return ViewUtils.getItemAt(frameDescriptors, (int) x, (int) y);
 	}
 
 	@Override
