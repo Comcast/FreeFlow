@@ -73,7 +73,7 @@ public class Container extends AbsLayoutContainer {
 
 	private EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
-	private float pullPastSlack = 50f;
+	private float pullPastSlack = 150f;
 
 	// This flag controls whether onTap/onLongPress/onTouch trigger
 	// the ActionMode
