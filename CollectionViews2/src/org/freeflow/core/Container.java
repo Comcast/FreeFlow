@@ -10,6 +10,7 @@ import org.freeflow.layouts.animations.LayoutAnimator;
 import org.freeflow.utils.ViewUtils;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.AttributeSet;
@@ -25,7 +26,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Checkable;
-import android.widget.Scroller;
+import android.widget.EdgeEffect;
+import android.widget.OverScroller;
 
 public class Container extends AbsLayoutContainer {
 
@@ -64,8 +66,10 @@ public class Container extends AbsLayoutContainer {
 	private Runnable mPendingCheckForTap;
 	private Runnable mPendingCheckForLongPress;
 
-	private Scroller scroller;
+	private OverScroller scroller;
 	private boolean flingStarted = false;
+
+	private EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
 	// This flag controls whether onTap/onLongPress/onTouch trigger
 	// the ActionMode
@@ -127,13 +131,20 @@ public class Container extends AbsLayoutContainer {
 		// usedViews = new HashMap<Object, ItemProxy>();
 		// usedHeaderViews = new HashMap<Object, ItemProxy>();
 
+		setWillNotDraw(false);
+
 		viewpool = new ViewPool();
 		frames = new HashMap<Object, ItemProxy>();
 
 		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-		scroller = new Scroller(context);
-		// scroller.setFriction(ViewConfiguration.getScrollFriction());
+
+		// TODO: create Scroller vars
+		scroller = new OverScroller(context);
+		mLeftEdge = new EdgeEffect(context);
+		mRightEdge = new EdgeEffect(context);
+		mTopEdge = new EdgeEffect(context);
+		mBottomEdge = new EdgeEffect(context);
 
 	}
 
@@ -151,6 +162,7 @@ public class Container extends AbsLayoutContainer {
 		if (beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
+
 	}
 
 	public void computeLayout(int w, int h) {
@@ -226,7 +238,9 @@ public class Container extends AbsLayoutContainer {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		// Log.d(TAG, "== onLayout ==");
 		// mDataChanged = false;
+
 		dispatchLayoutComplete();
+
 	}
 
 	private void doLayout(ItemProxy proxy) {
@@ -561,8 +575,8 @@ public class Container extends AbsLayoutContainer {
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-			scroller.abortAnimation();
-			
+			scroller.forceFinished(true);
+
 			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()),
 					(int) (viewPortY + event.getY()));
 
@@ -603,7 +617,17 @@ public class Container extends AbsLayoutContainer {
 				}
 
 				if (mTouchMode == TOUCH_MODE_SCROLL) {
-					moveScreen(event.getX() - deltaX, event.getY() - deltaY);
+					moveScreen(event.getX() - deltaX, event.getY() - deltaY, false);
+
+					float max = layout.getContentWidth() - getWidth() - 200;
+					Log.d(TAG, "viewport = " + viewPortX + " max = " + max);
+					if (viewPortX > max) {
+						float val = ((float) viewPortX - max) / 200F;
+						Log.d(TAG, "val= " + val);
+
+						// mTopEdge.onPull(val);
+					}
+
 					deltaX = event.getX();
 					deltaY = event.getY();
 				}
@@ -624,6 +648,9 @@ public class Container extends AbsLayoutContainer {
 			return true;
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
+
+			// mTopEdge.onRelease();
+
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
@@ -637,35 +664,15 @@ public class Container extends AbsLayoutContainer {
 				if (Math.abs(mVelocityTracker.getXVelocity()) > 100 || Math.abs(mVelocityTracker.getYVelocity()) > 100) {
 
 					// TODO: add scroller call here...
-//					scroller.forceFinished(true);
-//					scroller.abortAnimation();
+					// scroller.forceFinished(true);
+					// scroller.abortAnimation();
 
 					flingStarted = true;
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, layout.getContentWidth() - getWidth(), 0,
-							layout.getContentHeight() - getHeight());
+							layout.getContentHeight() - getHeight(), 300, 300);
 
 					post(scrollRunnable);
-
-					// final float velocityX = mVelocityTracker.getXVelocity();
-					// final float velocityY = mVelocityTracker.getYVelocity();
-					// ValueAnimator animator = ValueAnimator.ofFloat(1, 0);
-					// animator.addUpdateListener(new AnimatorUpdateListener() {
-					//
-					// @Override
-					// public void onAnimationUpdate(ValueAnimator animation) {
-					// int translateX = (int) ((1 -
-					// animation.getAnimatedFraction()) * velocityX / 350);
-					// int translateY = (int) ((1 -
-					// animation.getAnimatedFraction()) * velocityY / 350);
-					//
-					// moveScreen(translateX, translateY);
-					//
-					// }
-					// });
-					//
-					// animator.setDuration(500);
-					// animator.start();
 
 				}
 				mTouchMode = TOUCH_MODE_REST;
@@ -718,7 +725,7 @@ public class Container extends AbsLayoutContainer {
 		return selectedItemProxy;
 	}
 
-	//TODO: scroll runnable
+	// TODO: scroll runnable
 	private Runnable scrollRunnable = new Runnable() {
 
 		@Override
@@ -730,14 +737,37 @@ public class Container extends AbsLayoutContainer {
 
 			boolean more = scroller.computeScrollOffset();
 
+			if ((flingStarted || mLeftEdge.isFinished()) && viewPortX < 0 && layout.horizontalDragEnabled()) {
+				mLeftEdge.finish();
+				mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
+
+			if ((flingStarted || mRightEdge.isFinished()) && viewPortX > layout.getContentWidth() - getMeasuredWidth()
+					&& layout.horizontalDragEnabled()) {
+				mRightEdge.finish();
+				mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
+
+			if ((flingStarted || mTopEdge.isFinished()) && viewPortY < 0 && layout.verticalDragEnabled()) {
+				mTopEdge.finish();
+				mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
+
+			if ((flingStarted || mBottomEdge.isFinished())
+					&& viewPortY > layout.getContentHeight() - getMeasuredHeight() && layout.verticalDragEnabled()) {
+				mBottomEdge.finish();
+				mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
+
 			if (flingStarted) {
 				flingStarted = false;
 				scrollDeltaX = scroller.getCurrX();
 				scrollDeltaY = scroller.getCurrY();
 			}
 
-			Log.d("scrolling", "vel = " + scroller.getCurrVelocity() + ", cur x = " + scroller.getCurrX()
-					+ ", cur y = " + scroller.getCurrY() + ", vp x = " + viewPortX);
+			// Log.d("scrolling", "vel = " + scroller.getCurrVelocity() +
+			// ", cur x = " + scroller.getCurrX()
+			// + ", cur y = " + scroller.getCurrY() + ", vp x = " + viewPortX);
 			int x = scroller.getCurrX();
 			int y = scroller.getCurrY();
 
@@ -747,7 +777,7 @@ public class Container extends AbsLayoutContainer {
 			scrollDeltaX = x;
 			scrollDeltaY = y;
 
-			moveScreen(-diffx, -diffy);
+			moveScreen(-diffx, -diffy, true);
 
 			if (more) {
 				post(scrollRunnable);
@@ -755,7 +785,7 @@ public class Container extends AbsLayoutContainer {
 		}
 	};
 
-	private void moveScreen(float movementX, float movementY) {
+	private void moveScreen(float movementX, float movementY, boolean fling) {
 
 		if (layout.horizontalDragEnabled()) {
 			viewPortX = (int) (viewPortX - movementX);
@@ -772,16 +802,17 @@ public class Container extends AbsLayoutContainer {
 		scrollableWidth = layout.getContentWidth() - getWidth();
 		scrollableHeight = layout.getContentHeight() - getHeight();
 
-		if (viewPortX < 0)
-			viewPortX = 0;
-		else if (viewPortX > scrollableWidth)
-			viewPortX = scrollableWidth;
+		if (!fling) {
+			if (viewPortX < 0)
+				viewPortX = 0;
+			else if (viewPortX > scrollableWidth)
+				viewPortX = scrollableWidth;
 
-		if (viewPortY < 0)
-			viewPortY = 0;
-		else if (viewPortY > scrollableHeight)
-			viewPortY = scrollableHeight;
-
+			if (viewPortY < 0)
+				viewPortY = 0;
+			else if (viewPortY > scrollableHeight)
+				viewPortY = scrollableHeight;
+		}
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
@@ -802,6 +833,66 @@ public class Container extends AbsLayoutContainer {
 			removeViewInLayout(proxy.view);
 			returnItemToPoolIfNeeded(proxy);
 		}
+
+	}
+
+	@Override
+	protected void onDraw(Canvas canvas) {
+		super.onDraw(canvas);
+
+		boolean needsInvalidate = false;
+
+		final int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+		final int width = getMeasuredWidth();
+
+		if (!mLeftEdge.isFinished()) {
+			// Log.d("EdgeView", "edge not finished");
+			final int restoreCount = canvas.save();
+
+			canvas.rotate(270);
+			canvas.translate(-height + getPaddingTop(), 0);// width);
+			mLeftEdge.setSize(height, width);
+
+			needsInvalidate = mLeftEdge.draw(canvas);
+			canvas.restoreToCount(restoreCount);
+		}
+
+		if (!mTopEdge.isFinished()) {
+			// Log.d("EdgeView", "edge not finished");
+			final int restoreCount = canvas.save();
+
+			mTopEdge.setSize(width, height);
+
+			needsInvalidate = mTopEdge.draw(canvas);
+			canvas.restoreToCount(restoreCount);
+		}
+
+		if (!mRightEdge.isFinished()) {
+			// Log.d("EdgeView", "edge not finished");
+			final int restoreCount = canvas.save();
+
+			canvas.rotate(90);
+			canvas.translate(0, -width);// width);
+			mRightEdge.setSize(height, width);
+
+			needsInvalidate = mRightEdge.draw(canvas);
+			canvas.restoreToCount(restoreCount);
+		}
+
+		if (!mBottomEdge.isFinished()) {
+			// Log.d("EdgeView", "edge not finished");
+			final int restoreCount = canvas.save();
+
+			canvas.rotate(180);
+			canvas.translate(-width + getPaddingTop(), -height);
+			mBottomEdge.setSize(height, width);
+
+			needsInvalidate = mBottomEdge.draw(canvas);
+			canvas.restoreToCount(restoreCount);
+		}
+
+		if (needsInvalidate)
+			postInvalidateOnAnimation();
 
 	}
 

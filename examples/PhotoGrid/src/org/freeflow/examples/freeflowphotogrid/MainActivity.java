@@ -166,6 +166,7 @@ public class MainActivity extends Activity {
 
 			tv.setFocusable(false);
 			tv.setBackgroundResource(R.drawable.orange);
+//			tv.setAlpha(.25f);
 			// button.setOnTouchListener(MainActivity.this);
 			tv.setText("s" + section + " p" + position);
 
