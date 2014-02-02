@@ -1,5 +1,6 @@
 package org.freeflow.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v4.util.SimpleArrayMap;
+import android.text.GetChars;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -81,7 +83,7 @@ public class Container extends AbsLayoutContainer {
 
 	private ContextMenuInfo mContextMenuInfo = null;
 
-	private SimpleArrayMap<Position2D, Boolean> mCheckStates = null;
+	private SimpleArrayMap<IndexPath, Boolean> mCheckStates = null;
 
 	ActionMode mChoiceActionMode;
 	MultiChoiceModeWrapper mMultiChoiceModeCallback;
@@ -681,7 +683,7 @@ public class Container extends AbsLayoutContainer {
 								Log.d(TAG, "setting pressed back to false in reset");
 								beginTouchAt.view.setPressed(false);
 							}
-							if (mOnItemSelectedListener != null) {
+							if (mChoiceActionMode == null && mOnItemSelectedListener != null) {
 								mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
 							}
 
@@ -967,6 +969,15 @@ public class Container extends AbsLayoutContainer {
 	public int getCheckedItemCount() {
 		return mCheckStates.size();
 	}
+	
+	public ArrayList<IndexPath> getCheckedItemPositions(){
+		ArrayList<IndexPath> checked = new ArrayList<IndexPath>();
+		for(int i=0; i<mCheckStates.size(); i++){
+			checked.add(mCheckStates.keyAt(i));
+		}
+		
+		return checked;
+	}
 
 	public void clearChoices() {
 		mCheckStates.clear();
@@ -981,7 +992,7 @@ public class Container extends AbsLayoutContainer {
 		if (mChoiceMode != CHOICE_MODE_NONE) {
 			if (mCheckStates == null) {
 				Log.d(TAG, "Creating mCheckStates");
-				mCheckStates = new SimpleArrayMap<Container.Position2D, Boolean>();
+				mCheckStates = new SimpleArrayMap<IndexPath, Boolean>();
 			}
 			if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
 				clearChoices();
@@ -1210,31 +1221,6 @@ public class Container extends AbsLayoutContainer {
 		// }
 	}
 
-	class Position2D {
-		public int section;
-		public int positionInSection;
-
-		public Position2D(int section, int position) {
-			this.section = section;
-			this.positionInSection = position;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o.getClass() != Position2D.class) {
-				return false;
-			}
-			Position2D p = (Position2D) o;
-			return ((p.section == section) && (p.positionInSection == positionInSection));
-		}
-
-		@Override
-		public String toString() {
-			return "Section: " + section + " index: " + positionInSection;
-		}
-
-	}
-
 	@Override
 	public boolean performItemClick(View view, int section, int position, long id) {
 		boolean handled = false;
@@ -1313,7 +1299,7 @@ public class Container extends AbsLayoutContainer {
 
 	public boolean isChecked(int sectionIndex, int positionInSection) {
 		for (int i = 0; i < mCheckStates.size(); i++) {
-			Position2D p = mCheckStates.keyAt(i);
+			IndexPath p = mCheckStates.keyAt(i);
 			if (p.section == sectionIndex && p.positionInSection == positionInSection) {
 				return true;
 			}
@@ -1328,7 +1314,7 @@ public class Container extends AbsLayoutContainer {
 	protected void setCheckedValue(int sectionIndex, int positionInSection, boolean val) {
 		int foundAtIndex = -1;
 		for (int i = 0; i < mCheckStates.size(); i++) {
-			Position2D p = mCheckStates.keyAt(i);
+			IndexPath p = mCheckStates.keyAt(i);
 			if (p.section == sectionIndex && p.positionInSection == positionInSection) {
 				foundAtIndex = i;
 				break;
@@ -1337,7 +1323,7 @@ public class Container extends AbsLayoutContainer {
 		if (foundAtIndex > -1 && val == false) {
 			mCheckStates.removeAt(foundAtIndex);
 		} else if (foundAtIndex == -1 && val == true) {
-			Position2D pos = new Position2D(sectionIndex, positionInSection);
+			IndexPath pos = new IndexPath(sectionIndex, positionInSection);
 			mCheckStates.put(pos, true);
 		}
 
