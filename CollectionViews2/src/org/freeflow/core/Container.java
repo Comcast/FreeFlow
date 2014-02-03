@@ -1,5 +1,6 @@
 package org.freeflow.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,9 +12,8 @@ import org.freeflow.utils.ViewUtils;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
+import android.net.VpnService;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -73,7 +73,9 @@ public class Container extends AbsLayoutContainer {
 
 	private EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
-	private float pullPastSlack = 150f;
+	private float pullPastSlack = 300f;
+
+	private ArrayList<OnScrollListener> scrollListeners = new ArrayList<Container.OnScrollListener>();
 
 	// This flag controls whether onTap/onLongPress/onTouch trigger
 	// the ActionMode
@@ -658,7 +660,7 @@ public class Container extends AbsLayoutContainer {
 					flingStarted = true;
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, layout.getContentWidth() - getWidth(), 0,
-							layout.getContentHeight() - getHeight(), (int)pullPastSlack, (int)pullPastSlack);
+							layout.getContentHeight() - getHeight(), (int) pullPastSlack, (int) pullPastSlack);
 
 					post(scrollRunnable);
 
@@ -739,6 +741,11 @@ public class Container extends AbsLayoutContainer {
 		@Override
 		public void run() {
 			if (scroller.isFinished()) {
+
+				for (OnScrollListener l : scrollListeners) {
+					l.onScrolled();
+				}
+
 				return;
 			}
 
@@ -824,7 +831,7 @@ public class Container extends AbsLayoutContainer {
 
 			if (viewPortX <= 0) {
 				float val = viewPortX / (-pullPastSlack);
-				Log.d(TAG, "val = " + val);
+				// Log.d(TAG, "val = " + val);
 				mLeftEdge.onPull(val);
 				invalidate();
 			} else if (viewPortX >= scrollableWidth) {
@@ -1341,6 +1348,62 @@ public class Container extends AbsLayoutContainer {
 			mCheckStates.put(pos, true);
 		}
 
+	}
+
+	public void addScrollListener(OnScrollListener listener) {
+		if (!scrollListeners.contains(listener))
+			scrollListeners.add(listener);
+	}
+
+	public void removeScrollListener(OnScrollListener listener) {
+		scrollListeners.remove(listener);
+	}
+
+	public void scrollToItem(int sectionIndex, int itemIndex, boolean animate) {
+		Section section;
+
+		if (sectionIndex > itemAdapter.getNumberOfSections() || sectionIndex < 0
+				|| (section = itemAdapter.getSection(sectionIndex)) == null) {
+			Log.d(TAG, "section returning");
+			return;
+		}
+
+		if (itemIndex < 0 || itemIndex > section.getDataCount()) {
+			Log.d(TAG, "item index returning");
+			return;
+		}
+
+		ItemProxy proxy = layout.getItemProxyForItem(section.getDataAtIndex(itemIndex));
+
+		int newVPX = proxy.frame.left;
+		int newVPY = proxy.frame.top;
+
+		if (newVPX > layout.getContentWidth() - getMeasuredWidth())
+			newVPX = layout.getContentWidth() - getMeasuredWidth();
+
+		if (newVPY > layout.getContentHeight() - getMeasuredHeight())
+			newVPY = layout.getContentHeight() - getMeasuredHeight();
+
+		if (animate) {
+			Log.d(TAG, "vpx = " + newVPX + ", vpy = " + newVPY);
+			Log.d(TAG, "viewpx = " + viewPortX + ", viewpy = " + viewPortY);
+			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX), (viewPortY - newVPY), 1500);
+			Log.d(TAG, "final vpx = " + scroller.getFinalX() + ", final vpy = " + scroller.getFinalY());
+			flingStarted = true;
+			post(scrollRunnable);
+		} else {
+			Log.d(TAG, "vpx = " + newVPX + ", vpy = " + newVPY);
+			moveScreen((viewPortX - newVPX), (viewPortY - newVPY), false);
+			for (OnScrollListener l : scrollListeners) {
+				l.onScrolled();
+			}
+
+		}
+
+	}
+
+	public interface OnScrollListener {
+		public void onScrolled();
 	}
 
 }

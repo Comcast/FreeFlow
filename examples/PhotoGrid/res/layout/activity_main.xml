@@ -13,7 +13,21 @@
         android:id="@+id/transitionButton"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:text="Change Layout"
-        android:layout_gravity="bottom" />
+        android:layout_gravity="bottom"
+        android:text="Change Layout" />
+
+    <Button
+        android:id="@+id/jumpButtonAnim"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="bottom|right"
+        android:text="Jump w/ anim" />
+    
+    <Button
+        android:id="@+id/jumpButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="bottom|center"
+        android:text="Jump" />
 
 </FrameLayout>

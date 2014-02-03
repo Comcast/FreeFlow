@@ -11,7 +11,6 @@ import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
-import org.freeflow.layouts.animations.ScaleAnimator;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,14 +30,14 @@ public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	Container container = null;
 	HLayout hLayout = null;
-	VLayout vLayout = null; 
+	VLayout vLayout = null;
 	VGridLayout vGridLayout = null;
 	HGridLayout hGridLayout = null;
 	HLayout hLayout1 = null;
 	VLayout vLayout1 = null;
 	VGridLayout vGridLayout1 = null;
 	HGridLayout hGridLayout1 = null;
-	Button changeButton;
+	Button changeButton, jumpButton, jumpButtonAnim;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,18 +46,17 @@ public class MainActivity extends Activity {
 
 		FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frameLayout);
 
-		ImageAdapter adapter = new ImageAdapter();
+		final ImageAdapter adapter = new ImageAdapter();
 
 		container = new Container(this);
 
 		// container.setOnTouchListener(this);
 		// container.setFocusable(true);
-		
+
 		DefaultLayoutAnimator anim = (DefaultLayoutAnimator) container.getLayoutAnimator();
 		anim.animateAllSetsSequentially = false;
 		anim.animateIndividualCellsSequentially = false;
-		
-		
+
 		container.requestFocus();
 		hLayout = new HLayout();
 		hLayout.setItemWidth(100);
@@ -130,7 +128,35 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		frameLayout.findViewById(R.id.transitionButton).bringToFront();
+		jumpButton = (Button) findViewById(R.id.jumpButton);
+		jumpButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int section = (int) (adapter.getNumberOfSections() * Math.random());
+				int index = (int) (adapter.getSection(section).getDataCount() * Math.random());
+				Log.d(TAG, "section = " + section + ", index = " + index);
+				container.scrollToItem(section, index, false);
+
+			}
+		});
+		
+		jumpButtonAnim = (Button) findViewById(R.id.jumpButtonAnim);
+		jumpButtonAnim.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				int section = (int) (adapter.getNumberOfSections() * Math.random());
+				int index = (int) (adapter.getSection(section).getDataCount() * Math.random());
+				Log.d(TAG, "section = " + section + ", index = " + index);
+				container.scrollToItem(section, index, true);
+
+			}
+		});
+
+		changeButton.bringToFront();
+		jumpButton.bringToFront();
+		jumpButtonAnim.bringToFront();
 	}
 
 	class ImageAdapter implements BaseSectionedAdapter {
@@ -140,7 +166,7 @@ public class MainActivity extends Activity {
 		public ImageAdapter() {
 			for (int i = 0; i < 10; i++) {
 				Section s = new Section();
-				
+
 				s.setSectionTitle("Section " + i);
 				for (int j = 0; j < 10; j++) {
 					s.addItem(new Object());
@@ -166,7 +192,7 @@ public class MainActivity extends Activity {
 
 			tv.setFocusable(false);
 			tv.setBackgroundResource(R.drawable.orange);
-//			tv.setAlpha(.25f);
+			// tv.setAlpha(.25f);
 			// button.setOnTouchListener(MainActivity.this);
 			tv.setText("s" + section + " p" + position);
 
@@ -248,7 +274,7 @@ public class MainActivity extends Activity {
 
 			// Log.d(TAG, "attached: " + this.getText());
 
-		} 
+		}
 
 		@Override
 		protected void onDetachedFromWindow() {
