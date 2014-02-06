@@ -274,6 +274,8 @@ public class Container extends AbsLayoutContainer {
 		dispatchDataChanged();
 
 		markLayoutDirty = true;
+		viewPortX = 0;
+		viewPortY = 0;
 
 		Log.d(TAG, "=== setting layout ===");
 		requestLayout();
@@ -494,6 +496,8 @@ public class Container extends AbsLayoutContainer {
 		Log.d(TAG, "setting adapter");
 		markLayoutDirty = true;
 		markAdapterDirty = true;
+		viewPortX = 0;
+		viewPortY = 0;
 
 		this.itemAdapter = adapter;
 		if (adapter != null)
@@ -648,10 +652,10 @@ public class Container extends AbsLayoutContainer {
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 
-			// mTopEdge.onRelease();
-			releaseEdges();
-
+			
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
+				releaseEdges();
+
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
 				if (Math.abs(mVelocityTracker.getXVelocity()) > 100 || Math.abs(mVelocityTracker.getYVelocity()) > 100) {
@@ -662,7 +666,7 @@ public class Container extends AbsLayoutContainer {
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, layout.getContentWidth() - getWidth(), 0,
 							layout.getContentHeight() - getHeight(), (int) pullPastSlack, (int) pullPastSlack);
-
+					
 					post(scrollRunnable);
 
 				}
