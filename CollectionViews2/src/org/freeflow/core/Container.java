@@ -146,7 +146,6 @@ public class Container extends AbsLayoutContainer {
 		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
 		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
-		// TODO: create Scroller vars
 		scroller = new OverScroller(context);
 		mLeftEdge = new EdgeEffect(context);
 		mRightEdge = new EdgeEffect(context);
@@ -271,8 +270,7 @@ public class Container extends AbsLayoutContainer {
 		layout = lc;
 
 		dispatchLayoutChanging(oldLayout, lc);
-		dispatchDataChanged();
-
+		
 		markLayoutDirty = true;
 		viewPortX = 0;
 		viewPortY = 0;
@@ -296,6 +294,10 @@ public class Container extends AbsLayoutContainer {
 		Object data = null;
 		int lowestSection = 99999;
 		int lowestPosition = 99999;
+		
+		// Find the frame of of the first item in the first section in the current set of frames defining the viewport
+		// Changing layout will then keep this item in the viewport of the new layout
+		// TODO: Need to make sure this item is actually being shown in the viewport and not just in some offscreen buffer
 		for (ItemProxy fd : frames.values()) {
 			if (fd.itemSection < lowestSection || (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 				data = fd.data;
@@ -354,7 +356,7 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	/**
-	 * TODO:::: This should be renamed to layoutInvalidated, since the layout
+	 * TODO: This should be renamed to layoutInvalidated, since the layout
 	 * isn't changed
 	 */
 	public void layoutChanged() {
@@ -660,8 +662,6 @@ public class Container extends AbsLayoutContainer {
 
 				if (Math.abs(mVelocityTracker.getXVelocity()) > 100 || Math.abs(mVelocityTracker.getYVelocity()) > 100) {
 
-					// TODO: add scroller call here...
-
 					flingStarted = true;
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, layout.getContentWidth() - getWidth(), 0,
@@ -740,7 +740,6 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	// TODO: scroll runnable
 	private Runnable scrollRunnable = new Runnable() {
 
 		@Override
