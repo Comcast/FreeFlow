@@ -63,8 +63,6 @@ public class Container extends AbsLayoutContainer {
 	private float deltaX = -1f;
 	private float deltaY = -1f;
 
-	private int scrollDeltaX = 0;
-	private int scrollDeltaY = 0;
 
 	private int maxFlingVelocity;
 	private int minFlingVelocity;
@@ -78,7 +76,6 @@ public class Container extends AbsLayoutContainer {
 	private Runnable mPendingCheckForLongPress;
 
 	private OverScroller scroller;
-	private boolean flingStarted = false;
 
 	protected EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
@@ -681,7 +678,7 @@ public class Container extends AbsLayoutContainer {
 				}
 
 				if (mTouchMode == TOUCH_MODE_SCROLL) {
-					moveScreen(event.getX() - deltaX, event.getY() - deltaY, false);
+					moveViewportBy(event.getX() - deltaX, event.getY() - deltaY, false);
 
 					deltaX = event.getX();
 					deltaY = event.getY();
@@ -698,7 +695,7 @@ public class Container extends AbsLayoutContainer {
 				mVelocityTracker = null;
 			}
 
-			releaseEdges();
+			//releaseEdges();
 			// requestLayout();
 
 			return true;
@@ -707,20 +704,19 @@ public class Container extends AbsLayoutContainer {
 
 			
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
-				releaseEdges();
+				//releaseEdges();
 
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
 				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity || Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
-					flingStarted = true;
-					
 					int maxX = layout.getContentWidth() - getWidth();
 					int maxY = layout.getContentHeight() - getHeight();
 					
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, maxX, 0,
 							maxY, overflingDistance, overflingDistance);
+					
 					
 					post(scrollRunnable);
 
@@ -775,27 +771,6 @@ public class Container extends AbsLayoutContainer {
 		return selectedItemProxy;
 	}
 
-	private void releaseEdges() {
-		mLeftEdge.onRelease();
-		mTopEdge.onRelease();
-		mRightEdge.onRelease();
-		mBottomEdge.onRelease();
-
-		if (scroller.isFinished()) {
-			int maxX = layout.getContentWidth() - getWidth();
-			int maxY = layout.getContentHeight() - getHeight();
-			boolean start = scroller.springBack(viewPortX, viewPortY, 0, maxX, 0,maxY);
-
-			Log.d(TAG, "starting spring back = " + start);
-
-			if (start) {
-				flingStarted = true;
-				post(scrollRunnable);
-			}
-		}
-
-	}
-
 	private Runnable scrollRunnable = new Runnable() {
 
 		@Override
@@ -811,68 +786,65 @@ public class Container extends AbsLayoutContainer {
 
 			boolean more = scroller.computeScrollOffset();
 
-			if (flingStarted) {
+			
 				if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalDragEnabled()) {
-					mLeftEdge.finish();
 					mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
 				}
 
 				if (mRightEdge.isFinished() && viewPortX > layout.getContentWidth() - getMeasuredWidth()
 						&& layout.horizontalDragEnabled()) {
-					mRightEdge.finish();
 					mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
 				}
 
 				if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalDragEnabled()) {
-					mTopEdge.finish();
 					mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
 				}
 
 				if (mBottomEdge.isFinished() && viewPortY > layout.getContentHeight() - getMeasuredHeight()
 						&& layout.verticalDragEnabled()) {
-					mBottomEdge.finish();
 					mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
 				}
-
-				flingStarted = false;
-				scrollDeltaX = scroller.getCurrX();
-				scrollDeltaY = scroller.getCurrY();
+			
+			if(layout.horizontalDragEnabled()){
+				viewPortX = scroller.getCurrX();
 			}
-
-			// Log.d("scrolling", "vel = " + scroller.getCurrVelocity() +
-			// ", cur x = " + scroller.getCurrX()
-			// + ", cur y = " + scroller.getCurrY() + ", vp x = " + viewPortX);
-			int x = scroller.getCurrX();
-			int y = scroller.getCurrY();
-
-			int diffx = x - scrollDeltaX;
-			int diffy = y - scrollDeltaY;
-
-			scrollDeltaX = x;
-			scrollDeltaY = y;
-
-			moveScreen(-diffx, -diffy, true);
-
+			if(layout.verticalDragEnabled()){
+				viewPortY = scroller.getCurrY();
+			}
+			
+			moveViewport(true);
+			
 			if (more) {
 				post(scrollRunnable);
 			}
 		}
 	};
 
-	private void moveScreen(float movementX, float movementY, boolean fling) {
+	protected void moveViewportBy(float movementX, float movementY, boolean fling) {
 
 		if (layout.horizontalDragEnabled()) {
 			viewPortX = (int) (viewPortX - movementX);
-		} else {
-			movementX = 0;
 		}
 
 		if (layout.verticalDragEnabled()) {
 			viewPortY = (int) (viewPortY - movementY);
-		} else {
-			movementY = 0;
-		}
-
+		} 
+		moveViewport(fling);
+	}
+	
+	protected void moveViewPort(int left, int top, boolean isInFlingMode){
+		viewPortX = left;
+		viewPortY = top;
+		moveViewport(isInFlingMode);
+	}
+	
+	/**
+	 * Will move viewport to viewPortX and viewPortY values
+	 * 
+	 * @param isInFlingMode Setting this 
+	 */
+	protected void moveViewport(boolean isInFlingMode){
+		
 		scrollableWidth = layout.getContentWidth() - getWidth();
 		if(scrollableWidth < 0){
 			scrollableWidth = 0;
@@ -882,11 +854,11 @@ public class Container extends AbsLayoutContainer {
 			scrollableHeight = 0;
 		}
 
-		if (!fling) {
-			if (viewPortX < (int) -overflingDistance) {
-				viewPortX = (int) -overflingDistance;
+		if (!isInFlingMode) {
+			if (viewPortX < -overflingDistance) {
+				viewPortX = -overflingDistance;
 			} else if (viewPortX > scrollableWidth + overflingDistance) {
-				viewPortX = (int) (scrollableWidth + overflingDistance);
+				viewPortX = (scrollableWidth + overflingDistance);
 			}
 
 			if (viewPortY < (int) (-overflingDistance)) {
@@ -1435,15 +1407,10 @@ public class Container extends AbsLayoutContainer {
 			newVPY = layout.getContentHeight() - getMeasuredHeight();
 
 		if (animate) {
-			Log.d(TAG, "vpx = " + newVPX + ", vpy = " + newVPY);
-			Log.d(TAG, "viewpx = " + viewPortX + ", viewpy = " + viewPortY);
 			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX), (viewPortY - newVPY), 1500);
-			Log.d(TAG, "final vpx = " + scroller.getFinalX() + ", final vpy = " + scroller.getFinalY());
-			flingStarted = true;
 			post(scrollRunnable);
 		} else {
-			Log.d(TAG, "vpx = " + newVPX + ", vpy = " + newVPY);
-			moveScreen((viewPortX - newVPX), (viewPortY - newVPY), false);
+			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
 			for (OnScrollListener l : scrollListeners) {
 				l.onScrolled();
 			}
