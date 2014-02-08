@@ -67,6 +67,9 @@ public class Container extends AbsLayoutContainer {
 	private int scrollDeltaY = 0;
 
 	private int maxFlingVelocity;
+	private int minFlingVelocity;
+	private int overflingDistance;
+	private int overscrollDistance;
 	private int touchSlop;
 
 	private Runnable mTouchModeReset;
@@ -77,9 +80,7 @@ public class Container extends AbsLayoutContainer {
 	private OverScroller scroller;
 	private boolean flingStarted = false;
 
-	private EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
-
-	private float pullPastSlack = 300f;
+	protected EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
 	private ArrayList<OnScrollListener> scrollListeners = new ArrayList<Container.OnScrollListener>();
 
@@ -148,8 +149,13 @@ public class Container extends AbsLayoutContainer {
 		viewpool = new ViewPool();
 		frames = new HashMap<Object, ItemProxy>();
 
-		maxFlingVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
-		touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+		ViewConfiguration configuration = ViewConfiguration.get(context);
+		maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+		minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
+		overflingDistance = configuration.getScaledOverflingDistance();
+		overscrollDistance = configuration.getScaledOverscrollDistance();
+		
+		touchSlop = configuration.getScaledTouchSlop();
 
 		scroller = new OverScroller(context);
 		mLeftEdge = new EdgeEffect(context);
@@ -305,8 +311,8 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		Object data = null;
-		int lowestSection = 99999;
-		int lowestPosition = 99999;
+		int lowestSection = Integer.MAX_VALUE;
+		int lowestPosition = Integer.MAX_VALUE;
 		
 		// Find the frame of of the first item in the first section in the current set of frames defining the viewport
 		// Changing layout will then keep this item in the viewport of the new layout
@@ -705,12 +711,16 @@ public class Container extends AbsLayoutContainer {
 
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
-				if (Math.abs(mVelocityTracker.getXVelocity()) > 100 || Math.abs(mVelocityTracker.getYVelocity()) > 100) {
+				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity || Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
 					flingStarted = true;
+					
+					int maxX = layout.getContentWidth() - getWidth();
+					int maxY = layout.getContentHeight() - getHeight();
+					
 					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
-							-(int) mVelocityTracker.getYVelocity(), 0, layout.getContentWidth() - getWidth(), 0,
-							layout.getContentHeight() - getHeight(), (int) pullPastSlack, (int) pullPastSlack);
+							-(int) mVelocityTracker.getYVelocity(), 0, maxX, 0,
+							maxY, overflingDistance, overflingDistance);
 					
 					post(scrollRunnable);
 
@@ -772,8 +782,9 @@ public class Container extends AbsLayoutContainer {
 		mBottomEdge.onRelease();
 
 		if (scroller.isFinished()) {
-			boolean start = scroller.springBack(viewPortX, viewPortY, 0, layout.getContentWidth() - getWidth(), 0,
-					layout.getContentHeight() - getHeight());
+			int maxX = layout.getContentWidth() - getWidth();
+			int maxY = layout.getContentHeight() - getHeight();
+			boolean start = scroller.springBack(viewPortX, viewPortY, 0, maxX, 0,maxY);
 
 			Log.d(TAG, "starting spring back = " + start);
 
@@ -872,33 +883,33 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (!fling) {
-			if (viewPortX < (int) -pullPastSlack) {
-				viewPortX = (int) -pullPastSlack;
-			} else if (viewPortX > scrollableWidth + pullPastSlack) {
-				viewPortX = (int) (scrollableWidth + pullPastSlack);
+			if (viewPortX < (int) -overflingDistance) {
+				viewPortX = (int) -overflingDistance;
+			} else if (viewPortX > scrollableWidth + overflingDistance) {
+				viewPortX = (int) (scrollableWidth + overflingDistance);
 			}
 
-			if (viewPortY < (int) (-pullPastSlack)) {
-				viewPortY = (int) -pullPastSlack;
-			} else if (viewPortY > scrollableHeight + pullPastSlack) {
-				viewPortY = (int) (scrollableHeight + pullPastSlack);
+			if (viewPortY < (int) (-overflingDistance)) {
+				viewPortY = (int) -overflingDistance;
+			} else if (viewPortY > scrollableHeight + overflingDistance) {
+				viewPortY = (int) (scrollableHeight + overflingDistance);
 			}
 
 			if (viewPortX <= 0) {
-				float val = viewPortX / (-pullPastSlack);
+				float val = viewPortX / (-overflingDistance);
 				// Log.d(TAG, "val = " + val);
 				mLeftEdge.onPull(val);
 				invalidate();
 			} else if (viewPortX >= scrollableWidth) {
-				mRightEdge.onPull((viewPortX - scrollableWidth) / (-pullPastSlack));
+				mRightEdge.onPull((viewPortX - scrollableWidth) / (-overflingDistance));
 				invalidate();
 			}
 
 			if (viewPortY <= 0) {
-				mTopEdge.onPull(viewPortY / (-pullPastSlack));
+				mTopEdge.onPull(viewPortY / (-overflingDistance));
 				invalidate();
 			} else if (viewPortY >= scrollableHeight) {
-				mBottomEdge.onPull((viewPortY - scrollableHeight) / (-pullPastSlack));
+				mBottomEdge.onPull((viewPortY - scrollableHeight) / (-overflingDistance));
 				invalidate();
 			}
 
@@ -1440,8 +1451,17 @@ public class Container extends AbsLayoutContainer {
 		}
 
 	}
+	
+	protected void reportScrollStateChange(int state){
+		//TODO:
+	}
+	
 
 	public interface OnScrollListener {
+		public int SCROLL_STATE_IDLE = 0;
+		public int SCROLL_STATE_TOUCH_SCROLL = 1;
+		public int SCROLL_STATE_FLING = 2;
+		
 		public void onScrolled();
 	}
 
