@@ -24,8 +24,8 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
 
-			proxy.frame.left -= callback.viewPortX;
-			proxy.frame.top -= callback.viewPortY;
+			proxy.frame.left -= callback.getViewportLeft();
+			proxy.frame.top -= callback.getViewportTop();
 
 			// if (v instanceof StateListener)
 			// ((StateListener) v).ReportCurrentState(proxy.state);

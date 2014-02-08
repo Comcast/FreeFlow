@@ -232,10 +232,10 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 			if (v instanceof StateListener)
 				((StateListener) v).ReportCurrentState(proxy.state);
 
-			proxy.frame.left -= callback.viewPortX;
-			proxy.frame.top -= callback.viewPortY;
-			proxy.frame.right -= callback.viewPortX;
-			proxy.frame.bottom -= callback.viewPortY;
+			proxy.frame.left -= callback.getViewportLeft();
+			proxy.frame.top -= callback.getViewportTop();
+			proxy.frame.right -= callback.getViewportLeft();
+			proxy.frame.bottom -= callback.getViewportTop();
 
 			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
 			// callback.viewPortY);

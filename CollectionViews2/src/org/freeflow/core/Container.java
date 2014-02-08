@@ -44,8 +44,15 @@ public class Container extends AbsLayoutContainer {
 	protected BaseSectionedAdapter itemAdapter;
 	protected AbstractLayout layout;
 
-	public int viewPortX = 0;
-	public int viewPortY = 0;
+	/**
+	 * The X position of the active ViewPort
+	 */
+	protected int viewPortX = 0;
+	
+	/**
+	 * The Y position of the active ViewPort
+	 */
+	protected int viewPortY = 0;
 
 	protected int scrollableWidth;
 	protected int scrollableHeight;
@@ -186,10 +193,9 @@ public class Container extends AbsLayoutContainer {
 			if (markLayoutDirty) {
 				markLayoutDirty = false;
 			}
-
+			
 			// Create a copy of the incoming values because the source
-			// Layout
-			// may change the map inside its own class
+			// layout may change the map inside its own class
 			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
 
 			dispatchLayoutComputed();
@@ -281,7 +287,16 @@ public class Container extends AbsLayoutContainer {
 	public AbstractLayout getLayout() {
 		return layout;
 	}
-
+	
+	/**
+	 * Computes the Rectangle that defines the ViewPort.
+	 * The Container tries to keep the view at the top left
+	 * of the old layout visible in the new layout. 
+	 * 
+	 * @see getViewportTop
+	 * @see getViewportLeft
+	 * 
+	 */
 	private void computeViewPort(AbstractLayout newLayout) {
 		if (layout == null || frames == null || frames.size() == 0) {
 			viewPortX = 0;
@@ -305,13 +320,14 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		ItemProxy proxy = newLayout.getItemProxyForItem(data);
-
+		
+		
 		if (proxy == null) {
 			viewPortX = 0;
 			viewPortY = 0;
 			return;
 		}
-
+		
 		Rect vpFrame = proxy.frame;
 
 		viewPortX = vpFrame.left;
@@ -319,13 +335,20 @@ public class Container extends AbsLayoutContainer {
 
 		scrollableWidth = layout.getContentWidth() - getWidth();
 		scrollableHeight = layout.getContentHeight() - getHeight();
-
+		
+		if(scrollableWidth < 0){
+			scrollableWidth = 0;
+		}
+		if(scrollableHeight < 0){
+			scrollableHeight = 0;
+		}
+		
 		if (viewPortX > scrollableWidth)
 			viewPortX = scrollableWidth;
 
 		if (viewPortY > scrollableHeight)
 			viewPortY = scrollableHeight;
-
+		
 	}
 
 	/**
@@ -509,6 +532,30 @@ public class Container extends AbsLayoutContainer {
 	public AbstractLayout getLayoutController() {
 		return layout;
 	}
+	
+	/**
+	 * The Viewport defines the rectangular "window" that 
+	 * the container is actually showing of the entire view.
+	 * 
+	 * @return The left (x) of the viewport within the entire
+	 * container
+	 */
+	public int getViewportLeft(){
+		return viewPortX;
+	}
+	
+	/**
+	 * The Viewport defines the rectangular "window" that 
+	 * the container is actually showing of the entire view.
+	 * 
+	 *  @return The top (y) of the viewport within the entire
+	 * container
+	 * 
+	 */
+	public int getViewportTop(){
+		return viewPortY;
+	}
+	
 
 	/**
 	 * Indicates that we are not in the middle of a touch gesture
@@ -816,7 +863,13 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		scrollableWidth = layout.getContentWidth() - getWidth();
+		if(scrollableWidth < 0){
+			scrollableWidth = 0;
+		}
 		scrollableHeight = layout.getContentHeight() - getHeight();
+		if(scrollableHeight < 0){
+			scrollableHeight = 0;
+		}
 
 		if (!fling) {
 			if (viewPortX < (int) -pullPastSlack) {
