@@ -1,9 +1,9 @@
 package org.freeflow.examples.freeflowphotogrid;
 
-import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.core.SectionedAdapter;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VLayout;
 
@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-public class SimpleCollection extends Activity implements BaseSectionedAdapter {
+public class SimpleCollection extends Activity implements SectionedAdapter {
 
 	private final String TAG = "SimpleCollection";
 

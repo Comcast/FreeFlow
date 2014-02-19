@@ -2,10 +2,10 @@ package org.freeflow.examples.freeflowphotogrid;
 
 import java.util.ArrayList;
 
-import org.freeflow.core.BaseSectionedAdapter;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.core.SectionedAdapter;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
@@ -159,7 +159,7 @@ public class MainActivity extends Activity {
 		jumpButtonAnim.bringToFront();
 	}
 
-	class ImageAdapter implements BaseSectionedAdapter {
+	class ImageAdapter implements SectionedAdapter {
 
 		private ArrayList<Section> sections = new ArrayList<Section>();
 

@@ -2,7 +2,7 @@ package org.freeflow.helpers;
 
 import java.util.ArrayList;
 
-import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 
@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-public class DefaultSectionAdapter implements BaseSectionedAdapter {
+public class DefaultSectionAdapter implements SectionedAdapter {
 
 	private ArrayList<Section> sections = new ArrayList<Section>();
 	private Context context;

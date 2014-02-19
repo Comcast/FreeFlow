@@ -3,7 +3,7 @@ package org.freeflow.core;
 import android.view.View;
 import android.view.ViewGroup;
 
-public interface BaseSectionedAdapter {
+public interface SectionedAdapter {
 
 	public long getItemId(int section, int position);
 

@@ -2,7 +2,7 @@ package org.freeflow.layouts;
 
 import java.util.HashMap;
 
-import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.layouts.animations.LayoutAnimator;
 
@@ -18,7 +18,7 @@ public abstract class AbstractLayout {
 	 */
 	public abstract void setDimensions(int measuredWidth, int measuredHeight);
 
-	public abstract void setItems(BaseSectionedAdapter adapter);
+	public abstract void setItems(SectionedAdapter adapter);
 
 	/**
 	 * Generate the item proxies of all views in the given viewport, you provide

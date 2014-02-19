@@ -2,7 +2,7 @@ package org.freeflow.layouts;
 
 import java.util.HashMap;
 
-import org.freeflow.core.BaseSectionedAdapter;
+import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 import org.freeflow.utils.ViewUtils;
@@ -19,7 +19,7 @@ public class VGridLayout extends AbstractLayout {
 	protected int headerHeight = -1;
 	protected int width = -1;
 	protected int height = -1;
-	protected BaseSectionedAdapter itemsAdapter;
+	protected SectionedAdapter itemsAdapter;
 	protected HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
 
 	private int cellBufferSize = 0;
@@ -72,7 +72,7 @@ public class VGridLayout extends AbstractLayout {
 	}
 
 	@Override
-	public void setItems(BaseSectionedAdapter adapter) {
+	public void setItems(SectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 		dataChanged = true;
 	}

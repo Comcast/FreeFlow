@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.freeflow.debug.TouchDebugUtils;
 import org.freeflow.layouts.AbstractLayout;
 import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 import org.freeflow.layouts.animations.LayoutAnimator;
@@ -41,7 +42,7 @@ public class Container extends AbsLayoutContainer {
 	// prevent layout in <code>layout()</code> method
 	private boolean preventLayout = false;
 
-	protected BaseSectionedAdapter itemAdapter;
+	protected SectionedAdapter itemAdapter;
 	protected AbstractLayout layout;
 
 	/**
@@ -514,10 +515,10 @@ public class Container extends AbsLayoutContainer {
 	 * cleared at this point and all views on the stage will be cleared
 	 * 
 	 * @param adapter
-	 *            The {@link BaseSectionedAdapter} that will populate this
+	 *            The {@link SectionedAdapter} that will populate this
 	 *            Collection
 	 */
-	public void setAdapter(BaseSectionedAdapter adapter) {
+	public void setAdapter(SectionedAdapter adapter) {
 
 		Log.d(TAG, "setting adapter");
 		markLayoutDirty = true;
@@ -610,6 +611,14 @@ public class Container extends AbsLayoutContainer {
 	 * TOUCH_MODE_SCROLL, or TOUCH_MODE_DONE_WAITING
 	 */
 	int mTouchMode = TOUCH_MODE_REST;
+	
+	/**
+	 * The duration for which the scroller will wait 
+	 * before deciding whether the user was actually trying
+	 * to stop the scroll or swuipe again to increase the 
+	 * velocity
+	 */
+	protected final int FLYWHEEL_TIMEOUT = 40;
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -635,8 +644,23 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-			scroller.forceFinished(true);
+			
+			if(mTouchMode == TOUCH_MODE_FLING){
+				// Wait for some time to see if the user is just trying 
+				// to speed up the scroll
+				postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						if(mTouchMode == TOUCH_MODE_DOWN){
+							Log.d(TAG, "mTouchMode: "+TouchDebugUtils.getTouchModeString(mTouchMode));
+							if(mTouchMode == TOUCH_MODE_DOWN){
+								scroller.forceFinished(true);
+							}
+						}
+					}
+				}, FLYWHEEL_TIMEOUT);
+			}
+			
 
 			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()),
 					(int) (viewPortY + event.getY()));
@@ -666,6 +690,7 @@ public class Container extends AbsLayoutContainer {
 				float yDiff = event.getY() - deltaY;
 
 				double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+				Log.d(TAG, "Moving distance: "+deltaX+", "+deltaY);
 
 				if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
@@ -695,7 +720,6 @@ public class Container extends AbsLayoutContainer {
 				mVelocityTracker = null;
 			}
 
-			//releaseEdges();
 			// requestLayout();
 
 			return true;
@@ -704,10 +728,7 @@ public class Container extends AbsLayoutContainer {
 
 			
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
-				//releaseEdges();
-
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-
 				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity || Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
 					int maxX = layout.getContentWidth() - getWidth();
@@ -717,12 +738,14 @@ public class Container extends AbsLayoutContainer {
 							-(int) mVelocityTracker.getYVelocity(), 0, maxX, 0,
 							maxY, overflingDistance, overflingDistance);
 					
-					
-					post(scrollRunnable);
+					mTouchMode = TOUCH_MODE_FLING;
+					post(flingRunnable);
 
 				}
-				mTouchMode = TOUCH_MODE_REST;
-
+				else{
+					mTouchMode = TOUCH_MODE_REST;
+				}
+		
 			} else if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_DONE_WAITING) {
 				if (mTouchModeReset != null) {
 					removeCallbacks(mTouchModeReset);
@@ -771,12 +794,12 @@ public class Container extends AbsLayoutContainer {
 		return selectedItemProxy;
 	}
 
-	private Runnable scrollRunnable = new Runnable() {
+	private Runnable flingRunnable = new Runnable() {
 
 		@Override
 		public void run() {
 			if (scroller.isFinished()) {
-
+				mTouchMode = TOUCH_MODE_REST;
 				for (OnScrollListener l : scrollListeners) {
 					l.onScrolled();
 				}
@@ -787,23 +810,23 @@ public class Container extends AbsLayoutContainer {
 			boolean more = scroller.computeScrollOffset();
 
 			
-				if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalDragEnabled()) {
-					mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
-				}
+			if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalDragEnabled()) {
+				mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
 
-				if (mRightEdge.isFinished() && viewPortX > layout.getContentWidth() - getMeasuredWidth()
-						&& layout.horizontalDragEnabled()) {
-					mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
-				}
+			if (mRightEdge.isFinished() && viewPortX > layout.getContentWidth() - getMeasuredWidth()
+					&& layout.horizontalDragEnabled()) {
+				mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
 
-				if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalDragEnabled()) {
-					mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
-				}
+			if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalDragEnabled()) {
+				mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
 
-				if (mBottomEdge.isFinished() && viewPortY > layout.getContentHeight() - getMeasuredHeight()
-						&& layout.verticalDragEnabled()) {
-					mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
-				}
+			if (mBottomEdge.isFinished() && viewPortY > layout.getContentHeight() - getMeasuredHeight()
+					&& layout.verticalDragEnabled()) {
+				mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
+			}
 			
 			if(layout.horizontalDragEnabled()){
 				viewPortX = scroller.getCurrX();
@@ -815,7 +838,7 @@ public class Container extends AbsLayoutContainer {
 			moveViewport(true);
 			
 			if (more) {
-				post(scrollRunnable);
+				post(flingRunnable);
 			}
 		}
 	};
@@ -868,9 +891,7 @@ public class Container extends AbsLayoutContainer {
 			}
 
 			if (viewPortX <= 0) {
-				float val = viewPortX / (-overflingDistance);
-				// Log.d(TAG, "val = " + val);
-				mLeftEdge.onPull(val);
+				mLeftEdge.onPull(viewPortX / (-overflingDistance));
 				invalidate();
 			} else if (viewPortX >= scrollableWidth) {
 				mRightEdge.onPull((viewPortX - scrollableWidth) / (-overflingDistance));
@@ -983,7 +1004,7 @@ public class Container extends AbsLayoutContainer {
 		viewpool.returnViewToPool(v);
 	}
 
-	public BaseSectionedAdapter getAdapter() {
+	public SectionedAdapter getAdapter() {
 		return itemAdapter;
 	}
 
@@ -1408,7 +1429,7 @@ public class Container extends AbsLayoutContainer {
 
 		if (animate) {
 			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX), (viewPortY - newVPY), 1500);
-			post(scrollRunnable);
+			post(flingRunnable);
 		} else {
 			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
 			for (OnScrollListener l : scrollListeners) {
