@@ -12,12 +12,15 @@ import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
+import android.view.MenuItem;
 
 public class ArtbookActivity extends Activity {
 
 	public static final String TAG = "ArtbookActivity";
 
 	private Container container;
+	private VGridLayout grid;
+	private ArtbookLayout custom;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,33 +30,46 @@ public class ArtbookActivity extends Activity {
 		fetch.load(this);
 
 		container = (Container) findViewById(R.id.container);
-	}
-
-	public void onDataLoaded(DribbbleFeed feed) {
-		Log.d(TAG, "photo: " + feed.getShots().get(0).getImage_teaser_url());
-		DribbbleDataAdapter adapter = new DribbbleDataAdapter(this, feed);
 
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
 
-		VGridLayout grid = new VGridLayout();
+		grid = new VGridLayout();
 		grid.setItemWidth(size.x / 2);
 		grid.setItemHeight(size.x / 2);
-		
-		ArtbookLayout layout = new ArtbookLayout();
-		
-		
-		container.setLayout(layout);
-		container.setAdapter(adapter);
 
+		custom = new ArtbookLayout();
+
+	}
+
+	public void onDataLoaded(DribbbleFeed feed) {
+		Log.d(TAG, "photo: " + feed.getShots().get(0).getImage_teaser_url());
+		DribbbleDataAdapter adapter = new DribbbleDataAdapter(this, feed);
+		container.setLayout(custom);
+		container.setAdapter(adapter);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.artbook, menu);
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		super.onOptionsItemSelected(item);
+		switch(item.getItemId()){
+		case (R.id.action_change_layout):
+			if(container.getLayout() == grid){
+				container.setLayout(custom);
+			}
+			else{
+				container.setLayout(grid);
+			}
+		}
+		
+		return true;
+		
+	}
 }

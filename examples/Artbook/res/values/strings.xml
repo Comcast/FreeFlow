@@ -3,6 +3,6 @@
 
     <string name="app_name">Artbook</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="change_layout">Change Layout</string>
 
 </resources>
