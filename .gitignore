@@ -15,3 +15,8 @@ CollectionViews2/gen/*
 examples/PhotoGrid/gen/*
 examples/PhotoGrid/bin/*
 
+# IDEA files
+.idea
+*.iml
+out
+gen
