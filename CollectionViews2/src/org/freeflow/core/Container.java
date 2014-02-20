@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.freeflow.animations.DefaultLayoutAnimator;
+import org.freeflow.animations.LayoutAnimator;
 import org.freeflow.debug.TouchDebugUtils;
 import org.freeflow.layouts.AbstractLayout;
-import org.freeflow.layouts.animations.DefaultLayoutAnimator;
-import org.freeflow.layouts.animations.LayoutAnimator;
 import org.freeflow.utils.ViewUtils;
 
 import android.content.Context;

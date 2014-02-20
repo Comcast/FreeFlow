@@ -1,4 +1,4 @@
-package org.freeflow.layouts.animations;
+package org.freeflow.animations;
 
 import org.freeflow.core.Container;
 import org.freeflow.core.LayoutChangeSet;

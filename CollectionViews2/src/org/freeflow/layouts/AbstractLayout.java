@@ -2,9 +2,9 @@ package org.freeflow.layouts;
 
 import java.util.HashMap;
 
+import org.freeflow.animations.LayoutAnimator;
 import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
-import org.freeflow.layouts.animations.LayoutAnimator;
 
 public abstract class AbstractLayout {
 

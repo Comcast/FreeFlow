@@ -1,4 +1,4 @@
-package org.freeflow.layouts.animations;
+package org.freeflow.animations;
 
 import java.util.ArrayList;
 

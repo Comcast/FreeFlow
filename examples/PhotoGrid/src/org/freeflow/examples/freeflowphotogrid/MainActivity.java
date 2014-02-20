@@ -2,6 +2,7 @@ package org.freeflow.examples.freeflowphotogrid;
 
 import java.util.ArrayList;
 
+import org.freeflow.animations.DefaultLayoutAnimator;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
@@ -10,7 +11,6 @@ import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VLayout;
-import org.freeflow.layouts.animations.DefaultLayoutAnimator;
 
 import android.app.Activity;
 import android.content.Context;
