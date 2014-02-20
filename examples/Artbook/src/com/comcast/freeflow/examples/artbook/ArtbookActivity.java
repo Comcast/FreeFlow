@@ -4,6 +4,7 @@ import org.freeflow.core.Container;
 import org.freeflow.layouts.VGridLayout;
 
 import com.comcast.freeflow.examples.artbook.data.DribbbleDataAdapter;
+import com.comcast.freeflow.examples.artbook.layouts.ArtbookLayout;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -40,7 +41,10 @@ public class ArtbookActivity extends Activity {
 		grid.setItemWidth(size.x / 2);
 		grid.setItemHeight(size.x / 2);
 		
-		container.setLayout(grid);
+		ArtbookLayout layout = new ArtbookLayout();
+		
+		
+		container.setLayout(layout);
 		container.setAdapter(adapter);
 
 	}
