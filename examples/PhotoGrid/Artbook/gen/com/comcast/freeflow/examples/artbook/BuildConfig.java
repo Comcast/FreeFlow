@@ -1,5 +1,5 @@
 /** Automatically generated file. DO NOT MODIFY */
-package com.arpitonline.ubercal;
+package com.comcast.freeflow.examples.artbook;
 
 public final class BuildConfig {
     public final static boolean DEBUG = true;
