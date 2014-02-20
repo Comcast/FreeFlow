@@ -44,9 +44,13 @@ public abstract class AbstractLayout {
 
 	public abstract ItemProxy getItemProxyForItem(Object item);
 
-	public abstract boolean horizontalDragEnabled();
+	public boolean horizontalDragEnabled(){
+		return true;
+	}
 
-	public abstract boolean verticalDragEnabled();
+	public boolean verticalDragEnabled(){
+		return true;
+	}
 
 	public abstract int getContentWidth();
 

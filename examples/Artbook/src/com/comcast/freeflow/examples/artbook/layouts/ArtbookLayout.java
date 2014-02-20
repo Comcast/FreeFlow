@@ -1,54 +1,54 @@
 package com.comcast.freeflow.examples.artbook.layouts;
 
+import java.util.HashMap;
+
 import org.freeflow.core.ItemProxy;
-import org.freeflow.core.Section;
 import org.freeflow.core.SectionedAdapter;
+import org.freeflow.layouts.AbstractLayout;
 
-import android.view.View;
-import android.view.ViewGroup;
+public class ArtbookLayout extends AbstractLayout {
 
-public class ArtbookLayout implements SectionedAdapter {
+
+	private int largeItemSide;
+	private int regularItemSide;
+	
+	@Override
+	public void setDimensions(int measuredWidth, int measuredHeight) {
+		largeItemSide = measuredWidth/2;
+		regularItemSide = measuredWidth/4;
+	}
 
 	@Override
-	public long getItemId(int section, int position) {
+	public void setItems(SectionedAdapter adapter) {
+	}
+
+	@Override
+	public HashMap<? extends Object, ItemProxy> getItemProxies(
+			int viewPortLeft, int viewPortTop) {
+		return null;
+	}
+
+	@Override
+	public ItemProxy getItemProxyForItem(Object item) {
+		return null;
+	}
+
+	@Override
+	public int getContentWidth() {
 		return 0;
 	}
 
 	@Override
-	public View getItemView(int section, int position, View convertView,
-			ViewGroup parent) {
-		return null;
-	}
-
-	@Override
-	public View getHeaderViewForSection(int section, View convertView,
-			ViewGroup parent) {
-		return null;
-	}
-
-	@Override
-	public int getNumberOfSections() {
+	public int getContentHeight() {
 		return 0;
 	}
 
 	@Override
-	public Section getSection(int index) {
-		return null;
+	public void setHeaderItemDimensions(int hWidth, int hHeight) {
 	}
 
 	@Override
-	public Class[] getViewTypes() {
+	public ItemProxy getItemAt(float x, float y) {
 		return null;
 	}
-
-	@Override
-	public Class getViewType(ItemProxy proxy) {
-		return null;
-	}
-
-	@Override
-	public boolean shouldDisplaySectionHeaders() {
-		return false;
-	}
-
 }
