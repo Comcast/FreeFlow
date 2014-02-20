@@ -4,6 +4,12 @@
     android:layout_height="match_parent"
     tools:context=".ArtbookActivity" >
 	
+    <org.freeflow.core.Container
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container">
+        
+    </org.freeflow.core.Container>
    
 
 </FrameLayout>
