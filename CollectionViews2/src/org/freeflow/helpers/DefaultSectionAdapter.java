@@ -44,7 +44,7 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 	}
 
 	@Override
-	public View getViewForSection(int section, int position, View convertView, ViewGroup parent) {
+	public View getItemView(int section, int position, View convertView, ViewGroup parent) {
 		TextView tv = null;
 		if (convertView != null) {
 			tv = (TextView) convertView;

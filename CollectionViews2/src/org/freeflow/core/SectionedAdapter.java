@@ -7,7 +7,7 @@ public interface SectionedAdapter {
 
 	public long getItemId(int section, int position);
 
-	public View getViewForSection(int section, int position, View convertView, ViewGroup parent);
+	public View getItemView(int section, int position, View convertView, ViewGroup parent);
 
 	public View getHeaderViewForSection(int section, View convertView, ViewGroup parent);
 

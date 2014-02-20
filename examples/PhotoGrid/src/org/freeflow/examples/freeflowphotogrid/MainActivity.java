@@ -181,7 +181,7 @@ public class MainActivity extends Activity {
 		}
 
 		@Override
-		public View getViewForSection(int section, int position, View convertView, ViewGroup parent) {
+		public View getItemView(int section, int position, View convertView, ViewGroup parent) {
 			myTv tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");

@@ -221,7 +221,7 @@ public class Container extends AbsLayoutContainer {
 			if (frameDesc.isHeader) {
 				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection, convertView, this);
 			} else {
-				view = itemAdapter.getViewForSection(frameDesc.itemSection, frameDesc.itemIndex, convertView, this);
+				view = itemAdapter.getItemView(frameDesc.itemSection, frameDesc.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)

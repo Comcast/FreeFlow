@@ -87,7 +87,7 @@ public class SimpleCollection extends Activity implements SectionedAdapter {
 	}
 
 	@Override
-	public View getViewForSection(int section, int position, View convertView, ViewGroup parent) {
+	public View getItemView(int section, int position, View convertView, ViewGroup parent) {
 
 		View v;
 
