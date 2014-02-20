@@ -69,7 +69,7 @@ public class DribbbleFetch {
 				return out.toByteArray();
 			}
 
-		}.execute("http://api.dribbble.com/shots/popular");
+		}.execute("http://api.dribbble.com/shots/popular?per_page=30");
 	}
 
 }

@@ -52,14 +52,14 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 	 * 
 	 * If set to false, all sets will animate in parallel
 	 */
-	public boolean animateAllSetsSequentially = true;
+	public boolean animateAllSetsSequentially = false;
 
 	/**
 	 * If set to true, this forces each view in a set to animate sequentially
 	 * 
 	 * If set to false, all views for a set will animate in parallel
 	 */
-	public boolean animateIndividualCellsSequentially = true;
+	public boolean animateIndividualCellsSequentially = false;
 
 	protected Container callback;
 	protected AnimatorSet disappearingSet = null;
