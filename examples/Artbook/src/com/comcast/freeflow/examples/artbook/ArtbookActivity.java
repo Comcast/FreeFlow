@@ -37,7 +37,6 @@ public class ArtbookActivity extends Activity {
 		display.getSize(size);
 
 		VGridLayout grid = new VGridLayout();
-		grid.setHeaderItemDimensions(0, 0);
 		grid.setItemWidth(size.x / 2);
 		grid.setItemHeight(size.x / 2);
 		
