@@ -16,12 +16,9 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 	
 	public void testGridLayoutMath(){
 		VGridLayout vGrid = new VGridLayout();
-		vGrid.setHeaderItemDimensions(200, 500);
-		vGrid.setItemHeight( 250 );
-		vGrid.setItemWidth(250);
-		
+		vGrid.setLayoutParams(new VGridLayout.LayoutParams(250, 250, 200, 500));
 		DefaultSectionAdapter adapter = new DefaultSectionAdapter(getActivity(), 2, 5);
-		vGrid.setItems(adapter);
+		vGrid.setAdapter(adapter);
 		
 		vGrid.setDimensions(600, 1000);
 		

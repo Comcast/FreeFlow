@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.freeflow.helpers.DefaultSectionAdapter;
+import org.freeflow.layouts.AbstractLayout;
 import org.freeflow.layouts.VLayout;
 import org.freeflow.teststub.MainActivity;
 
@@ -48,9 +49,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 							
 				
 				final VLayout vLayout = new VLayout();
-				vLayout.setItemHeight(100);
-				vLayout.setHeaderItemDimensions(200, 10);
-				vLayout.setItemHeight(300);
+				vLayout.setLayoutParams(new VLayout.LayoutParams(300, 200, 10));
 				container.setLayout(vLayout);
 				
 				final DefaultSectionAdapter adapter = new DefaultSectionAdapter(main, 1, 2);
@@ -67,7 +66,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 						adapter.setData(5, 10);
 						
 						// setItems will force new frames to be generated, but not set 
-						vLayout.setItems(adapter); 
+						vLayout.setAdapter(adapter); 
 						vLayout.generateItemProxies() ;
 						
 						//assertEquals("Layout frames did not generate as expected", 5*(10+1), vLayout.getAllProxies().size());
@@ -95,29 +94,46 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 			public void run() {
 				
 				final Container container = new Container(main);
-							
-				
-				VLayout vLayout = new VLayout();
-				vLayout.setItemHeight(100);
-				vLayout.setHeaderItemDimensions(200, 10);
-				vLayout.setItemHeight(300);
-				container.setLayout(vLayout);
 				
 				DefaultSectionAdapter adapter = new DefaultSectionAdapter(main, 1, 2);
 				container.setAdapter(adapter);
 				
+				VLayout vLayout = new VLayout();
+				vLayout.setLayoutParams(new VLayout.LayoutParams(300, 200, 10));
+				container.setLayout(vLayout);
+				
+				container.addFreeFlowEventListener( new FreeFlowEventListener() {
+					
+					@Override
+					public void onLayoutChanging(AbstractLayout oldLayout,
+							AbstractLayout newLayout) {
+					}
+					
+					@Override
+					public void layoutComputed() {
+					}
+					
+					@Override
+					public void layoutComplete() {
+						assertEquals("Correct number of children were not created", 3, container.getChildCount());
+					}
+					
+					@Override
+					public void dataChanged() {
+					}
+					
+					@Override
+					public void animationsStarted() {
+					}
+					
+					@Override
+					public void animationsComplete() {
+					}
+				} );
 				
 				main.setContentView(container);	
 				
-				container.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
-					@Override
-					public boolean onPreDraw() {
-						
-						assertEquals("Correct number of children were not created", 3, container.getChildCount());
-						lock.countDown();
-						return false;
-					}
-				});
+				
 			}
 		});
 		lock.await(5000, TimeUnit.MILLISECONDS);
