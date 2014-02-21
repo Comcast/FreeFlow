@@ -60,16 +60,13 @@ public class MainActivity extends Activity {
 
 		container.requestFocus();
 		hLayout = new HLayout();
-		hLayout.setItemWidth(100);
-		hLayout.setHeaderItemDimensions(150, 600);
+		hLayout.setLayoutParams(new HLayout.LayoutParams(100, 150, 600));
 
 		vLayout = new VLayout();
-		vLayout.setItemHeight(100);
-		vLayout.setHeaderItemDimensions(600, 150);
+		vLayout.setLayoutParams(new VLayout.LayoutParams(100, 600, 150));
 
 		vGridLayout = new VGridLayout();
-		vGridLayout.setLayoutParams(new LayoutParams(200,200));
-		vGridLayout.setHeaderItemDimensions(600, 100);
+		vGridLayout.setLayoutParams(new LayoutParams(200,200, 600, 100));
 
 		hGridLayout = new HGridLayout();
 		hGridLayout.setItemHeight(200);
@@ -77,16 +74,13 @@ public class MainActivity extends Activity {
 		hGridLayout.setHeaderItemDimensions(100, 600);
 
 		hLayout1 = new HLayout();
-		hLayout1.setItemWidth(100);
-		hLayout1.setHeaderItemDimensions(150, 600);
+		hLayout1.setLayoutParams(new HLayout.LayoutParams(100, 150, 600));
 
 		vLayout1 = new VLayout();
-		vLayout1.setItemHeight(100);
-		vLayout1.setHeaderItemDimensions(600, 150);
+		vLayout1.setLayoutParams(new VLayout.LayoutParams(100, 600, 150));
 
 		vGridLayout1 = new VGridLayout();
-		vGridLayout1.setLayoutParams(new LayoutParams(200,200));
-		vGridLayout1.setHeaderItemDimensions(600, 100);
+		vGridLayout1.setLayoutParams(new LayoutParams(200,200, 600, 100));
 
 		hGridLayout1 = new HGridLayout();
 		hGridLayout1.setItemHeight(200);

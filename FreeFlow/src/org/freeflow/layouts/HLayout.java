@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.layouts.AbstractLayout.FreeFlowLayoutParams;
+import org.freeflow.layouts.VGridLayout.LayoutParams;
 import org.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
@@ -24,10 +26,21 @@ public class HLayout extends AbstractLayout {
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
-
-	public void setItemWidth(int i) {
-		this.itemWidth = i;
-		cellBufferSize = bufferCount * itemWidth;
+	
+	@Override
+	public void setLayoutParams(FreeFlowLayoutParams params){
+		
+		if(params.equals(this.layoutParams)){
+			return;
+		}
+		
+		LayoutParams lp = (LayoutParams)params;
+		this.itemWidth = lp.itemWidth;
+		this.headerWidth = lp.headerWidth;
+		this.headerHeight = lp.headerHeight;
+		cellBufferSize = bufferCount * cellBufferSize;
+		dataChanged = true;
+		
 	}
 
 	/**
@@ -194,19 +207,24 @@ public class HLayout extends AbstractLayout {
 		return fd;
 	}
 
-	@Override
-	public void setHeaderItemDimensions(int hWidth, int hHeight) {
-		if (hWidth == headerWidth && hHeight == headerHeight)
-			return;
-
-		headerHeight = hHeight;
-		headerWidth = hWidth;
-		dataChanged = true;
-
-	}
-
 	public void setBufferCount(int bufferCount) {
 		this.bufferCount = bufferCount;
+	}
+	
+	public static class LayoutParams extends FreeFlowLayoutParams{
+		public int itemWidth = 0;
+		public int headerWidth = 0;
+		public int headerHeight = 0;
+		
+		public LayoutParams(int itemWidth){
+			this.itemWidth = itemWidth;
+		}
+		
+		public LayoutParams(int itemWidth, int headerWidth, int headerHeight){
+			this.itemWidth = itemWidth;
+			this.headerWidth = headerWidth;
+			this.headerHeight = headerHeight;
+		}
 	}
 
 }

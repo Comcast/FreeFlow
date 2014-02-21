@@ -49,6 +49,8 @@ public class VGridLayout extends AbstractLayout {
 		LayoutParams lp = (LayoutParams)params;
 		this.itemWidth = lp.itemWidth;
 		this.itemHeight = lp.itemHeight;
+		this.headerWidth = lp.headerWidth;
+		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
 		dataChanged = true;
 		
@@ -90,14 +92,6 @@ public class VGridLayout extends AbstractLayout {
 			Section s = itemsAdapter.getSection(i);
 
 			if (itemsAdapter.shouldDisplaySectionHeaders()) {
-
-				if (headerWidth < 0) {
-					throw new IllegalStateException("headerWidth not set");
-				}
-
-				if (headerHeight < 0) {
-					throw new IllegalStateException("headerHeight not set");
-				}
 
 				ItemProxy header = new ItemProxy();
 				Rect hframe = new Rect();
@@ -214,16 +208,6 @@ public class VGridLayout extends AbstractLayout {
 
 		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
 		return fd;
-	}
-
-	@Override
-	public void setHeaderItemDimensions(int hWidth, int hHeight) {
-		if (hWidth == headerWidth && headerHeight == hHeight)
-			return;
-
-		dataChanged = true;
-		headerWidth = hWidth;
-		headerHeight = hHeight;
 	}
 
 	public void setBufferCount(int bufferCount) {

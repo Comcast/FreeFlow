@@ -168,10 +168,6 @@ public class ArtbookLayout extends AbstractLayout {
 	}
 
 	@Override
-	public void setHeaderItemDimensions(int hWidth, int hHeight) {
-	}
-
-	@Override
 	public ItemProxy getItemAt(float x, float y) {
 		return (ItemProxy) ViewUtils.getItemAt(map, (int) x, (int) y);
 	}

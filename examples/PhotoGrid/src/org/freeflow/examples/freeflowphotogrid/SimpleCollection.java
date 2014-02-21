@@ -6,6 +6,7 @@ import org.freeflow.core.Section;
 import org.freeflow.core.SectionedAdapter;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VLayout;
+import org.freeflow.layouts.VGridLayout.LayoutParams;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -36,8 +37,7 @@ public class SimpleCollection extends Activity implements SectionedAdapter {
 				Log.d(TAG, "changing layout");
 
 				HLayout l = new HLayout();
-				l.setHeaderItemDimensions(10, 10);
-				l.setItemWidth(40);
+				l.setLayoutParams(new HLayout.LayoutParams(40, 10, 10));
 				container.setLayout(l);
 
 			}
@@ -62,21 +62,13 @@ public class SimpleCollection extends Activity implements SectionedAdapter {
 	}
 
 	private void populateContainer() {
-
 		section = new Section();
-		
-
 		for (int i = 0; i < colors.length; i++) {
 			section.addItem(colors[i]);
 		}
-
 		container = (Container) findViewById(R.id.container);
-
 		VLayout vLayout = new VLayout();
-		vLayout.setItemHeight(30); // Note: ItemWidth would be set by the width
-									// of the container
-		vLayout.setHeaderItemDimensions(10, 10);
-
+		vLayout.setLayoutParams(new VLayout.LayoutParams(30, 10, 10));
 		container.setAdapter(this);
 		container.setLayout(vLayout);
 	}

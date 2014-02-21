@@ -206,7 +206,6 @@ public class HGridLayout extends AbstractLayout {
 	
 	
 
-	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
 		if (hWidth == headerWidth && hHeight == headerHeight)
 			return;

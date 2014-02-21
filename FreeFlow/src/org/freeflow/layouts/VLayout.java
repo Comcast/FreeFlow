@@ -2,13 +2,14 @@ package org.freeflow.layouts;
 
 import java.util.HashMap;
 
-import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.core.SectionedAdapter;
+import org.freeflow.layouts.AbstractLayout.FreeFlowLayoutParams;
+import org.freeflow.layouts.HLayout.LayoutParams;
 import org.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
-import android.util.Log;
 
 public class VLayout extends AbstractLayout {
 
@@ -25,11 +26,6 @@ public class VLayout extends AbstractLayout {
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
 
-	public void setItemHeight(int i) {
-		this.itemHeight = i;
-		cellBufferSize = bufferCount * itemHeight;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -44,15 +40,25 @@ public class VLayout extends AbstractLayout {
 	}
 
 	@Override
+	public void setLayoutParams(FreeFlowLayoutParams params) {
+		if (params.equals(this.layoutParams)) {
+			return;
+		}
+		LayoutParams lp = (LayoutParams) params;
+		this.itemHeight = lp.itemHeight;
+		this.headerWidth = lp.headerWidth;
+		this.headerHeight = lp.headerHeight;
+		cellBufferSize = bufferCount * cellBufferSize;
+		dataChanged = true;
+	}
+
+	@Override
 	public void setItems(SectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 
 		dataChanged = true;
 	}
 
-	/**
-	 * TODO: Future optimization: can we avoid object allocation here?
-	 */
 	public void generateItemProxies() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
@@ -125,7 +131,8 @@ public class VLayout extends AbstractLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
+	public HashMap<? extends Object, ItemProxy> getItemProxies(
+			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
 		if (frameDescriptors.size() == 0 || dataChanged) {
@@ -191,7 +198,6 @@ public class VLayout extends AbstractLayout {
 		return ViewUtils.getItemAt(frameDescriptors, (int) x, (int) y);
 	}
 
-	@Override
 	public void setHeaderItemDimensions(int hWidth, int hHeight) {
 		headerWidth = hWidth;
 		headerHeight = hHeight;
@@ -199,6 +205,22 @@ public class VLayout extends AbstractLayout {
 
 	public void setBufferCount(int bufferCount) {
 		this.bufferCount = bufferCount;
+	}
+
+	public static class LayoutParams extends FreeFlowLayoutParams {
+		public int itemHeight = 0;
+		public int headerWidth = 0;
+		public int headerHeight = 0;
+
+		public LayoutParams(int itemHeight) {
+			this.itemHeight = itemHeight;
+		}
+
+		public LayoutParams(int itemHeight, int headerWidth, int headerHeight) {
+			this.itemHeight = itemHeight;
+			this.headerWidth = headerWidth;
+			this.headerHeight = headerHeight;
+		}
 	}
 
 }
