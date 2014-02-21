@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.freeflow.core.SectionedAdapter;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
+import org.freeflow.layouts.AbstractLayout.FreeFlowLayoutParams;
+import org.freeflow.layouts.VGridLayout.LayoutParams;
 import org.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
@@ -24,14 +26,6 @@ public class HGridLayout extends AbstractLayout {
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
 
-	public void setItemHeight(int i) {
-		this.itemHeight = i;
-	}
-
-	public void setItemWidth(int itemWidth) {
-		this.itemWidth = itemWidth;
-		cellBufferSize = bufferCount * itemWidth;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -46,6 +40,20 @@ public class HGridLayout extends AbstractLayout {
 		dataChanged = true;
 
 	}
+	
+	@Override
+	public void setLayoutParams(FreeFlowLayoutParams params){
+		if(params.equals(this.layoutParams)){
+			return;
+		}
+		LayoutParams lp = (LayoutParams)params;
+		this.itemWidth = lp.itemWidth;
+		this.itemHeight = lp.itemHeight;
+		this.headerWidth = lp.headerWidth;
+		this.headerHeight = lp.headerHeight;
+		cellBufferSize = bufferCount * cellBufferSize;
+		dataChanged = true;
+	}
 
 	@Override
 	public void setItems(SectionedAdapter adapter) {
@@ -53,21 +61,7 @@ public class HGridLayout extends AbstractLayout {
 		dataChanged = true;
 	}
 
-	/**
-	 * TODO: Future optimization: can we avoid object allocation here?
-	 */
 	public void generateItemProxies() {
-		if (itemHeight < 0) {
-			throw new IllegalStateException("itemHeight not set");
-		}
-
-		if (itemWidth < 0) {
-			throw new IllegalStateException("itemWidth not set");
-		}
-
-		if (height < 0 || width < 0)
-			throw new IllegalStateException("dimensions not set");
-
 		dataChanged = false;
 
 		frameDescriptors.clear();
@@ -203,21 +197,29 @@ public class HGridLayout extends AbstractLayout {
 
 		return fd;
 	}
-	
-	
-
-	public void setHeaderItemDimensions(int hWidth, int hHeight) {
-		if (hWidth == headerWidth && hHeight == headerHeight)
-			return;
-
-		headerHeight = hHeight;
-		headerWidth = hWidth;
-		dataChanged = true;
-
-	}
 
 	public void setBufferCount(int bufferCount) {
 		this.bufferCount = bufferCount;
+	}
+	
+	public static class LayoutParams extends FreeFlowLayoutParams{
+		public int itemWidth = 0;
+		public int itemHeight = 0;
+		public int headerWidth = 0;
+		public int headerHeight = 0;
+		
+		public LayoutParams(int itemWidth, int itemHeight){
+			this.itemWidth = itemWidth;
+			this.itemHeight = itemHeight;
+		}
+		
+		public LayoutParams(int itemWidth, int itemHeight, int headerWidth, int headerHeight){
+			this.itemWidth = itemWidth;
+			this.itemHeight = itemHeight;
+			this.headerWidth = headerWidth;
+			this.headerHeight = headerHeight;
+		}
+		
 	}
 
 }

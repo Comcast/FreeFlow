@@ -41,11 +41,9 @@ public class VGridLayout extends AbstractLayout {
 	
 	@Override
 	public void setLayoutParams(FreeFlowLayoutParams params){
-		
 		if(params.equals(this.layoutParams)){
 			return;
 		}
-		
 		LayoutParams lp = (LayoutParams)params;
 		this.itemWidth = lp.itemWidth;
 		this.itemHeight = lp.itemHeight;
@@ -53,7 +51,6 @@ public class VGridLayout extends AbstractLayout {
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
 		dataChanged = true;
-		
 	}
 
 	/**

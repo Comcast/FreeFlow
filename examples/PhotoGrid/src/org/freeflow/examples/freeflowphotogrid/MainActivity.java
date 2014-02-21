@@ -10,7 +10,6 @@ import org.freeflow.core.SectionedAdapter;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
-import org.freeflow.layouts.VGridLayout.LayoutParams;
 import org.freeflow.layouts.VLayout;
 
 import android.app.Activity;
@@ -66,13 +65,11 @@ public class MainActivity extends Activity {
 		vLayout.setLayoutParams(new VLayout.LayoutParams(100, 600, 150));
 
 		vGridLayout = new VGridLayout();
-		vGridLayout.setLayoutParams(new LayoutParams(200,200, 600, 100));
+		vGridLayout.setLayoutParams(new VGridLayout.LayoutParams(200,200, 600, 100));
 
 		hGridLayout = new HGridLayout();
-		hGridLayout.setItemHeight(200);
-		hGridLayout.setItemWidth(200);
-		hGridLayout.setHeaderItemDimensions(100, 600);
-
+		hGridLayout.setLayoutParams(new HGridLayout.LayoutParams(200, 200, 100, 600));
+	
 		hLayout1 = new HLayout();
 		hLayout1.setLayoutParams(new HLayout.LayoutParams(100, 150, 600));
 
@@ -80,13 +77,11 @@ public class MainActivity extends Activity {
 		vLayout1.setLayoutParams(new VLayout.LayoutParams(100, 600, 150));
 
 		vGridLayout1 = new VGridLayout();
-		vGridLayout1.setLayoutParams(new LayoutParams(200,200, 600, 100));
+		vGridLayout1.setLayoutParams(new VGridLayout.LayoutParams(200,200, 600, 100));
 
 		hGridLayout1 = new HGridLayout();
-		hGridLayout1.setItemHeight(200);
-		hGridLayout1.setItemWidth(200);
-		hGridLayout1.setHeaderItemDimensions(100, 600);
-
+		hGridLayout1.setLayoutParams(new HGridLayout.LayoutParams(200, 200, 100, 600));
+		
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
 		// container.setLayoutAnimator(new ScaleAnimator());
