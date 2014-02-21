@@ -10,6 +10,7 @@ import org.freeflow.core.SectionedAdapter;
 import org.freeflow.layouts.HGridLayout;
 import org.freeflow.layouts.HLayout;
 import org.freeflow.layouts.VGridLayout;
+import org.freeflow.layouts.VGridLayout.LayoutParams;
 import org.freeflow.layouts.VLayout;
 
 import android.app.Activity;
@@ -67,8 +68,7 @@ public class MainActivity extends Activity {
 		vLayout.setHeaderItemDimensions(600, 150);
 
 		vGridLayout = new VGridLayout();
-		vGridLayout.setItemHeight(200);
-		vGridLayout.setItemWidth(200);
+		vGridLayout.setLayoutParams(new LayoutParams(200,200));
 		vGridLayout.setHeaderItemDimensions(600, 100);
 
 		hGridLayout = new HGridLayout();
@@ -85,8 +85,7 @@ public class MainActivity extends Activity {
 		vLayout1.setHeaderItemDimensions(600, 150);
 
 		vGridLayout1 = new VGridLayout();
-		vGridLayout1.setItemHeight(200);
-		vGridLayout1.setItemWidth(200);
+		vGridLayout1.setLayoutParams(new LayoutParams(200,200));
 		vGridLayout1.setHeaderItemDimensions(600, 100);
 
 		hGridLayout1 = new HGridLayout();

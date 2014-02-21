@@ -38,23 +38,20 @@ public class VGridLayout extends AbstractLayout {
 	 * the items laid out by this class
 	 */
 	public int itemFrameInsetY = 0;
-
-	public void setItemHeight(int itemHeight) {
-		if (itemHeight == this.itemHeight)
+	
+	@Override
+	public void setLayoutParams(FreeFlowLayoutParams params){
+		
+		if(params.equals(this.layoutParams)){
 			return;
-
-		this.itemHeight = itemHeight;
-
+		}
+		
+		LayoutParams lp = (LayoutParams)params;
+		this.itemWidth = lp.itemWidth;
+		this.itemHeight = lp.itemHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
 		dataChanged = true;
-	}
-
-	public void setItemWidth(int itemWidth) {
-		if (itemWidth == this.itemWidth)
-			return;
-
-		this.itemWidth = itemWidth;
-		dataChanged = true;
+		
 	}
 
 	/**
@@ -77,21 +74,8 @@ public class VGridLayout extends AbstractLayout {
 		dataChanged = true;
 	}
 
-	/**
-	 * TODO: Future optimization: can we avoid object allocation here?
-	 */
 	public void generateItemProxies() {
-		if (itemHeight < 0) {
-			throw new IllegalStateException("itemHeight not set");
-		}
-
-		if (itemWidth < 0) {
-			throw new IllegalStateException("itemWidth not set");
-		}
-
-		if (height < 0 || width < 0)
-			throw new IllegalStateException("dimensions not set");
-
+		
 		dataChanged = false;
 
 		frameDescriptors.clear();
@@ -244,5 +228,25 @@ public class VGridLayout extends AbstractLayout {
 
 	public void setBufferCount(int bufferCount) {
 		this.bufferCount = bufferCount;
+	}
+	
+	public static class LayoutParams extends FreeFlowLayoutParams{
+		public int itemWidth = 0;
+		public int itemHeight = 0;
+		public int headerWidth = 0;
+		public int headerHeight = 0;
+		
+		public LayoutParams(int itemWidth, int itemHeight){
+			this.itemWidth = itemWidth;
+			this.itemHeight = itemHeight;
+		}
+		
+		public LayoutParams(int itemWidth, int itemHeight, int headerWidth, int headerHeight){
+			this.itemWidth = itemWidth;
+			this.itemHeight = itemHeight;
+			this.headerWidth = headerWidth;
+			this.headerHeight = headerHeight;
+		}
+		
 	}
 }

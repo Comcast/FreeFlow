@@ -42,6 +42,13 @@ public abstract class AbstractLayout {
 	 */
 	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop);
 
+	protected FreeFlowLayoutParams layoutParams;
+	public void setLayoutParams(FreeFlowLayoutParams params){
+		if(layoutParams != params){
+			params = layoutParams;
+		}
+	}
+	
 	public abstract ItemProxy getItemProxyForItem(Object item);
 
 	public boolean horizontalDragEnabled(){
@@ -59,5 +66,9 @@ public abstract class AbstractLayout {
 	public abstract void setHeaderItemDimensions(int hWidth, int hHeight);
 	
 	public abstract ItemProxy getItemAt(float x, float y);
+	
+	public static class FreeFlowLayoutParams{
+		
+	}
 
 }

@@ -2,6 +2,7 @@ package com.comcast.freeflow.examples.artbook;
 
 import org.freeflow.core.Container;
 import org.freeflow.layouts.VGridLayout;
+import org.freeflow.layouts.VGridLayout.LayoutParams;
 
 import com.comcast.freeflow.examples.artbook.data.DribbbleDataAdapter;
 import com.comcast.freeflow.examples.artbook.layouts.ArtbookLayout;
@@ -36,8 +37,8 @@ public class ArtbookActivity extends Activity {
 		display.getSize(size);
 
 		grid = new VGridLayout();
-		grid.setItemWidth(size.x / 2);
-		grid.setItemHeight(size.x / 2);
+		VGridLayout.LayoutParams params = new VGridLayout.LayoutParams(size.x/2, size.x/2);
+		grid.setLayoutParams(params);
 
 		custom = new ArtbookLayout();
 
