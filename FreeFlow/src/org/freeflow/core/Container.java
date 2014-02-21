@@ -34,6 +34,7 @@ import android.widget.OverScroller;
 public class Container extends AbsLayoutContainer {
 
 	private static final String TAG = "Container";
+	private static final String DEBUG_CONTAINER_LIFECYCLE_TAG = "ContainerLifecycle";
 
 	// ViewPool class
 	protected ViewPool viewpool;
@@ -182,7 +183,7 @@ public class Container extends AbsLayoutContainer {
 
 	public void computeLayout(int w, int h) {
 
-		Log.d(TAG, "=== Computing layout ==== ");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout");
 
 		if (layout != null) {
 
@@ -250,7 +251,7 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		// Log.d(TAG, "== onLayout ==");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onLayout");
 		// mDataChanged = false;
 
 		dispatchLayoutComplete();
@@ -283,7 +284,7 @@ public class Container extends AbsLayoutContainer {
 		viewPortX = 0;
 		viewPortY = 0;
 
-		Log.d(TAG, "=== setting layout ===");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Setting layout");
 		requestLayout();
 
 	}
@@ -394,7 +395,7 @@ public class Container extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "animating changes");
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
 			return;
 		}
@@ -520,7 +521,7 @@ public class Container extends AbsLayoutContainer {
 	 */
 	public void setAdapter(SectionedAdapter adapter) {
 
-		Log.d(TAG, "setting adapter");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "setting adapter");
 		markLayoutDirty = true;
 		markAdapterDirty = true;
 		viewPortX = 0;
@@ -929,10 +930,9 @@ public class Container extends AbsLayoutContainer {
 		}
 
 	}
-
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
-
 		super.onDraw(canvas);
 
 		boolean needsInvalidate = false;
@@ -941,7 +941,6 @@ public class Container extends AbsLayoutContainer {
 		final int width = getMeasuredWidth();
 
 		if (!mLeftEdge.isFinished()) {
-			// Log.d("EdgeView", "edge not finished");
 			final int restoreCount = canvas.save();
 
 			canvas.rotate(270);
@@ -953,7 +952,6 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (!mTopEdge.isFinished()) {
-			// Log.d("EdgeView", "edge not finished");
 			final int restoreCount = canvas.save();
 
 			mTopEdge.setSize(width, height);
@@ -963,7 +961,6 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (!mRightEdge.isFinished()) {
-			// Log.d("EdgeView", "edge not finished");
 			final int restoreCount = canvas.save();
 
 			canvas.rotate(90);
@@ -975,7 +972,6 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (!mBottomEdge.isFinished()) {
-			// Log.d("EdgeView", "edge not finished");
 			final int restoreCount = canvas.save();
 
 			canvas.rotate(180);
