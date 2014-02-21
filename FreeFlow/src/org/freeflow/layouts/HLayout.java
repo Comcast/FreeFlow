@@ -57,7 +57,7 @@ public class HLayout extends AbstractLayout {
 	}
 
 	@Override
-	public void setItems(SectionedAdapter adapter) {
+	public void setAdapter(SectionedAdapter adapter) {
 		if(adapter == this.itemsAdapter)
 			return;
 		

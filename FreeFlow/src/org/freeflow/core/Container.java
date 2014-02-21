@@ -189,7 +189,7 @@ public class Container extends AbsLayoutContainer {
 			layout.setDimensions(w, h);
 
 			if (this.itemAdapter != null)
-				layout.setItems(itemAdapter);
+				layout.setAdapter(itemAdapter);
 
 			computeViewPort(layout);
 			HashMap<? extends Object, ItemProxy> oldFrames = frames;

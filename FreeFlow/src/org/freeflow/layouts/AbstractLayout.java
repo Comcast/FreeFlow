@@ -18,7 +18,7 @@ public abstract class AbstractLayout {
 	 */
 	public abstract void setDimensions(int measuredWidth, int measuredHeight);
 
-	public abstract void setItems(SectionedAdapter adapter);
+	public abstract void setAdapter(SectionedAdapter adapter);
 
 	/**
 	 * Generate the item proxies of all views in the given viewport, you provide

@@ -56,7 +56,7 @@ public class HGridLayout extends AbstractLayout {
 	}
 
 	@Override
-	public void setItems(SectionedAdapter adapter) {
+	public void setAdapter(SectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 		dataChanged = true;
 	}

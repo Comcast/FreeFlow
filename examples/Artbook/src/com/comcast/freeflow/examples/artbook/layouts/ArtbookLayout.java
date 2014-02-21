@@ -37,7 +37,7 @@ public class ArtbookLayout extends AbstractLayout {
 	private Section s;
 
 	@Override
-	public void setItems(SectionedAdapter adapter) {
+	public void setAdapter(SectionedAdapter adapter) {
 
 		// assuming one section
 		map = new HashMap<Object, ItemProxy>();
