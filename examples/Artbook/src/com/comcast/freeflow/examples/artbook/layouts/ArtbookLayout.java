@@ -3,6 +3,7 @@ package com.comcast.freeflow.examples.artbook.layouts;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
@@ -30,8 +31,6 @@ public class ArtbookLayout extends AbstractLayout {
 
 		viewPortWidth = measuredWidth;
 		viewPortHeight = measuredHeight;
-
-		Log.d(TAG, "=> large: " + largeItemSide);
 	}
 
 	private HashMap<Object, ItemProxy> map;
@@ -121,43 +120,27 @@ public class ArtbookLayout extends AbstractLayout {
 			p.frame = r;
 			map.put(s.getDataAtIndex(i), p);
 		}
-
-		Log.d(TAG, "=> set data count: " + map.size());
-
 	}
 
 	@Override
 	public HashMap<? extends Object, ItemProxy> getItemProxies(
 			int viewPortLeft, int viewPortTop) {
 
-//		Rect viewport = new Rect(viewPortLeft, viewPortTop, viewPortLeft
-//				+ viewPortWidth, viewPortTop + viewPortHeight);
-//		Log.d(TAG, "=> Viewport: " + viewPortWidth);
-//
-//		HashMap<Object, ItemProxy> ret = new HashMap<Object, ItemProxy>();
-//
-//		Iterator it = map.entrySet().iterator();
-//		while (it.hasNext()) {
-//			Map.Entry pairs = (Map.Entry) it.next();
-//			ItemProxy p = (ItemProxy) pairs.getValue();
-//			if (p.frame.intersect(viewport)) {
-//				ret.put(pairs.getKey(), p);
-//				Log.d(TAG, "=> returning with frame: " + p.frame);
-//			}
-//		}
-//		Log.d(TAG, "for vp, returning: " + ret.size());
-//		return ret;
-		
-		
-		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
-		for (ItemProxy fd : map.values()) {
-			if (fd.frame.top + fd.frame.bottom > viewPortTop
-					&& fd.frame.top < viewPortTop + viewPortHeight) {
-				ItemProxy newDesc = ItemProxy.clone(fd);
-				desc.put(newDesc.data, newDesc);
+		Rect viewport = new Rect(viewPortLeft, 
+								viewPortTop, 
+								viewPortLeft + viewPortWidth, 
+								viewPortTop + viewPortHeight);
+		HashMap<Object, ItemProxy> ret = new HashMap<Object, ItemProxy>();
+
+		Iterator<Entry<Object, ItemProxy>> it = map.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<Object, ItemProxy> pairs = it.next();
+			ItemProxy p = (ItemProxy) pairs.getValue();
+			if ( Rect.intersects(p.frame, viewport) ) {
+				ret.put(pairs.getKey(), ItemProxy.clone(p));
 			}
 		}
-		return desc;
+		return ret;
 		
 	}
 
