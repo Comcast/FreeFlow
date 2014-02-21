@@ -6,17 +6,16 @@ import org.freeflow.core.ItemProxy;
 import org.freeflow.core.Section;
 import org.freeflow.core.SectionedAdapter;
 
-import com.comcast.freeflow.examples.artbook.DribbbleFeed;
-import com.comcast.freeflow.examples.artbook.R;
-import com.comcast.freeflow.examples.artbook.Shot;
-import com.squareup.picasso.Picasso;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import com.comcast.freeflow.examples.artbook.DribbbleFeed;
+import com.comcast.freeflow.examples.artbook.R;
+import com.squareup.picasso.Picasso;
 
 public class DribbbleDataAdapter implements SectionedAdapter {
 
