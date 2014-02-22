@@ -7,6 +7,7 @@ FreeFlow is inspired by UI frameworks like [UICollectionViews on iOS][1] and the
 
 Additionally since Layouts are only responsible or coming up with positioning rectangles, its very easy to write custom layouts in this framework.
 
+FreeFlow also gives you full control over the animation experience as the layouts transition from one to another. 
 
 ![](examples/ArtBook/screenshots/freeflow.png)
 
