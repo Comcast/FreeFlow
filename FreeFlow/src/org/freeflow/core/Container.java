@@ -697,7 +697,7 @@ public class Container extends AbsLayoutContainer {
 
 				if (mTouchMode == TOUCH_MODE_SCROLL) {
 					moveViewportBy(event.getX() - deltaX, event.getY() - deltaY, false);
-
+					invokeOnItemScrollListeners();
 					deltaX = event.getX();
 					deltaY = event.getY();
 				}
@@ -793,10 +793,7 @@ public class Container extends AbsLayoutContainer {
 		public void run() {
 			if (scroller.isFinished()) {
 				mTouchMode = TOUCH_MODE_REST;
-				for (OnScrollListener l : scrollListeners) {
-					l.onScrolled();
-				}
-
+				invokeOnItemScrollListeners();
 				return;
 			}
 
@@ -1420,12 +1417,47 @@ public class Container extends AbsLayoutContainer {
 			post(flingRunnable);
 		} else {
 			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
-			for (OnScrollListener l : scrollListeners) {
-				l.onScrolled();
-			}
-
+			invokeOnItemScrollListeners();
 		}
+	}
+	
 
+	/**
+	 * Returns the percentage of width scrolled.
+	 * The values range from 0 to 1
+	 * @return
+	 */
+	public float getScrollPercentX(){
+		if(layout == null || itemAdapter == null) 
+			return 0;
+		float w = layout.getContentWidth();
+		float scrollableWidth = w - getWidth();
+		if(scrollableWidth == 0) 
+			return 0;
+		return viewPortX/scrollableWidth;
+	}
+	
+	/**
+	 * Returns the percentage of height scrolled.
+	 * The values range from 0 to 1
+	 * @return
+	 */
+	public float getScrollPercentY(){
+		if(layout == null || itemAdapter == null) 
+			return 0;
+		float ht = layout.getContentHeight();
+		float scrollableHeight = ht - getHeight();
+		if(scrollableHeight == 0) 
+			return 0;
+		return viewPortY/scrollableHeight;
+	}
+	
+	
+	
+	protected void invokeOnItemScrollListeners() {
+		for (OnScrollListener l : scrollListeners) {
+			l.onScroll(this);
+		}
 	}
 	
 	protected void reportScrollStateChange(int state){
@@ -1438,7 +1470,7 @@ public class Container extends AbsLayoutContainer {
 		public int SCROLL_STATE_TOUCH_SCROLL = 1;
 		public int SCROLL_STATE_FLING = 2;
 		
-		public void onScrolled();
+		public void onScroll(Container container);
 	}
 
 }

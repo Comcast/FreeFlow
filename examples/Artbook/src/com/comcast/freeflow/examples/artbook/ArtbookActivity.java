@@ -1,6 +1,7 @@
 package com.comcast.freeflow.examples.artbook;
 
 import org.freeflow.core.Container;
+import org.freeflow.core.Container.OnScrollListener;
 import org.freeflow.layouts.VGridLayout;
 import org.freeflow.layouts.VGridLayout.LayoutParams;
 
@@ -49,6 +50,17 @@ public class ArtbookActivity extends Activity {
 		DribbbleDataAdapter adapter = new DribbbleDataAdapter(this, feed);
 		container.setLayout(custom);
 		container.setAdapter(adapter);
+		container.addScrollListener( new OnScrollListener() {
+			
+			@Override
+			public void onScroll(Container container) {
+				
+				float ht = container.getLayout().getContentHeight();
+				float scrollableHeight = ht - container.getHeight();
+				
+				Log.d(TAG, "scrolling % "+ container.getViewportTop() / scrollableHeight );
+			}
+		});
 	}
 
 	@Override
