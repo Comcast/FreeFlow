@@ -7,7 +7,6 @@ import java.util.Comparator;
 import org.freeflow.core.Container;
 import org.freeflow.core.ItemProxy;
 import org.freeflow.core.LayoutChangeSet;
-import org.freeflow.core.StateListener;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -228,9 +227,6 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		for (Pair<ItemProxy, Rect> item : moved) {
 			ItemProxy proxy = ItemProxy.clone(item.first);
 			View v = proxy.view;
-
-			if (v instanceof StateListener)
-				((StateListener) v).ReportCurrentState(proxy.state);
 
 			proxy.frame.left -= callback.getViewportLeft();
 			proxy.frame.top -= callback.getViewportTop();

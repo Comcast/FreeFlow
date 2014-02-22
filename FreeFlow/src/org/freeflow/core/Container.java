@@ -213,7 +213,7 @@ public class Container extends AbsLayoutContainer {
 		}
 	}
 
-	private void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
+	protected void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
 		View view;
 		if (frameDesc.view == null) {
 
@@ -237,10 +237,7 @@ public class Container extends AbsLayoutContainer {
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(), MeasureSpec.EXACTLY);
 		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(), MeasureSpec.EXACTLY);
-
 		view.measure(widthSpec, heightSpec);
-		if (view instanceof StateListener)
-			((StateListener) view).ReportCurrentState(frameDesc.state);
 	}
 
 	private void prepareViewForAddition(View view, ItemProxy proxy) {
@@ -258,15 +255,10 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	private void doLayout(ItemProxy proxy) {
+	protected void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
 		Rect frame = proxy.frame;
-
 		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.right - viewPortX, frame.bottom - viewPortY);
-
-		if (view instanceof StateListener)
-			((StateListener) view).ReportCurrentState(proxy.state);
-
 	}
 
 	public void setLayout(AbstractLayout lc) {
