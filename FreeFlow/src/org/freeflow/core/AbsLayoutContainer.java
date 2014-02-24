@@ -168,6 +168,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 	}
 
 	public void addFreeFlowEventListener(FreeFlowEventListener listener) {
+		if(listeners.indexOf(listener) != -1) return;
 		listeners.add(listener);
 	}
 
@@ -187,9 +188,9 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		}
 	}
 
-	protected void dispatchLayoutComplete() {
+	protected void dispatchLayoutComplete(boolean areTransitionAnimationsPlaying) {
 		for (FreeFlowEventListener listener : listeners) {
-			listener.layoutComplete();
+			listener.layoutComplete(areTransitionAnimationsPlaying);
 		}
 	}
 
