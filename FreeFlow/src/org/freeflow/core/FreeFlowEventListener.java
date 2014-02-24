@@ -13,8 +13,6 @@ public interface FreeFlowEventListener {
 
 	public void animationsComplete();
 
-	public void layoutComplete();
-
 	public void layoutComputed();
 	
 	/**
@@ -30,9 +28,17 @@ public interface FreeFlowEventListener {
 	 * @param newLayout
 	 */
 	public void onLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout);
+	
+	/**
+	 * Dispatched when onLayout is called and views are laid out. Note that onLayout
+	 * could be called because of views moving to new positions during a transition 
+	 * animation, so you are passed that value as a boolean. 
+	 * 
+	 * @param areTransitionAnimationsPlaying Whether layout transition animations are 
+	 * playing
+	 */
+	public void layoutComplete(boolean areTransitionAnimationsPlaying);
 
-	// Not implemented yet
-	// public void beginningScroll();
-	// public void scrollEnded();
+	
 
 }

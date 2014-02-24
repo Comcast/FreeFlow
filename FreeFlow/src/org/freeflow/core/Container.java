@@ -245,9 +245,8 @@ public class Container extends AbsLayoutContainer {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onLayout");
+		dispatchLayoutComplete(isAnimatingChanges);
 		// mDataChanged = false;
-
-		dispatchLayoutComplete();
 
 	}
 
@@ -383,7 +382,6 @@ public class Container extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "animating changes");
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
 			return;
 		}
@@ -409,7 +407,7 @@ public class Container extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layout changes complete");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layout change animations complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
 			removeView(v);

@@ -114,7 +114,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 					}
 					
 					@Override
-					public void layoutComplete() {
+					public void layoutComplete(boolean areTransitionAnimationsPlaying) {
 						assertEquals("Correct number of children were not created", 3, container.getChildCount());
 					}
 					
