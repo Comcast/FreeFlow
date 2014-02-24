@@ -54,11 +54,7 @@ public class ArtbookActivity extends Activity {
 			
 			@Override
 			public void onScroll(Container container) {
-				
-				float ht = container.getLayout().getContentHeight();
-				float scrollableHeight = ht - container.getHeight();
-				
-				Log.d(TAG, "scrolling % "+ container.getViewportTop() / scrollableHeight );
+				Log.d(TAG, "scroll percent "+ container.getScrollPercentX() );
 			}
 		});
 	}
