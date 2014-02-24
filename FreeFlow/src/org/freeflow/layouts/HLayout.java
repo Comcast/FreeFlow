@@ -14,7 +14,7 @@ import android.util.Log;
 
 public class HLayout extends AbstractLayout {
 
-	private boolean dataChanged = false;
+	private boolean layoutChanged = false;
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
 	protected int width = -1;
@@ -39,7 +39,7 @@ public class HLayout extends AbstractLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		dataChanged = true;
+		layoutChanged = true;
 		
 	}
 
@@ -53,7 +53,7 @@ public class HLayout extends AbstractLayout {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class HLayout extends AbstractLayout {
 		Log.d(TAG, "setItems called");
 		
 		this.itemsAdapter = adapter;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class HLayout extends AbstractLayout {
 			throw new IllegalStateException("dimensions not set");
 		}
 
-		dataChanged = false;
+		layoutChanged = false;
 
 		frameDescriptors.clear();
 		int leftStart = 0;
@@ -144,7 +144,7 @@ public class HLayout extends AbstractLayout {
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
@@ -199,7 +199,7 @@ public class HLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 

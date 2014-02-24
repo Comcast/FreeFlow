@@ -13,7 +13,7 @@ import android.graphics.Rect;
 
 public class HGridLayout extends AbstractLayout {
 
-	private boolean dataChanged = false;
+	private boolean layoutChanged = false;
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
@@ -37,7 +37,7 @@ public class HGridLayout extends AbstractLayout {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		dataChanged = true;
+		layoutChanged = true;
 
 	}
 	
@@ -52,17 +52,17 @@ public class HGridLayout extends AbstractLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	@Override
 	public void setAdapter(SectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	public void generateItemProxies() {
-		dataChanged = false;
+		layoutChanged = false;
 
 		frameDescriptors.clear();
 
@@ -131,7 +131,7 @@ public class HGridLayout extends AbstractLayout {
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
@@ -189,7 +189,7 @@ public class HGridLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 

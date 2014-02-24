@@ -13,7 +13,7 @@ import android.graphics.Rect;
 
 public class VLayout extends AbstractLayout {
 
-	private boolean dataChanged = false;
+	private boolean layoutChanged = false;
 	private static final String TAG = "VLayout";
 	private int itemHeight = -1;
 	private int width = -1;
@@ -36,7 +36,7 @@ public class VLayout extends AbstractLayout {
 		}
 		this.width = measuredWidth;
 		this.height = measuredHeight;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	@Override
@@ -49,14 +49,14 @@ public class VLayout extends AbstractLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	@Override
 	public void setAdapter(SectionedAdapter adapter) {
 		this.itemsAdapter = adapter;
 
-		dataChanged = true;
+		layoutChanged = true;
 	}
 
 	public void generateItemProxies() {
@@ -68,7 +68,7 @@ public class VLayout extends AbstractLayout {
 			throw new IllegalStateException("dimensions not set");
 		}
 
-		dataChanged = false;
+		layoutChanged = false;
 
 		frameDescriptors.clear();
 		int topStart = 0;
@@ -135,7 +135,7 @@ public class VLayout extends AbstractLayout {
 			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
@@ -184,7 +184,7 @@ public class VLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if (frameDescriptors.size() == 0 || dataChanged) {
+		if (frameDescriptors.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
