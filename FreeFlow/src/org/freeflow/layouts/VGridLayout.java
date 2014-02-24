@@ -20,7 +20,7 @@ public class VGridLayout extends AbstractLayout {
 	protected int width = -1;
 	protected int height = -1;
 	protected SectionedAdapter itemsAdapter;
-	protected HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
+	protected HashMap<Object, ItemProxy> proxies = new HashMap<Object, ItemProxy>();
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
@@ -77,7 +77,7 @@ public class VGridLayout extends AbstractLayout {
 		
 		layoutChanged = false;
 
-		frameDescriptors.clear();
+		proxies.clear();
 
 		int cols = width / itemWidth;
 
@@ -101,7 +101,7 @@ public class VGridLayout extends AbstractLayout {
 				hframe.bottom = topStart + headerHeight;
 				header.frame = hframe;
 				header.data = s.getSectionTitle();
-				frameDescriptors.put(header.data, header);
+				proxies.put(header.data, header);
 				topStart += headerHeight;
 			}
 
@@ -119,7 +119,7 @@ public class VGridLayout extends AbstractLayout {
 				
 				descriptor.frame = frame;
 				descriptor.data = s.getDataAtIndex(j);
-				frameDescriptors.put(descriptor.data, descriptor);
+				proxies.put(descriptor.data, descriptor);
 			}
 			int mod = 0;
 			if (s.getDataCount() % cols != 0)
@@ -142,11 +142,11 @@ public class VGridLayout extends AbstractLayout {
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if (frameDescriptors.size() == 0 || layoutChanged) {
+		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		for (ItemProxy fd : frameDescriptors.values()) {
+		for (ItemProxy fd : proxies.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
 					&& fd.frame.top < viewPortTop + height + cellBufferSize) {
 				ItemProxy newDesc = ItemProxy.clone(fd);
@@ -159,7 +159,7 @@ public class VGridLayout extends AbstractLayout {
 	
 	@Override
 	public ItemProxy getItemAt(float x, float y){
-		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
+		return ViewUtils.getItemAt(proxies, (int)x, (int)y);
 	}
 	
 	@Override
@@ -189,21 +189,21 @@ public class VGridLayout extends AbstractLayout {
 			return 0;
 
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
-		ItemProxy fd = frameDescriptors.get(lastFrameData);
+		ItemProxy fd = proxies.get(lastFrameData);
 
 		return (fd.frame.top + fd.frame.height());
 	}
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if (frameDescriptors.size() == 0 || layoutChanged) {
+		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		if (frameDescriptors.get(data) == null)
+		if (proxies.get(data) == null)
 			return null;
 
-		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
+		ItemProxy fd = ItemProxy.clone(proxies.get(data));
 		return fd;
 	}
 

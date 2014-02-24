@@ -20,7 +20,7 @@ public class HGridLayout extends AbstractLayout {
 	private int width = -1;
 	private int height = -1;
 	private SectionedAdapter itemsAdapter;
-	private HashMap<Object, ItemProxy> frameDescriptors = new HashMap<Object, ItemProxy>();
+	private HashMap<Object, ItemProxy> proxies = new HashMap<Object, ItemProxy>();
 	private int headerWidth = -1;
 	private int headerHeight = -1;
 	private int cellBufferSize = 0;
@@ -64,7 +64,7 @@ public class HGridLayout extends AbstractLayout {
 	public void generateItemProxies() {
 		layoutChanged = false;
 
-		frameDescriptors.clear();
+		proxies.clear();
 
 		int rows = height / itemHeight;
 		int leftStart = 0;
@@ -86,7 +86,7 @@ public class HGridLayout extends AbstractLayout {
 				hframe.bottom = headerHeight;
 				header.frame = hframe;
 				header.data = s.getSectionTitle();
-				frameDescriptors.put(header.data, header);
+				proxies.put(header.data, header);
 
 				leftStart += headerWidth;
 			}
@@ -102,7 +102,7 @@ public class HGridLayout extends AbstractLayout {
 				frame.bottom = frame.top + itemHeight;
 				descriptor.frame = frame;
 				descriptor.data = s.getDataAtIndex(j);
-				frameDescriptors.put(descriptor.data, descriptor);
+				proxies.put(descriptor.data, descriptor);
 			}
 			int mod = 0;
 			if (s.getDataCount() % rows != 0)
@@ -123,11 +123,11 @@ public class HGridLayout extends AbstractLayout {
 	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
 
-		if (frameDescriptors.size() == 0 || layoutChanged) {
+		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		for (ItemProxy fd : frameDescriptors.values()) {
+		for (ItemProxy fd : proxies.values()) {
 
 			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
 					&& fd.frame.left < viewPortLeft + width + cellBufferSize) {
@@ -141,7 +141,7 @@ public class HGridLayout extends AbstractLayout {
 	
 	@Override
 	public ItemProxy getItemAt(float x, float y){
-		return ViewUtils.getItemAt(frameDescriptors, (int)x, (int)y);
+		return ViewUtils.getItemAt(proxies, (int)x, (int)y);
 	}
 
 	@Override
@@ -166,7 +166,7 @@ public class HGridLayout extends AbstractLayout {
 			return 0;
 
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
-		ItemProxy fd = frameDescriptors.get(lastFrameData);
+		ItemProxy fd = proxies.get(lastFrameData);
 
 		return (fd.frame.left + fd.frame.width());
 	}
@@ -181,11 +181,11 @@ public class HGridLayout extends AbstractLayout {
 
 	@Override
 	public ItemProxy getItemProxyForItem(Object data) {
-		if (frameDescriptors.size() == 0 || layoutChanged) {
+		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		ItemProxy fd = ItemProxy.clone(frameDescriptors.get(data));
+		ItemProxy fd = ItemProxy.clone(proxies.get(data));
 
 		return fd;
 	}

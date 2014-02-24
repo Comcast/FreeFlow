@@ -206,37 +206,33 @@ public class Container extends AbsLayoutContainer {
 			dispatchLayoutComputed();
 
 			animateChanges(getViewChanges(oldFrames, frames));
-			//
-			// for (ItemProxy frameDesc : changeSet.added) {
-			// addAndMeasureViewIfNeeded(frameDesc);
-			// }
 		}
 	}
 
-	protected void addAndMeasureViewIfNeeded(ItemProxy frameDesc) {
+	protected void addAndMeasureViewIfNeeded(ItemProxy proxy) {
 		View view;
-		if (frameDesc.view == null) {
+		if (proxy.view == null) {
 
-			View convertView = viewpool.getViewFromPool(itemAdapter.getViewType(frameDesc));
+			View convertView = viewpool.getViewFromPool(itemAdapter.getViewType(proxy));
 
-			if (frameDesc.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(frameDesc.itemSection, convertView, this);
+			if (proxy.isHeader) {
+				view = itemAdapter.getHeaderViewForSection(proxy.itemSection, convertView, this);
 			} else {
-				view = itemAdapter.getItemView(frameDesc.itemSection, frameDesc.itemIndex, convertView, this);
+				view = itemAdapter.getItemView(proxy.itemSection, proxy.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)
 				throw new IllegalStateException("A container cannot be a direct child view to a container");
 
-			frameDesc.view = view;
-			prepareViewForAddition(view, frameDesc);
+			proxy.view = view;
+			prepareViewForAddition(view, proxy);
 			addView(view, getChildCount(), params);
 		}
 
-		view = frameDesc.view;
+		view = proxy.view;
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.width(), MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(frameDesc.frame.height(), MeasureSpec.EXACTLY);
+		int widthSpec = MeasureSpec.makeMeasureSpec(proxy.frame.width(), MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(proxy.frame.height(), MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 	}
 
