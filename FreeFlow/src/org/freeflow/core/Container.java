@@ -620,10 +620,10 @@ public class Container extends AbsLayoutContainer {
 
 		boolean canScroll = false;
 
-		if (layout.horizontalDragEnabled() && this.layout.getContentWidth() > getWidth()) {
+		if (layout.horizontalScrollEnabled() && this.layout.getContentWidth() > getWidth()) {
 			canScroll = true;
 		}
-		if (layout.verticalDragEnabled() && layout.getContentHeight() > getHeight()) {
+		if (layout.verticalScrollEnabled() && layout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
 
@@ -794,28 +794,28 @@ public class Container extends AbsLayoutContainer {
 			boolean more = scroller.computeScrollOffset();
 
 			
-			if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalDragEnabled()) {
+			if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalScrollEnabled()) {
 				mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
 			if (mRightEdge.isFinished() && viewPortX > layout.getContentWidth() - getMeasuredWidth()
-					&& layout.horizontalDragEnabled()) {
+					&& layout.horizontalScrollEnabled()) {
 				mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
-			if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalDragEnabled()) {
+			if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalScrollEnabled()) {
 				mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
 			if (mBottomEdge.isFinished() && viewPortY > layout.getContentHeight() - getMeasuredHeight()
-					&& layout.verticalDragEnabled()) {
+					&& layout.verticalScrollEnabled()) {
 				mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 			
-			if(layout.horizontalDragEnabled()){
+			if(layout.horizontalScrollEnabled()){
 				viewPortX = scroller.getCurrX();
 			}
-			if(layout.verticalDragEnabled()){
+			if(layout.verticalScrollEnabled()){
 				viewPortY = scroller.getCurrY();
 			}
 			
@@ -829,11 +829,11 @@ public class Container extends AbsLayoutContainer {
 
 	protected void moveViewportBy(float movementX, float movementY, boolean fling) {
 
-		if (layout.horizontalDragEnabled()) {
+		if (layout.horizontalScrollEnabled()) {
 			viewPortX = (int) (viewPortX - movementX);
 		}
 
-		if (layout.verticalDragEnabled()) {
+		if (layout.verticalScrollEnabled()) {
 			viewPortY = (int) (viewPortY - movementY);
 		} 
 		moveViewport(fling);

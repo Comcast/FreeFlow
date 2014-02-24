@@ -157,7 +157,7 @@ public class ArtbookLayout extends AbstractLayout {
 	
 	
 	@Override
-	public boolean horizontalDragEnabled(){
+	public boolean horizontalScrollEnabled(){
 		return false;
 	}
 	

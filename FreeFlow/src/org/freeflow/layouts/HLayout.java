@@ -166,12 +166,12 @@ public class HLayout extends AbstractLayout {
 	}
 
 	@Override
-	public boolean horizontalDragEnabled() {
+	public boolean horizontalScrollEnabled() {
 		return true;
 	}
 
 	@Override
-	public boolean verticalDragEnabled() {
+	public boolean verticalScrollEnabled() {
 		return false;
 	}
 

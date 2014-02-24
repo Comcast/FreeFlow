@@ -151,12 +151,12 @@ public class VLayout extends AbstractLayout {
 	}
 
 	@Override
-	public boolean horizontalDragEnabled() {
+	public boolean horizontalScrollEnabled() {
 		return false;
 	}
 
 	@Override
-	public boolean verticalDragEnabled() {
+	public boolean verticalScrollEnabled() {
 		return true;
 	}
 

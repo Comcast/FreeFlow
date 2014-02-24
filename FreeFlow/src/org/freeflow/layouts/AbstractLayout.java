@@ -51,11 +51,11 @@ public abstract class AbstractLayout {
 	
 	public abstract ItemProxy getItemProxyForItem(Object item);
 
-	public boolean horizontalDragEnabled(){
+	public boolean horizontalScrollEnabled(){
 		return true;
 	}
 
-	public boolean verticalDragEnabled(){
+	public boolean verticalScrollEnabled(){
 		return true;
 	}
 
