@@ -378,7 +378,7 @@ public class Container extends AbsLayoutContainer {
 	 * isn't changed
 	 */
 	public void layoutChanged() {
-		Log.d(TAG, "== layoutChanged");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layoutChanged");
 		markLayoutDirty = true;
 		dispatchDataChanged();
 		requestLayout();
@@ -402,7 +402,7 @@ public class Container extends AbsLayoutContainer {
 		}
 		isAnimatingChanges = true;
 
-		Log.d(TAG, "== animating changes: " + changeSet.toString());
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "animating changes: " + changeSet.toString());
 
 		dispatchAnimationsStarted();
 
@@ -413,7 +413,7 @@ public class Container extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
-		Log.d(TAG, "=== layout changes complete");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layout changes complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
 			removeView(v);
@@ -439,7 +439,6 @@ public class Container extends AbsLayoutContainer {
 
 		if (oldFrames == null) {
 			markAdapterDirty = false;
-			Log.d(TAG, "old frames is null");
 			for (ItemProxy proxy : newFrames.values()) {
 				change.addToAdded(proxy);
 			}
@@ -448,7 +447,6 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		if (markAdapterDirty) {
-			Log.d(TAG, "old frames is null");
 			markAdapterDirty = false;
 			for (ItemProxy proxy : newFrames.values()) {
 				change.addToAdded(proxy);
@@ -635,7 +633,7 @@ public class Container extends AbsLayoutContainer {
 		if (mVelocityTracker != null) {
 			mVelocityTracker.addMovement(event);
 		}
-
+		
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
 			
 			if(mTouchMode == TOUCH_MODE_FLING){
@@ -645,7 +643,6 @@ public class Container extends AbsLayoutContainer {
 					@Override
 					public void run() {
 						if(mTouchMode == TOUCH_MODE_DOWN){
-							Log.d(TAG, "mTouchMode: "+TouchDebugUtils.getTouchModeString(mTouchMode));
 							if(mTouchMode == TOUCH_MODE_DOWN){
 								scroller.forceFinished(true);
 							}
@@ -683,9 +680,7 @@ public class Container extends AbsLayoutContainer {
 				float yDiff = event.getY() - deltaY;
 
 				double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-				Log.d(TAG, "Moving distance: "+deltaX+", "+deltaY);
-
-				if (mTouchMode == TOUCH_MODE_DOWN && distance > touchSlop) {
+				if ( (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_REST) && distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
 
 					if (mPendingCheckForTap != null) {
@@ -752,7 +747,6 @@ public class Container extends AbsLayoutContainer {
 							mTouchModeReset = null;
 							mTouchMode = TOUCH_MODE_REST;
 							if (beginTouchAt != null && beginTouchAt.view != null) {
-								Log.d(TAG, "setting pressed back to false in reset");
 								beginTouchAt.view.setPressed(false);
 							}
 							if (mChoiceActionMode == null && mOnItemSelectedListener != null) {
@@ -1040,7 +1034,6 @@ public class Container extends AbsLayoutContainer {
 		}
 		if (mChoiceMode != CHOICE_MODE_NONE) {
 			if (mCheckStates == null) {
-				Log.d(TAG, "Creating mCheckStates");
 				mCheckStates = new SimpleArrayMap<IndexPath, Boolean>();
 			}
 			if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
@@ -1252,7 +1245,6 @@ public class Container extends AbsLayoutContainer {
 
 		if (mChoiceMode == CHOICE_MODE_MULTIPLE || mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
 
-			Log.d(TAG, "Setting checked: " + sectionIndex + "/" + positionInSection + ": " + value);
 			setCheckedValue(sectionIndex, positionInSection, value);
 			if (mChoiceActionMode != null) {
 				final long id = itemAdapter.getItemId(sectionIndex, positionInSection);
@@ -1337,8 +1329,6 @@ public class Container extends AbsLayoutContainer {
 			child = pairs.getValue().view;
 			boolean isChecked = isChecked(pairs.getValue().itemSection, pairs.getValue().itemIndex);
 			if (child instanceof Checkable) {
-				Log.d(TAG, "Setting checked UI : " + pairs.getValue().itemSection + ", " + pairs.getValue().itemIndex
-						+ ": " + isChecked);
 				((Checkable) child).setChecked(isChecked);
 			} else {
 				child.setActivated(isChecked);
@@ -1392,12 +1382,10 @@ public class Container extends AbsLayoutContainer {
 
 		if (sectionIndex > itemAdapter.getNumberOfSections() || sectionIndex < 0
 				|| (section = itemAdapter.getSection(sectionIndex)) == null) {
-			Log.d(TAG, "section returning");
 			return;
 		}
 
 		if (itemIndex < 0 || itemIndex > section.getDataCount()) {
-			Log.d(TAG, "item index returning");
 			return;
 		}
 
