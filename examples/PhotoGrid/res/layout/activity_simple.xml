@@ -12,7 +12,7 @@
         
         android:orientation="horizontal" >
 
-        <org.freeflow.core.Container
+        <com.comcast.freeflow.core.Container
             android:id="@+id/container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -20,7 +20,7 @@
             android:background="#BBD022"/>
         
         
-        <org.freeflow.examples.freeflowphotogrid.ControlLinearLayout
+        <com.comcast.freeflow.examples.freeflowphotogrid.ControlLinearLayout
             android:orientation="vertical"
             android:id="@+id/control_layout"
             android:layout_width="0dp"

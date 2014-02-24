@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.freeflow.core.ItemProxy;
-import org.freeflow.core.Section;
-import org.freeflow.core.SectionedAdapter;
-import org.freeflow.layouts.AbstractLayout;
-import org.freeflow.utils.ViewUtils;
+import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.Section;
+import com.comcast.freeflow.core.SectionedAdapter;
+import com.comcast.freeflow.layouts.AbstractLayout;
+import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 import android.util.Log;

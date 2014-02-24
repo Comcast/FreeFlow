@@ -2,9 +2,9 @@ package com.comcast.freeflow.examples.artbook.data;
 
 import java.util.ArrayList;
 
-import org.freeflow.core.ItemProxy;
-import org.freeflow.core.Section;
-import org.freeflow.core.SectionedAdapter;
+import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.Section;
+import com.comcast.freeflow.core.SectionedAdapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

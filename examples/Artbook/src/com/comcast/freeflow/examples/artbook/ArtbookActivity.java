@@ -1,9 +1,12 @@
 package com.comcast.freeflow.examples.artbook;
 
-import org.freeflow.core.Container;
-import org.freeflow.core.Container.OnScrollListener;
-import org.freeflow.layouts.VGridLayout;
-import org.freeflow.layouts.VGridLayout.LayoutParams;
+import com.comcast.freeflow.core.AbsLayoutContainer;
+import com.comcast.freeflow.core.AbsLayoutContainer.OnItemClickListener;
+import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.Container.OnScrollListener;
+import com.comcast.freeflow.layouts.VGridLayout;
+import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
 
 import com.comcast.freeflow.examples.artbook.data.DribbbleDataAdapter;
 import com.comcast.freeflow.examples.artbook.layouts.ArtbookLayout;
@@ -50,6 +53,13 @@ public class ArtbookActivity extends Activity {
 		DribbbleDataAdapter adapter = new DribbbleDataAdapter(this, feed);
 		container.setLayout(custom);
 		container.setAdapter(adapter);
+		container.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AbsLayoutContainer parent, ItemProxy proxy) {
+				
+			}
+		});
+		
 		container.addScrollListener( new OnScrollListener() {
 			
 			@Override
