@@ -64,10 +64,6 @@ public class VLayout extends AbstractLayout {
 			throw new IllegalStateException("itemHeight not set");
 		}
 
-		if (height < 0 || width < 0) {
-			throw new IllegalStateException("dimensions not set");
-		}
-
 		layoutChanged = false;
 
 		frameDescriptors.clear();

@@ -60,23 +60,13 @@ public class HLayout extends AbstractLayout {
 	public void setAdapter(SectionedAdapter adapter) {
 		if(adapter == this.itemsAdapter)
 			return;
-		
-		Log.d(TAG, "setItems called");
-		
 		this.itemsAdapter = adapter;
 		layoutChanged = true;
 	}
 
-	/**
-	 * TODO: Future optimization: can we avoid object allocation here?
-	 */
 	public void generateItemProxies() {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
-		}
-
-		if (height < 0 || width < 0) {
-			throw new IllegalStateException("dimensions not set");
 		}
 
 		layoutChanged = false;

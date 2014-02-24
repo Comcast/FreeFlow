@@ -75,14 +75,6 @@ public class HGridLayout extends AbstractLayout {
 
 			if (itemsAdapter.shouldDisplaySectionHeaders()) {
 				
-				if (headerWidth < 0) {
-					throw new IllegalStateException("headerWidth not set");
-				}
-
-				if (headerHeight < 0) {
-					throw new IllegalStateException("headerHeight not set");
-				}
-				
 				ItemProxy header = new ItemProxy();
 				Rect hframe = new Rect();
 				header.itemSection = i;
