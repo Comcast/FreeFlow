@@ -20,11 +20,12 @@ import java.util.HashMap;
 import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
+import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
 import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 
-public class VGridLayout extends AbstractLayout {
+public class VGridLayout implements FreeFlowLayout {
 
 	private boolean layoutChanged = false;
 	private static final String TAG = "VGridLayout";
@@ -53,6 +54,8 @@ public class VGridLayout extends AbstractLayout {
 	 * the items laid out by this class
 	 */
 	public int itemFrameInsetY = 0;
+	
+	protected FreeFlowLayoutParams layoutParams;
 	
 	@Override
 	public void setLayoutParams(FreeFlowLayoutParams params){

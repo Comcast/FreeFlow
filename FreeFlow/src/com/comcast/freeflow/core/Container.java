@@ -23,7 +23,7 @@ import java.util.Map;
 import com.comcast.freeflow.animations.DefaultLayoutAnimator;
 import com.comcast.freeflow.animations.LayoutAnimator;
 import com.comcast.freeflow.debug.TouchDebugUtils;
-import com.comcast.freeflow.layouts.AbstractLayout;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.utils.ViewUtils;
 
 import android.content.Context;
@@ -59,7 +59,7 @@ public class Container extends AbsLayoutContainer {
 	private boolean preventLayout = false;
 
 	protected SectionedAdapter itemAdapter;
-	protected AbstractLayout layout;
+	protected FreeFlowLayout layout;
 
 	/**
 	 * The X position of the active ViewPort
@@ -164,7 +164,7 @@ public class Container extends AbsLayoutContainer {
 
 	private boolean markLayoutDirty = false;
 	private boolean markAdapterDirty = false;
-	private AbstractLayout oldLayout;
+	private FreeFlowLayout oldLayout;
 
 	public Container(Context context) {
 		super(context);
@@ -341,10 +341,10 @@ public class Container extends AbsLayoutContainer {
 	 * applied, this causes the views to animate to the new layout positions.
 	 * Scroll positions will also be reset.
 	 * 
-	 * @see AbstractLayout
+	 * @see FreeFlowLayout
 	 * @param lc
 	 */
-	public void setLayout(AbstractLayout lc) {
+	public void setLayout(FreeFlowLayout lc) {
 
 		if (lc == layout) {
 			return;
@@ -367,7 +367,7 @@ public class Container extends AbsLayoutContainer {
 	/**
 	 * @return The layout currently applied to the Container
 	 */
-	public AbstractLayout getLayout() {
+	public FreeFlowLayout getLayout() {
 		return layout;
 	}
 
@@ -380,7 +380,7 @@ public class Container extends AbsLayoutContainer {
 	 * @see getViewportLeft
 	 * 
 	 */
-	private void computeViewPort(AbstractLayout newLayout) {
+	private void computeViewPort(FreeFlowLayout newLayout) {
 		if (layout == null || frames == null || frames.size() == 0) {
 			viewPortX = 0;
 			viewPortY = 0;
@@ -626,7 +626,7 @@ public class Container extends AbsLayoutContainer {
 		requestLayout();
 	}
 
-	public AbstractLayout getLayoutController() {
+	public FreeFlowLayout getLayoutController() {
 		return layout;
 	}
 

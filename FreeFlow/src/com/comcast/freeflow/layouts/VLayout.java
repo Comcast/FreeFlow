@@ -20,13 +20,13 @@ import java.util.HashMap;
 import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
-import com.comcast.freeflow.layouts.AbstractLayout.FreeFlowLayoutParams;
+import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
 import com.comcast.freeflow.layouts.HLayout.LayoutParams;
 import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 
-public class VLayout extends AbstractLayout {
+public class VLayout implements FreeFlowLayout {
 
 	private boolean layoutChanged = false;
 	private static final String TAG = "VLayout";
@@ -40,7 +40,9 @@ public class VLayout extends AbstractLayout {
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
-
+	
+	protected FreeFlowLayoutParams layoutParams;
+	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.comcast.freeflow.core;
 
-import com.comcast.freeflow.layouts.AbstractLayout;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 
 /**
  * Interface that all listeners interested in layout change events must
@@ -42,7 +42,7 @@ public interface FreeFlowEventListener {
 	 * @param oldLayout
 	 * @param newLayout
 	 */
-	public void onLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout);
+	public void onLayoutChanging(FreeFlowLayout oldLayout, FreeFlowLayout newLayout);
 	
 	/**
 	 * Dispatched when onLayout is called and views are laid out. Note that onLayout

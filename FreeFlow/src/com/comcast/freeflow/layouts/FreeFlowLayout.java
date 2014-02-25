@@ -27,9 +27,7 @@ import com.comcast.freeflow.core.SectionedAdapter;
  * <code>SectionedAdapter</code> supplied to it.
  * 
  */
-public abstract class AbstractLayout {
-
-	protected LayoutAnimator layoutAnimator = null;
+public interface FreeFlowLayout {
 
 	/**
 	 * Called whenever Container's onMeasure is triggered Note: We don't support
@@ -41,9 +39,9 @@ public abstract class AbstractLayout {
 	 * @param measuredHeight
 	 *            The height of the Container
 	 */
-	public abstract void setDimensions(int measuredWidth, int measuredHeight);
+	public  void setDimensions(int measuredWidth, int measuredHeight);
 
-	public abstract void setAdapter(SectionedAdapter adapter);
+	public  void setAdapter(SectionedAdapter adapter);
 
 	/**
 	 * Generate the item proxies of all views in the given viewport, you provide
@@ -65,32 +63,22 @@ public abstract class AbstractLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(
+	public  HashMap<? extends Object, ItemProxy> getItemProxies(
 			int viewPortLeft, int viewPortTop);
 
-	protected FreeFlowLayoutParams layoutParams;
+	public void setLayoutParams(FreeFlowLayoutParams params);
 
-	public void setLayoutParams(FreeFlowLayoutParams params) {
-		if (layoutParams != params) {
-			params = layoutParams;
-		}
-	}
+	public  ItemProxy getItemProxyForItem(Object item);
 
-	public abstract ItemProxy getItemProxyForItem(Object item);
+	public boolean horizontalScrollEnabled();
 
-	public boolean horizontalScrollEnabled() {
-		return true;
-	}
+	public boolean verticalScrollEnabled();
 
-	public boolean verticalScrollEnabled() {
-		return true;
-	}
+	public  int getContentWidth();
 
-	public abstract int getContentWidth();
+	public  int getContentHeight();
 
-	public abstract int getContentHeight();
-
-	public abstract ItemProxy getItemAt(float x, float y);
+	public  ItemProxy getItemAt(float x, float y);
 
 	public static class FreeFlowLayoutParams {
 

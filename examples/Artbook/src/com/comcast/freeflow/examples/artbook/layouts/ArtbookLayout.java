@@ -17,19 +17,19 @@ package com.comcast.freeflow.examples.artbook.layouts;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
-
-import com.comcast.freeflow.core.ItemProxy;
-import com.comcast.freeflow.core.Section;
-import com.comcast.freeflow.core.SectionedAdapter;
-import com.comcast.freeflow.layouts.AbstractLayout;
-import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 import android.util.Log;
 
-public class ArtbookLayout extends AbstractLayout {
+import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.Section;
+import com.comcast.freeflow.core.SectionedAdapter;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
+import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
+import com.comcast.freeflow.utils.ViewUtils;
+
+public class ArtbookLayout implements FreeFlowLayout {
 
 	private static final String TAG = "ArtbookLayout";
 
@@ -169,13 +169,6 @@ public class ArtbookLayout extends AbstractLayout {
 	public int getContentWidth() {
 		return 0;
 	}
-	
-	
-	@Override
-	public boolean horizontalScrollEnabled(){
-		return false;
-	}
-	
 
 	@Override
 	public int getContentHeight() {
@@ -185,5 +178,21 @@ public class ArtbookLayout extends AbstractLayout {
 	@Override
 	public ItemProxy getItemAt(float x, float y) {
 		return (ItemProxy) ViewUtils.getItemAt(map, (int) x, (int) y);
+	}
+
+	@Override
+	public void setLayoutParams(FreeFlowLayoutParams params) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean verticalScrollEnabled() {
+		return true;
+	}
+	
+	@Override
+	public boolean horizontalScrollEnabled(){
+		return false;
 	}
 }

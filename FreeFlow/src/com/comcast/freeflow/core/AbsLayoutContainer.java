@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.comcast.freeflow.layouts.AbstractLayout;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -221,7 +221,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		}
 	}
 
-	protected void dispatchLayoutChanging(AbstractLayout oldLayout, AbstractLayout newLayout) {
+	protected void dispatchLayoutChanging(FreeFlowLayout oldLayout, FreeFlowLayout newLayout) {
 		for (FreeFlowEventListener listener : listeners) {
 			listener.onLayoutChanging(oldLayout, newLayout);
 		}

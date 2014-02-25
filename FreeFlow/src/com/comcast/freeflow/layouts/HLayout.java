@@ -20,14 +20,14 @@ import java.util.HashMap;
 import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
-import com.comcast.freeflow.layouts.AbstractLayout.FreeFlowLayoutParams;
+import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
 import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
 import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 import android.util.Log;
 
-public class HLayout extends AbstractLayout {
+public class HLayout implements FreeFlowLayout {
 
 	private boolean layoutChanged = false;
 	private static final String TAG = "HLayout";
@@ -41,6 +41,8 @@ public class HLayout extends AbstractLayout {
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
+	
+	protected FreeFlowLayoutParams layoutParams;
 	
 	@Override
 	public void setLayoutParams(FreeFlowLayoutParams params){

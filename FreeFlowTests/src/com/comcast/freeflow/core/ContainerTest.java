@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.comcast.freeflow.helpers.DefaultSectionAdapter;
-import com.comcast.freeflow.layouts.AbstractLayout;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.layouts.VLayout;
 import com.comcast.freeflow.teststub.MainActivity;
 
@@ -120,8 +120,8 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 				container.addFreeFlowEventListener( new FreeFlowEventListener() {
 					
 					@Override
-					public void onLayoutChanging(AbstractLayout oldLayout,
-							AbstractLayout newLayout) {
+					public void onLayoutChanging(FreeFlowLayout oldLayout,
+							FreeFlowLayout newLayout) {
 					}
 					
 					@Override
