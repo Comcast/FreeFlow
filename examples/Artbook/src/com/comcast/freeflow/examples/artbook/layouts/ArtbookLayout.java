@@ -48,18 +48,11 @@ public class ArtbookLayout extends FreeFlowLayoutBase implements FreeFlowLayout 
 
 	private HashMap<Object, FreeFlowItem> map;
 	private Section s;
-
-	@Override
-	public void setAdapter(SectionedAdapter adapter) {
-
-		// assuming one section
-		map = new HashMap<Object, FreeFlowItem>();
-		s = adapter.getSection(0);
-	}
 	
 	@Override
 	public void prepareLayout(){
-
+		map = new HashMap<Object, FreeFlowItem>();
+		s = itemsAdapter.getSection(0);
 		int rowIndex;
 
 		for (int i = 0; i < s.getDataCount(); i++) {
