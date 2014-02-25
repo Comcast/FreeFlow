@@ -142,7 +142,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 					}
 					
 					@Override
-					public void animationsComplete() {
+					public void layoutChangeAnimationsComplete() {
 					}
 				} );
 				
