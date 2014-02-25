@@ -36,7 +36,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
-public class DefaultLayoutAnimator implements LayoutAnimator {
+public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	
 	protected LayoutChangeset changeSet;
 

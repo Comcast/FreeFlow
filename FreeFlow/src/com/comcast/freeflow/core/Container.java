@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.comcast.freeflow.animations.DefaultLayoutAnimator;
-import com.comcast.freeflow.animations.LayoutAnimator;
+import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
 import com.comcast.freeflow.debug.TouchDebugUtils;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.utils.ViewUtils;
@@ -158,7 +158,7 @@ public class Container extends AbsLayoutContainer {
 
 	private LayoutParams params = new LayoutParams(0, 0);
 
-	private LayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
+	private FreeFlowLayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
 
 	private ItemProxy beginTouchAt;
 
@@ -507,7 +507,7 @@ public class Container extends AbsLayoutContainer {
 	 * @param anim
 	 *            The LayoutAnimator instance that reported change complete.
 	 */
-	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
+	public void onLayoutChangeAnimationsCompleted(FreeFlowLayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
@@ -1105,11 +1105,11 @@ public class Container extends AbsLayoutContainer {
 		return itemAdapter;
 	}
 
-	public void setLayoutAnimator(LayoutAnimator anim) {
+	public void setLayoutAnimator(FreeFlowLayoutAnimator anim) {
 		layoutAnimator = anim;
 	}
 
-	public LayoutAnimator getLayoutAnimator() {
+	public FreeFlowLayoutAnimator getLayoutAnimator() {
 		return layoutAnimator;
 	}
 

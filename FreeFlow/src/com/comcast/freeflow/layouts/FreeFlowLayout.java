@@ -17,7 +17,7 @@ package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
 
-import com.comcast.freeflow.animations.LayoutAnimator;
+import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
 import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.SectionedAdapter;
 

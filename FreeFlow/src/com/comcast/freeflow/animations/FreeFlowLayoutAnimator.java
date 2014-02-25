@@ -18,7 +18,7 @@ package com.comcast.freeflow.animations;
 import com.comcast.freeflow.core.Container;
 import com.comcast.freeflow.core.LayoutChangeset;
 
-public interface LayoutAnimator {
+public interface FreeFlowLayoutAnimator {
 
 	/**
 	 * Returns the <code>LayoutChangeSet</code> object thats currently being
