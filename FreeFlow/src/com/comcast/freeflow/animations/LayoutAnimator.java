@@ -18,21 +18,15 @@ package com.comcast.freeflow.animations;
 import com.comcast.freeflow.core.Container;
 import com.comcast.freeflow.core.LayoutChangeSet;
 
-public abstract class LayoutAnimator {
+public interface LayoutAnimator {
 
-	protected LayoutChangeSet changeSet;
+	public LayoutChangeSet getChangeSet();
 
-	public LayoutAnimator() {
+	public void cancel();
 
-	}
-
-	public LayoutChangeSet getChangeSet() {
-		return changeSet;
-	}
-
-	public abstract void cancel();
-
-	public abstract void animateChanges(LayoutChangeSet changes, Container callback);
+	public void animateChanges(LayoutChangeSet changes, Container callback);
+	
+	public boolean isRunning();
 
 
 }

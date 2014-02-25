@@ -36,7 +36,9 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
-public class DefaultLayoutAnimator extends LayoutAnimator {
+public class DefaultLayoutAnimator implements LayoutAnimator {
+	
+	protected LayoutChangeSet changeSet;
 
 	public static final String TAG = "DefaultLayoutAnimator";
 
@@ -94,8 +96,12 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 		if (movingSet != null)
 			movingSet.cancel();
+		
+		mIsRunning = false;
 
 	}
+	
+	protected boolean mIsRunning = false;
 
 	@Override
 	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
@@ -106,6 +112,8 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 		cancel();
 
+		mIsRunning = true;
+		
 		disappearingSet = null;
 		appearingSet = null;
 		movingSet = null;
@@ -136,6 +144,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 		AnimatorSet all = getAnimationSequence();
 		if (all == null) {
+			mIsRunning = false;
 			callback.onLayoutChangeAnimationsCompleted(this);
 		} else {
 
@@ -151,6 +160,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 				@Override
 				public void onAnimationEnd(Animator animation) {
+					mIsRunning = false;
 					callback.onLayoutChangeAnimationsCompleted(DefaultLayoutAnimator.this);
 				}
 
@@ -315,6 +325,16 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 
 	public void setDuration(int duration) {
 		this.cellPositionTransitionAnimationDuration = duration;
+	}
+
+	@Override
+	public LayoutChangeSet getChangeSet() {
+		return changeSet;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return mIsRunning;
 	}
 
 }

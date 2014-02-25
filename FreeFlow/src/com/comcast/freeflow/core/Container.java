@@ -500,6 +500,13 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
+	/**
+	 * This method is called by the <code>LayoutAnimator</code> instance once
+	 * all transition animations have been completed.
+	 * 
+	 * @param anim
+	 *            The LayoutAnimator instance that reported change complete.
+	 */
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
