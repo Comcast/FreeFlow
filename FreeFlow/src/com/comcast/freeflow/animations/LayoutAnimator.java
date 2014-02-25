@@ -43,10 +43,16 @@ public interface LayoutAnimator {
 	 * @see Container#onLayoutChangeAnimationsCompleted(LayoutAnimator)
 	 * 
 	 * @param changes
+	 *            The Changeset to be animated
 	 * @param callback
+	 *            The Container instance to be informed when your animations are
+	 *            complete
 	 */
 	public void animateChanges(LayoutChangeset changes, Container callback);
 
+	/**
+	 * @return Whether the layout animation is currently playing
+	 */
 	public boolean isRunning();
 
 }
