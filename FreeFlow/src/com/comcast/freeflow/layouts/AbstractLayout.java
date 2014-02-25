@@ -21,15 +21,25 @@ import com.comcast.freeflow.animations.LayoutAnimator;
 import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.SectionedAdapter;
 
+/**
+ * The base class for all custom layouts. The Layout is responsible for figuring
+ * out all the positions for all the views created by the Container based on the
+ * <code>SectionedAdapter</code> supplied to it.
+ * 
+ */
 public abstract class AbstractLayout {
 
 	protected LayoutAnimator layoutAnimator = null;
 
 	/**
-	 * Called whenever Container's onMeasure is triggered
+	 * Called whenever Container's onMeasure is triggered Note: We don't support
+	 * margin and padding yet, so the dimensions are the entire actual of the
+	 * Container
 	 * 
 	 * @param measuredWidth
+	 *            The width of the Container
 	 * @param measuredHeight
+	 *            The height of the Container
 	 */
 	public abstract void setDimensions(int measuredWidth, int measuredHeight);
 
@@ -55,33 +65,35 @@ public abstract class AbstractLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop);
+	public abstract HashMap<? extends Object, ItemProxy> getItemProxies(
+			int viewPortLeft, int viewPortTop);
 
 	protected FreeFlowLayoutParams layoutParams;
-	public void setLayoutParams(FreeFlowLayoutParams params){
-		if(layoutParams != params){
+
+	public void setLayoutParams(FreeFlowLayoutParams params) {
+		if (layoutParams != params) {
 			params = layoutParams;
 		}
 	}
-	
+
 	public abstract ItemProxy getItemProxyForItem(Object item);
 
-	public boolean horizontalScrollEnabled(){
+	public boolean horizontalScrollEnabled() {
 		return true;
 	}
 
-	public boolean verticalScrollEnabled(){
+	public boolean verticalScrollEnabled() {
 		return true;
 	}
 
 	public abstract int getContentWidth();
 
 	public abstract int getContentHeight();
-	
+
 	public abstract ItemProxy getItemAt(float x, float y);
-	
-	public static class FreeFlowLayoutParams{
-		
+
+	public static class FreeFlowLayoutParams {
+
 	}
 
 }
