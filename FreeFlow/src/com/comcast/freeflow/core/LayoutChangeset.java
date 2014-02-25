@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import android.graphics.Rect;
 import android.util.Pair;
 
-public class LayoutChangeSet {
+public class LayoutChangeset {
 	protected ArrayList<Pair<ItemProxy, Rect>> moved = new ArrayList<Pair<ItemProxy, Rect>>();
 	protected ArrayList<ItemProxy> removed = new ArrayList<ItemProxy>();
 	protected ArrayList<ItemProxy> added = new ArrayList<ItemProxy>();
 
-	public LayoutChangeSet() {
+	public LayoutChangeset() {
 	}
 
 	public void addToMoved(ItemProxy proxy, Rect oldFrame) {

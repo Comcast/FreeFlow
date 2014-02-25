@@ -21,7 +21,7 @@ import java.util.Comparator;
 
 import com.comcast.freeflow.core.Container;
 import com.comcast.freeflow.core.ItemProxy;
-import com.comcast.freeflow.core.LayoutChangeSet;
+import com.comcast.freeflow.core.LayoutChangeset;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -38,7 +38,7 @@ import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator implements LayoutAnimator {
 	
-	protected LayoutChangeSet changeSet;
+	protected LayoutChangeset changeSet;
 
 	public static final String TAG = "DefaultLayoutAnimator";
 
@@ -104,7 +104,7 @@ public class DefaultLayoutAnimator implements LayoutAnimator {
 	protected boolean mIsRunning = false;
 
 	@Override
-	public void animateChanges(LayoutChangeSet changeSet, final Container callback) {
+	public void animateChanges(LayoutChangeset changeSet, final Container callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
 
@@ -328,7 +328,7 @@ public class DefaultLayoutAnimator implements LayoutAnimator {
 	}
 
 	@Override
-	public LayoutChangeSet getChangeSet() {
+	public LayoutChangeset getChangeSet() {
 		return changeSet;
 	}
 

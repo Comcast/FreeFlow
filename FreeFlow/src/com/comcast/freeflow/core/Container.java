@@ -475,7 +475,7 @@ public class Container extends AbsLayoutContainer {
 
 	protected boolean isAnimatingChanges = false;
 
-	private void animateChanges(LayoutChangeSet changeSet) {
+	private void animateChanges(LayoutChangeset changeSet) {
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
 				&& changeSet.moved.size() == 0) {
 			return;
@@ -524,19 +524,19 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	public LayoutChangeSet getViewChanges(
+	public LayoutChangeset getViewChanges(
 			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
-	public LayoutChangeSet getViewChanges(
+	public LayoutChangeset getViewChanges(
 			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames,
 			boolean moveEvenIfSame) {
 
 		// cleanupViews();
-		LayoutChangeSet change = new LayoutChangeSet();
+		LayoutChangeset change = new LayoutChangeset();
 
 		if (oldFrames == null) {
 			markAdapterDirty = false;
@@ -1012,7 +1012,7 @@ public class Container extends AbsLayoutContainer {
 		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
 				viewPortX, viewPortY));
 
-		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames, true);
+		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
 		for (ItemProxy proxy : changeSet.added) {
 			addAndMeasureViewIfNeeded(proxy);

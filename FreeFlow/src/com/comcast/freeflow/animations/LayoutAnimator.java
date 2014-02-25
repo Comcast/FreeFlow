@@ -16,17 +16,37 @@
 package com.comcast.freeflow.animations;
 
 import com.comcast.freeflow.core.Container;
-import com.comcast.freeflow.core.LayoutChangeSet;
+import com.comcast.freeflow.core.LayoutChangeset;
 
 public interface LayoutAnimator {
 
-	public LayoutChangeSet getChangeSet();
+	/**
+	 * Returns the <code>LayoutChangeSet</code> object thats currently being
+	 * animated
+	 * 
+	 * @return
+	 */
+	public LayoutChangeset getChangeSet();
 
+	/**
+	 * Cancels the currently running layout change animation
+	 */
 	public void cancel();
 
-	public void animateChanges(LayoutChangeSet changes, Container callback);
-	
-	public boolean isRunning();
+	/**
+	 * Start the animation on all the changes that are wrapped in the
+	 * <code>LayoutChangeset</code> object. These animations can span as much
+	 * time as they want, but you are responsible for telling the
+	 * <code>Container</code> when the animations are done by calling the
+	 * <code>onLayoutChangeAnimationsCompleted</code> method on it.
+	 * 
+	 * @see Container#onLayoutChangeAnimationsCompleted(LayoutAnimator)
+	 * 
+	 * @param changes
+	 * @param callback
+	 */
+	public void animateChanges(LayoutChangeset changes, Container callback);
 
+	public boolean isRunning();
 
 }

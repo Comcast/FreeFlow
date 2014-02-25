@@ -176,7 +176,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 		newMap.put(one, proxy2);
 		
 		Container container = new Container(getActivity());
-		LayoutChangeSet changes = container.getViewChanges(oldMap, newMap);
+		LayoutChangeset changes = container.getViewChanges(oldMap, newMap);
 		
 		assertTrue(changes.getMoved().size() == 1);
 		assertTrue(changes.getAdded().size() == 0);
