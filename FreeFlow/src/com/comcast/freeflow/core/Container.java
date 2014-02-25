@@ -65,21 +65,29 @@ public class Container extends AbsLayoutContainer {
 	 * The X position of the active ViewPort
 	 */
 	protected int viewPortX = 0;
-	
+
 	/**
 	 * The Y position of the active ViewPort
 	 */
 	protected int viewPortY = 0;
 
-	protected int scrollableWidth;
-	protected int scrollableHeight;
+	/**
+	 * The scrollable width in pixels. This is usually computed as the
+	 * difference between the width of the container and the contentWidth as
+	 * computed by the layout.
+	 */
+	protected int mScrollableWidth;
 
-	protected View headerView = null;
+	/**
+	 * The scrollable height in pixels. This is usually computed as the
+	 * difference between the height of the container and the contentHeight as
+	 * computed by the layout.
+	 */
+	protected int mScrollableHeight;
 
 	private VelocityTracker mVelocityTracker = null;
 	private float deltaX = -1f;
 	private float deltaY = -1f;
-
 
 	private int maxFlingVelocity;
 	private int minFlingVelocity;
@@ -102,11 +110,21 @@ public class Container extends AbsLayoutContainer {
 	// the ActionMode
 	// private boolean mDataChanged = false;
 
-	private ContextMenuInfo mContextMenuInfo = null;
+	/**
+	 * TODO: ContextMenu action on long press has not been implemented yet
+	 */
+	protected ContextMenuInfo mContextMenuInfo = null;
 
-	private SimpleArrayMap<IndexPath, Boolean> mCheckStates = null;
+	/**
+	 * Holds the checked items when the Container is in CHOICE_MODE_MULTIPLE
+	 */
+	protected SimpleArrayMap<IndexPath, Boolean> mCheckStates = null;
 
 	ActionMode mChoiceActionMode;
+
+	/**
+	 * Wraps the callback for MultiChoiceMode
+	 */
 	MultiChoiceModeWrapper mMultiChoiceModeCallback;
 
 	/**
@@ -129,6 +147,13 @@ public class Container extends AbsLayoutContainer {
 	 */
 	public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
 
+	/**
+	 * The value of the current ChoiceMode
+	 * 
+	 * @see <a href=
+	 *      "http://developer.android.com/reference/android/widget/AbsListView.html#attr_android:choiceMode"
+	 *      >List View's Choice Mode</a>
+	 */
 	int mChoiceMode = CHOICE_MODE_NONE;
 
 	private LayoutParams params = new LayoutParams(0, 0);
@@ -168,7 +193,7 @@ public class Container extends AbsLayoutContainer {
 		minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
 		overflingDistance = configuration.getScaledOverflingDistance();
 		overscrollDistance = configuration.getScaledOverscrollDistance();
-		
+
 		touchSlop = configuration.getScaledTouchSlop();
 
 		scroller = new OverScroller(context);
@@ -190,13 +215,26 @@ public class Container extends AbsLayoutContainer {
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-		if (beforeWidth != afterWidth || beforeHeight != afterHeight || markLayoutDirty) {
+		if (beforeWidth != afterWidth || beforeHeight != afterHeight
+				|| markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
 
 	}
 
-	public void computeLayout(int w, int h) {
+	/**
+	 * The heart of the system. Calls the layout to get the frames needed,
+	 * decides which view should be kept in focus if view transitions are going
+	 * to happen and then kicks off animation changes if things have changed
+	 * 
+	 * @param w
+	 *            Width of the viewport. Since right now we don't support
+	 *            margins and padding, this is width of the container.
+	 * @param h
+	 *            Height of the viewport. Since right now we don't support
+	 *            margins and padding, this is height of the container.
+	 */
+	protected void computeLayout(int w, int h) {
 
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout");
 
@@ -213,10 +251,11 @@ public class Container extends AbsLayoutContainer {
 			if (markLayoutDirty) {
 				markLayoutDirty = false;
 			}
-			
+
 			// Create a copy of the incoming values because the source
 			// layout may change the map inside its own class
-			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+					viewPortX, viewPortY));
 
 			dispatchLayoutComputed();
 
@@ -224,20 +263,33 @@ public class Container extends AbsLayoutContainer {
 		}
 	}
 
+	/**
+	 * Adds a view based on the current viewport. If we can get a view from the
+	 * ViewPool, we dont need to construct a new instance, else we will based on
+	 * the View class returned by the <code>Adapter</code>
+	 * 
+	 * @param proxy
+	 *            <code>ItemProxy</code> instance that determines the View being
+	 *            positioned
+	 */
 	protected void addAndMeasureViewIfNeeded(ItemProxy proxy) {
 		View view;
 		if (proxy.view == null) {
 
-			View convertView = viewpool.getViewFromPool(itemAdapter.getViewType(proxy));
+			View convertView = viewpool.getViewFromPool(itemAdapter
+					.getViewType(proxy));
 
 			if (proxy.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(proxy.itemSection, convertView, this);
+				view = itemAdapter.getHeaderViewForSection(proxy.itemSection,
+						convertView, this);
 			} else {
-				view = itemAdapter.getItemView(proxy.itemSection, proxy.itemIndex, convertView, this);
+				view = itemAdapter.getItemView(proxy.itemSection,
+						proxy.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)
-				throw new IllegalStateException("A container cannot be a direct child view to a container");
+				throw new IllegalStateException(
+						"A container cannot be a direct child view to a container");
 
 			proxy.view = view;
 			prepareViewForAddition(view, proxy);
@@ -246,14 +298,26 @@ public class Container extends AbsLayoutContainer {
 
 		view = proxy.view;
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(proxy.frame.width(), MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(proxy.frame.height(), MeasureSpec.EXACTLY);
+		int widthSpec = MeasureSpec.makeMeasureSpec(proxy.frame.width(),
+				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(proxy.frame.height(),
+				MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 	}
 
-	private void prepareViewForAddition(View view, ItemProxy proxy) {
+	/**
+	 * Does all the necessary work right before a view is about to be laid out.
+	 * 
+	 * @param view
+	 *            The View that will be added to the Container
+	 * @param proxy
+	 *            The <code>ItemProxy</code> instance that represents the view
+	 *            that will be positioned
+	 */
+	protected void prepareViewForAddition(View view, ItemProxy proxy) {
 		if (view instanceof Checkable) {
-			((Checkable) view).setChecked(isChecked(proxy.itemSection, proxy.itemIndex));
+			((Checkable) view).setChecked(isChecked(proxy.itemSection,
+					proxy.itemIndex));
 		}
 	}
 
@@ -268,9 +332,18 @@ public class Container extends AbsLayoutContainer {
 	protected void doLayout(ItemProxy proxy) {
 		View view = proxy.view;
 		Rect frame = proxy.frame;
-		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.right - viewPortX, frame.bottom - viewPortY);
+		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.right
+				- viewPortX, frame.bottom - viewPortY);
 	}
 
+	/**
+	 * Sets the layout on the Container. If a previous layout was already
+	 * applied, this causes the views to animate to the new layout positions.
+	 * Scroll positions will also be reset.
+	 * 
+	 * @see AbstractLayout
+	 * @param lc
+	 */
 	public void setLayout(AbstractLayout lc) {
 
 		if (lc == layout) {
@@ -281,7 +354,7 @@ public class Container extends AbsLayoutContainer {
 		layout = lc;
 
 		dispatchLayoutChanging(oldLayout, lc);
-		
+
 		markLayoutDirty = true;
 		viewPortX = 0;
 		viewPortY = 0;
@@ -291,14 +364,17 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
+	/**
+	 * @return The layout currently applied to the Container
+	 */
 	public AbstractLayout getLayout() {
 		return layout;
 	}
-	
+
 	/**
-	 * Computes the Rectangle that defines the ViewPort.
-	 * The Container tries to keep the view at the top left
-	 * of the old layout visible in the new layout. 
+	 * Computes the Rectangle that defines the ViewPort. The Container tries to
+	 * keep the view at the top left of the old layout visible in the new
+	 * layout.
 	 * 
 	 * @see getViewportTop
 	 * @see getViewportLeft
@@ -314,12 +390,16 @@ public class Container extends AbsLayoutContainer {
 		Object data = null;
 		int lowestSection = Integer.MAX_VALUE;
 		int lowestPosition = Integer.MAX_VALUE;
-		
-		// Find the frame of of the first item in the first section in the current set of frames defining the viewport
-		// Changing layout will then keep this item in the viewport of the new layout
-		// TODO: Need to make sure this item is actually being shown in the viewport and not just in some offscreen buffer
+
+		// Find the frame of of the first item in the first section in the
+		// current set of frames defining the viewport
+		// Changing layout will then keep this item in the viewport of the new
+		// layout
+		// TODO: Need to make sure this item is actually being shown in the
+		// viewport and not just in some offscreen buffer
 		for (ItemProxy fd : frames.values()) {
-			if (fd.itemSection < lowestSection || (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
+			if (fd.itemSection < lowestSection
+					|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 				data = fd.data;
 				lowestSection = fd.itemSection;
 				lowestPosition = fd.itemIndex;
@@ -327,35 +407,34 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		ItemProxy proxy = newLayout.getItemProxyForItem(data);
-		
-		
+
 		if (proxy == null) {
 			viewPortX = 0;
 			viewPortY = 0;
 			return;
 		}
-		
+
 		Rect vpFrame = proxy.frame;
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
 
-		scrollableWidth = layout.getContentWidth() - getWidth();
-		scrollableHeight = layout.getContentHeight() - getHeight();
-		
-		if(scrollableWidth < 0){
-			scrollableWidth = 0;
-		}
-		if(scrollableHeight < 0){
-			scrollableHeight = 0;
-		}
-		
-		if (viewPortX > scrollableWidth)
-			viewPortX = scrollableWidth;
+		mScrollableWidth = layout.getContentWidth() - getWidth();
+		mScrollableHeight = layout.getContentHeight() - getHeight();
 
-		if (viewPortY > scrollableHeight)
-			viewPortY = scrollableHeight;
-		
+		if (mScrollableWidth < 0) {
+			mScrollableWidth = 0;
+		}
+		if (mScrollableHeight < 0) {
+			mScrollableHeight = 0;
+		}
+
+		if (viewPortX > mScrollableWidth)
+			viewPortX = mScrollableWidth;
+
+		if (viewPortY > mScrollableHeight)
+			viewPortY = mScrollableHeight;
+
 	}
 
 	/**
@@ -384,8 +463,8 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	/**
-	 * TODO: This should be renamed to layoutInvalidated, since the layout
-	 * isn't changed
+	 * TODO: This should be renamed to layoutInvalidated, since the layout isn't
+	 * changed
 	 */
 	public void layoutChanged() {
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layoutChanged");
@@ -397,7 +476,8 @@ public class Container extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeSet changeSet) {
-		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0 && changeSet.moved.size() == 0) {
+		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
+				&& changeSet.moved.size() == 0) {
 			return;
 		}
 
@@ -411,7 +491,8 @@ public class Container extends AbsLayoutContainer {
 		}
 		isAnimatingChanges = true;
 
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "animating changes: " + changeSet.toString());
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
+				"animating changes: " + changeSet.toString());
 
 		dispatchAnimationsStarted();
 
@@ -422,26 +503,30 @@ public class Container extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(LayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layout change animations complete");
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
+				"layout change animations complete");
 		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
 			View v = proxy.view;
 			removeView(v);
 			returnItemToPoolIfNeeded(proxy);
 		}
 
-		dispatchAnimationsComplete();
+		dispatchLayoutChangeAnimationsComplete();
 
 		// changeSet = null;
 
 	}
 
-	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
+	public LayoutChangeSet getViewChanges(
+			HashMap<? extends Object, ItemProxy> oldFrames,
 			HashMap<? extends Object, ItemProxy> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
-	public LayoutChangeSet getViewChanges(HashMap<? extends Object, ItemProxy> oldFrames,
-			HashMap<? extends Object, ItemProxy> newFrames, boolean moveEvenIfSame) {
+	public LayoutChangeSet getViewChanges(
+			HashMap<? extends Object, ItemProxy> oldFrames,
+			HashMap<? extends Object, ItemProxy> newFrames,
+			boolean moveEvenIfSame) {
 
 		// cleanupViews();
 		LayoutChangeSet change = new LayoutChangeSet();
@@ -481,7 +566,8 @@ public class Container extends AbsLayoutContainer {
 				// if (moveEvenIfSame || !old.compareRect(((ItemProxy)
 				// m.getValue()).frame)) {
 
-				if (moveEvenIfSame || !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
+				if (moveEvenIfSame
+						|| !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
 
 					change.addToMoved(proxy, getActualFrame(proxy));
 				}
@@ -536,30 +622,27 @@ public class Container extends AbsLayoutContainer {
 	public AbstractLayout getLayoutController() {
 		return layout;
 	}
-	
+
 	/**
-	 * The Viewport defines the rectangular "window" that 
-	 * the container is actually showing of the entire view.
+	 * The Viewport defines the rectangular "window" that the container is
+	 * actually showing of the entire view.
 	 * 
-	 * @return The left (x) of the viewport within the entire
-	 * container
+	 * @return The left (x) of the viewport within the entire container
 	 */
-	public int getViewportLeft(){
+	public int getViewportLeft() {
 		return viewPortX;
 	}
-	
+
 	/**
-	 * The Viewport defines the rectangular "window" that 
-	 * the container is actually showing of the entire view.
+	 * The Viewport defines the rectangular "window" that the container is
+	 * actually showing of the entire view.
 	 * 
-	 *  @return The top (y) of the viewport within the entire
-	 * container
+	 * @return The top (y) of the viewport within the entire container
 	 * 
 	 */
-	public int getViewportTop(){
+	public int getViewportTop() {
 		return viewPortY;
 	}
-	
 
 	/**
 	 * Indicates that we are not in the middle of a touch gesture
@@ -611,12 +694,11 @@ public class Container extends AbsLayoutContainer {
 	 * TOUCH_MODE_SCROLL, or TOUCH_MODE_DONE_WAITING
 	 */
 	int mTouchMode = TOUCH_MODE_REST;
-	
+
 	/**
-	 * The duration for which the scroller will wait 
-	 * before deciding whether the user was actually trying
-	 * to stop the scroll or swuipe again to increase the 
-	 * velocity
+	 * The duration for which the scroller will wait before deciding whether the
+	 * user was actually trying to stop the scroll or swuipe again to increase
+	 * the velocity
 	 */
 	protected final int FLYWHEEL_TIMEOUT = 40;
 
@@ -629,10 +711,12 @@ public class Container extends AbsLayoutContainer {
 
 		boolean canScroll = false;
 
-		if (layout.horizontalScrollEnabled() && this.layout.getContentWidth() > getWidth()) {
+		if (layout.horizontalScrollEnabled()
+				&& this.layout.getContentWidth() > getWidth()) {
 			canScroll = true;
 		}
-		if (layout.verticalScrollEnabled() && layout.getContentHeight() > getHeight()) {
+		if (layout.verticalScrollEnabled()
+				&& layout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
 
@@ -642,26 +726,26 @@ public class Container extends AbsLayoutContainer {
 		if (mVelocityTracker != null) {
 			mVelocityTracker.addMovement(event);
 		}
-		
+
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			
-			if(mTouchMode == TOUCH_MODE_FLING){
-				// Wait for some time to see if the user is just trying 
+
+			if (mTouchMode == TOUCH_MODE_FLING) {
+				// Wait for some time to see if the user is just trying
 				// to speed up the scroll
 				postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						if(mTouchMode == TOUCH_MODE_DOWN){
-							if(mTouchMode == TOUCH_MODE_DOWN){
+						if (mTouchMode == TOUCH_MODE_DOWN) {
+							if (mTouchMode == TOUCH_MODE_DOWN) {
 								scroller.forceFinished(true);
 							}
 						}
 					}
 				}, FLYWHEEL_TIMEOUT);
 			}
-			
 
-			beginTouchAt = ViewUtils.getItemAt(frames, (int) (viewPortX + event.getX()),
+			beginTouchAt = ViewUtils.getItemAt(frames,
+					(int) (viewPortX + event.getX()),
 					(int) (viewPortY + event.getY()));
 
 			if (canScroll) {
@@ -689,7 +773,8 @@ public class Container extends AbsLayoutContainer {
 				float yDiff = event.getY() - deltaY;
 
 				double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-				if ( (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_REST) && distance > touchSlop) {
+				if ((mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_REST)
+						&& distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
 
 					if (mPendingCheckForTap != null) {
@@ -700,7 +785,8 @@ public class Container extends AbsLayoutContainer {
 				}
 
 				if (mTouchMode == TOUCH_MODE_SCROLL) {
-					moveViewportBy(event.getX() - deltaX, event.getY() - deltaY, false);
+					moveViewportBy(event.getX() - deltaX,
+							event.getY() - deltaY, false);
 					invokeOnItemScrollListeners();
 					deltaX = event.getX();
 					deltaY = event.getY();
@@ -723,27 +809,28 @@ public class Container extends AbsLayoutContainer {
 
 		} else if (event.getAction() == MotionEvent.ACTION_UP) {
 
-			
 			if (mTouchMode == TOUCH_MODE_SCROLL) {
 				mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity || Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
+				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity
+						|| Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
 					int maxX = layout.getContentWidth() - getWidth();
 					int maxY = layout.getContentHeight() - getHeight();
-					
-					scroller.fling(viewPortX, viewPortY, -(int) mVelocityTracker.getXVelocity(),
+
+					scroller.fling(viewPortX, viewPortY,
+							-(int) mVelocityTracker.getXVelocity(),
 							-(int) mVelocityTracker.getYVelocity(), 0, maxX, 0,
 							maxY, overflingDistance, overflingDistance);
-					
+
 					mTouchMode = TOUCH_MODE_FLING;
 					post(flingRunnable);
 
-				}
-				else{
+				} else {
 					mTouchMode = TOUCH_MODE_REST;
 				}
-		
-			} else if (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_DONE_WAITING) {
+
+			} else if (mTouchMode == TOUCH_MODE_DOWN
+					|| mTouchMode == TOUCH_MODE_DONE_WAITING) {
 				if (mTouchModeReset != null) {
 					removeCallbacks(mTouchModeReset);
 				}
@@ -755,11 +842,14 @@ public class Container extends AbsLayoutContainer {
 						public void run() {
 							mTouchModeReset = null;
 							mTouchMode = TOUCH_MODE_REST;
-							if (beginTouchAt != null && beginTouchAt.view != null) {
+							if (beginTouchAt != null
+									&& beginTouchAt.view != null) {
 								beginTouchAt.view.setPressed(false);
 							}
-							if (mChoiceActionMode == null && mOnItemSelectedListener != null) {
-								mOnItemSelectedListener.onItemSelected(Container.this, selectedItemProxy);
+							if (mChoiceActionMode == null
+									&& mOnItemSelectedListener != null) {
+								mOnItemSelectedListener.onItemSelected(
+										Container.this, selectedItemProxy);
 							}
 
 							// setPressed(false);
@@ -770,7 +860,8 @@ public class Container extends AbsLayoutContainer {
 						}
 					};
 					selectedItemProxy = beginTouchAt;
-					postDelayed(mTouchModeReset, ViewConfiguration.getPressedStateDuration());
+					postDelayed(mTouchModeReset,
+							ViewConfiguration.getPressedStateDuration());
 
 					mTouchMode = TOUCH_MODE_TAP;
 				} else {
@@ -802,41 +893,47 @@ public class Container extends AbsLayoutContainer {
 
 			boolean more = scroller.computeScrollOffset();
 
-			
-			if (mLeftEdge.isFinished() && viewPortX < 0 && layout.horizontalScrollEnabled()) {
+			if (mLeftEdge.isFinished() && viewPortX < 0
+					&& layout.horizontalScrollEnabled()) {
 				mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
-			if (mRightEdge.isFinished() && viewPortX > layout.getContentWidth() - getMeasuredWidth()
+			if (mRightEdge.isFinished()
+					&& viewPortX > layout.getContentWidth()
+							- getMeasuredWidth()
 					&& layout.horizontalScrollEnabled()) {
 				mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
-			if (mTopEdge.isFinished() && viewPortY < 0 && layout.verticalScrollEnabled()) {
+			if (mTopEdge.isFinished() && viewPortY < 0
+					&& layout.verticalScrollEnabled()) {
 				mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
 
-			if (mBottomEdge.isFinished() && viewPortY > layout.getContentHeight() - getMeasuredHeight()
+			if (mBottomEdge.isFinished()
+					&& viewPortY > layout.getContentHeight()
+							- getMeasuredHeight()
 					&& layout.verticalScrollEnabled()) {
 				mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
 			}
-			
-			if(layout.horizontalScrollEnabled()){
+
+			if (layout.horizontalScrollEnabled()) {
 				viewPortX = scroller.getCurrX();
 			}
-			if(layout.verticalScrollEnabled()){
+			if (layout.verticalScrollEnabled()) {
 				viewPortY = scroller.getCurrY();
 			}
-			
+
 			moveViewport(true);
-			
+
 			if (more) {
 				post(flingRunnable);
 			}
 		}
 	};
 
-	protected void moveViewportBy(float movementX, float movementY, boolean fling) {
+	protected void moveViewportBy(float movementX, float movementY,
+			boolean fling) {
 
 		if (layout.horizontalScrollEnabled()) {
 			viewPortX = (int) (viewPortX - movementX);
@@ -844,65 +941,69 @@ public class Container extends AbsLayoutContainer {
 
 		if (layout.verticalScrollEnabled()) {
 			viewPortY = (int) (viewPortY - movementY);
-		} 
+		}
 		moveViewport(fling);
 	}
-	
-	protected void moveViewPort(int left, int top, boolean isInFlingMode){
+
+	protected void moveViewPort(int left, int top, boolean isInFlingMode) {
 		viewPortX = left;
 		viewPortY = top;
 		moveViewport(isInFlingMode);
 	}
-	
+
 	/**
 	 * Will move viewport to viewPortX and viewPortY values
 	 * 
-	 * @param isInFlingMode Setting this 
+	 * @param isInFlingMode
+	 *            Setting this
 	 */
-	protected void moveViewport(boolean isInFlingMode){
-		
-		scrollableWidth = layout.getContentWidth() - getWidth();
-		if(scrollableWidth < 0){
-			scrollableWidth = 0;
+	protected void moveViewport(boolean isInFlingMode) {
+
+		mScrollableWidth = layout.getContentWidth() - getWidth();
+		if (mScrollableWidth < 0) {
+			mScrollableWidth = 0;
 		}
-		scrollableHeight = layout.getContentHeight() - getHeight();
-		if(scrollableHeight < 0){
-			scrollableHeight = 0;
+		mScrollableHeight = layout.getContentHeight() - getHeight();
+		if (mScrollableHeight < 0) {
+			mScrollableHeight = 0;
 		}
 
 		if (!isInFlingMode) {
 			if (viewPortX < -overflingDistance) {
 				viewPortX = -overflingDistance;
-			} else if (viewPortX > scrollableWidth + overflingDistance) {
-				viewPortX = (scrollableWidth + overflingDistance);
+			} else if (viewPortX > mScrollableWidth + overflingDistance) {
+				viewPortX = (mScrollableWidth + overflingDistance);
 			}
 
 			if (viewPortY < (int) (-overflingDistance)) {
 				viewPortY = (int) -overflingDistance;
-			} else if (viewPortY > scrollableHeight + overflingDistance) {
-				viewPortY = (int) (scrollableHeight + overflingDistance);
+			} else if (viewPortY > mScrollableHeight + overflingDistance) {
+				viewPortY = (int) (mScrollableHeight + overflingDistance);
 			}
 
 			if (viewPortX <= 0) {
 				mLeftEdge.onPull(viewPortX / (-overflingDistance));
 				invalidate();
-			} else if (viewPortX >= scrollableWidth) {
-				mRightEdge.onPull((viewPortX - scrollableWidth) / (-overflingDistance));
+			} else if (viewPortX >= mScrollableWidth) {
+				mRightEdge.onPull((viewPortX - mScrollableWidth)
+						/ (-overflingDistance));
 				invalidate();
 			}
 
 			if (viewPortY <= 0) {
 				mTopEdge.onPull(viewPortY / (-overflingDistance));
 				invalidate();
-			} else if (viewPortY >= scrollableHeight) {
-				mBottomEdge.onPull((viewPortY - scrollableHeight) / (-overflingDistance));
+			} else if (viewPortY >= mScrollableHeight) {
+				mBottomEdge.onPull((viewPortY - mScrollableHeight)
+						/ (-overflingDistance));
 				invalidate();
 			}
 
 		}
 		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
-		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(viewPortX, viewPortY));
+		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+				viewPortX, viewPortY));
 
 		LayoutChangeSet changeSet = getViewChanges(oldFrames, frames, true);
 
@@ -922,14 +1023,15 @@ public class Container extends AbsLayoutContainer {
 		}
 
 	}
-	
+
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
 		boolean needsInvalidate = false;
 
-		final int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+		final int height = getMeasuredHeight() - getPaddingTop()
+				- getPaddingBottom();
 		final int width = getMeasuredWidth();
 
 		if (!mLeftEdge.isFinished()) {
@@ -1021,13 +1123,13 @@ public class Container extends AbsLayoutContainer {
 	public int getCheckedItemCount() {
 		return mCheckStates.size();
 	}
-	
-	public ArrayList<IndexPath> getCheckedItemPositions(){
+
+	public ArrayList<IndexPath> getCheckedItemPositions() {
 		ArrayList<IndexPath> checked = new ArrayList<IndexPath>();
-		for(int i=0; i<mCheckStates.size(); i++){
+		for (int i = 0; i < mCheckStates.size(); i++) {
 			checked.add(mCheckStates.keyAt(i));
 		}
-		
+
 		return checked;
 	}
 
@@ -1035,6 +1137,13 @@ public class Container extends AbsLayoutContainer {
 		mCheckStates.clear();
 	}
 
+	/**
+	 * Defines the choice behavior for the Container allowing multi-select etc.
+	 * 
+	 * @see <a href=
+	 *      "http://developer.android.com/reference/android/widget/AbsListView.html#attr_android:choiceMode"
+	 *      >List View's Choice Mode</a>
+	 */
 	public void setChoiceMode(int choiceMode) {
 		mChoiceMode = choiceMode;
 		if (mChoiceActionMode != null) {
@@ -1082,7 +1191,8 @@ public class Container extends AbsLayoutContainer {
 				}
 
 				refreshDrawableState();
-				final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+				final int longPressTimeout = ViewConfiguration
+						.getLongPressTimeout();
 				final boolean longClickable = isLongClickable();
 
 				if (longClickable) {
@@ -1127,8 +1237,10 @@ public class Container extends AbsLayoutContainer {
 	boolean performLongPress() {
 		// CHOICE_MODE_MULTIPLE_MODAL takes over long press.
 		if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
-			if (mChoiceActionMode == null && (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
-				setItemChecked(beginTouchAt.itemSection, beginTouchAt.itemIndex, true);
+			if (mChoiceActionMode == null
+					&& (mChoiceActionMode = startActionMode(mMultiChoiceModeCallback)) != null) {
+				setItemChecked(beginTouchAt.itemSection,
+						beginTouchAt.itemIndex, true);
 				updateOnScreenCheckedViews();
 				performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 			}
@@ -1136,14 +1248,17 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		boolean handled = false;
-		final long longPressId = itemAdapter.getItemId(beginTouchAt.itemSection, beginTouchAt.itemSection);
+		final long longPressId = itemAdapter.getItemId(
+				beginTouchAt.itemSection, beginTouchAt.itemSection);
 		if (mOnItemLongClickListener != null) {
-			handled = mOnItemLongClickListener.onItemLongClick(this, beginTouchAt.view, beginTouchAt.itemSection,
+			handled = mOnItemLongClickListener.onItemLongClick(this,
+					beginTouchAt.view, beginTouchAt.itemSection,
 					beginTouchAt.itemIndex, longPressId);
 		}
 		if (!handled) {
-			mContextMenuInfo = createContextMenuInfo(beginTouchAt.view, beginTouchAt.itemSection,
-					beginTouchAt.itemIndex, longPressId);
+			mContextMenuInfo = createContextMenuInfo(beginTouchAt.view,
+					beginTouchAt.itemSection, beginTouchAt.itemIndex,
+					longPressId);
 			handled = super.showContextMenuForChild(this);
 		}
 		if (handled) {
@@ -1153,8 +1268,10 @@ public class Container extends AbsLayoutContainer {
 		return handled;
 	}
 
-	ContextMenuInfo createContextMenuInfo(View view, int sectionIndex, int positionInSection, long id) {
-		return new AbsLayoutContainerContextMenuInfo(view, sectionIndex, positionInSection, id);
+	ContextMenuInfo createContextMenuInfo(View view, int sectionIndex,
+			int positionInSection, long id) {
+		return new AbsLayoutContainerContextMenuInfo(view, sectionIndex,
+				positionInSection, id);
 	}
 
 	class MultiChoiceModeWrapper implements MultiChoiceModeListener {
@@ -1205,8 +1322,10 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		@Override
-		public void onItemCheckedStateChanged(ActionMode mode, int section, int position, long id, boolean checked) {
-			mWrapped.onItemCheckedStateChanged(mode, section, position, id, checked);
+		public void onItemCheckedStateChanged(ActionMode mode, int section,
+				int position, long id, boolean checked) {
+			mWrapped.onItemCheckedStateChanged(mode, section, position, id,
+					checked);
 
 			// If there are no items selected we no longer need the selection
 			// mode.
@@ -1233,32 +1352,40 @@ public class Container extends AbsLayoutContainer {
 		 *            <code>true</code> if the item is now checked,
 		 *            <code>false</code> if the item is now unchecked.
 		 */
-		public void onItemCheckedStateChanged(ActionMode mode, int section, int position, long id, boolean checked);
+		public void onItemCheckedStateChanged(ActionMode mode, int section,
+				int position, long id, boolean checked);
 	}
 
-	public void setItemChecked(int sectionIndex, int positionInSection, boolean value) {
+	public void setItemChecked(int sectionIndex, int positionInSection,
+			boolean value) {
 		if (mChoiceMode == CHOICE_MODE_NONE) {
 			return;
 		}
 
 		// Start selection mode if needed. We don't need to if we're unchecking
 		// something.
-		if (value && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
-			if (mMultiChoiceModeCallback == null || !mMultiChoiceModeCallback.hasWrappedCallback()) {
-				throw new IllegalStateException("Container: attempted to start selection mode "
-						+ "for CHOICE_MODE_MULTIPLE_MODAL but no choice mode callback was "
-						+ "supplied. Call setMultiChoiceModeListener to set a callback.");
+		if (value && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL
+				&& mChoiceActionMode == null) {
+			if (mMultiChoiceModeCallback == null
+					|| !mMultiChoiceModeCallback.hasWrappedCallback()) {
+				throw new IllegalStateException(
+						"Container: attempted to start selection mode "
+								+ "for CHOICE_MODE_MULTIPLE_MODAL but no choice mode callback was "
+								+ "supplied. Call setMultiChoiceModeListener to set a callback.");
 			}
 			mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
 		}
 
-		if (mChoiceMode == CHOICE_MODE_MULTIPLE || mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
+		if (mChoiceMode == CHOICE_MODE_MULTIPLE
+				|| mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
 
 			setCheckedValue(sectionIndex, positionInSection, value);
 			if (mChoiceActionMode != null) {
-				final long id = itemAdapter.getItemId(sectionIndex, positionInSection);
-				mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode, sectionIndex, positionInSection,
-						id, value);
+				final long id = itemAdapter.getItemId(sectionIndex,
+						positionInSection);
+				mMultiChoiceModeCallback.onItemCheckedStateChanged(
+						mChoiceActionMode, sectionIndex, positionInSection, id,
+						value);
 			}
 		} else {
 			setCheckedValue(sectionIndex, positionInSection, value);
@@ -1272,7 +1399,8 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	@Override
-	public boolean performItemClick(View view, int section, int position, long id) {
+	public boolean performItemClick(View view, int section, int position,
+			long id) {
 		boolean handled = false;
 		boolean dispatchItemClick = true;
 		if (mChoiceMode != CHOICE_MODE_NONE) {
@@ -1286,8 +1414,8 @@ public class Container extends AbsLayoutContainer {
 				setCheckedValue(section, position, checked);
 
 				if (mChoiceActionMode != null) {
-					mMultiChoiceModeCallback.onItemCheckedStateChanged(mChoiceActionMode, section, position, id,
-							checked);
+					mMultiChoiceModeCallback.onItemCheckedStateChanged(
+							mChoiceActionMode, section, position, id, checked);
 					dispatchItemClick = false;
 				}
 				checkedStateChanged = true;
@@ -1318,8 +1446,10 @@ public class Container extends AbsLayoutContainer {
 			// if (mDataChanged) return;
 			View view = beginTouchAt.view;
 			if (view != null) {
-				performItemClick(view, beginTouchAt.itemSection, beginTouchAt.itemIndex,
-						itemAdapter.getItemId(beginTouchAt.itemSection, beginTouchAt.itemIndex));
+				performItemClick(view, beginTouchAt.itemSection,
+						beginTouchAt.itemIndex, itemAdapter.getItemId(
+								beginTouchAt.itemSection,
+								beginTouchAt.itemIndex));
 			}
 			// }
 		}
@@ -1336,7 +1466,8 @@ public class Container extends AbsLayoutContainer {
 		while (it.hasNext()) {
 			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
 			child = pairs.getValue().view;
-			boolean isChecked = isChecked(pairs.getValue().itemSection, pairs.getValue().itemIndex);
+			boolean isChecked = isChecked(pairs.getValue().itemSection,
+					pairs.getValue().itemIndex);
 			if (child instanceof Checkable) {
 				((Checkable) child).setChecked(isChecked);
 			} else {
@@ -1348,7 +1479,8 @@ public class Container extends AbsLayoutContainer {
 	public boolean isChecked(int sectionIndex, int positionInSection) {
 		for (int i = 0; i < mCheckStates.size(); i++) {
 			IndexPath p = mCheckStates.keyAt(i);
-			if (p.section == sectionIndex && p.positionInSection == positionInSection) {
+			if (p.section == sectionIndex
+					&& p.positionInSection == positionInSection) {
 				return true;
 			}
 		}
@@ -1359,11 +1491,13 @@ public class Container extends AbsLayoutContainer {
 	 * Updates the internal ArrayMap keeping track of checked states. Will not
 	 * update the check UI.
 	 */
-	protected void setCheckedValue(int sectionIndex, int positionInSection, boolean val) {
+	protected void setCheckedValue(int sectionIndex, int positionInSection,
+			boolean val) {
 		int foundAtIndex = -1;
 		for (int i = 0; i < mCheckStates.size(); i++) {
 			IndexPath p = mCheckStates.keyAt(i);
-			if (p.section == sectionIndex && p.positionInSection == positionInSection) {
+			if (p.section == sectionIndex
+					&& p.positionInSection == positionInSection) {
 				foundAtIndex = i;
 				break;
 			}
@@ -1389,7 +1523,8 @@ public class Container extends AbsLayoutContainer {
 	public void scrollToItem(int sectionIndex, int itemIndex, boolean animate) {
 		Section section;
 
-		if (sectionIndex > itemAdapter.getNumberOfSections() || sectionIndex < 0
+		if (sectionIndex > itemAdapter.getNumberOfSections()
+				|| sectionIndex < 0
 				|| (section = itemAdapter.getSection(sectionIndex)) == null) {
 			return;
 		}
@@ -1398,7 +1533,8 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		ItemProxy proxy = layout.getItemProxyForItem(section.getDataAtIndex(itemIndex));
+		ItemProxy proxy = layout.getItemProxyForItem(section
+				.getDataAtIndex(itemIndex));
 
 		int newVPX = proxy.frame.left;
 		int newVPY = proxy.frame.top;
@@ -1410,63 +1546,60 @@ public class Container extends AbsLayoutContainer {
 			newVPY = layout.getContentHeight() - getMeasuredHeight();
 
 		if (animate) {
-			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX), (viewPortY - newVPY), 1500);
+			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX),
+					(viewPortY - newVPY), 1500);
 			post(flingRunnable);
 		} else {
 			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
 			invokeOnItemScrollListeners();
 		}
 	}
-	
 
 	/**
-	 * Returns the percentage of width scrolled.
-	 * The values range from 0 to 1
+	 * Returns the percentage of width scrolled. The values range from 0 to 1
+	 * 
 	 * @return
 	 */
-	public float getScrollPercentX(){
-		if(layout == null || itemAdapter == null) 
+	public float getScrollPercentX() {
+		if (layout == null || itemAdapter == null)
 			return 0;
 		float w = layout.getContentWidth();
 		float scrollableWidth = w - getWidth();
-		if(scrollableWidth == 0) 
+		if (scrollableWidth == 0)
 			return 0;
-		return viewPortX/scrollableWidth;
+		return viewPortX / scrollableWidth;
 	}
-	
+
 	/**
-	 * Returns the percentage of height scrolled.
-	 * The values range from 0 to 1
+	 * Returns the percentage of height scrolled. The values range from 0 to 1
+	 * 
 	 * @return
 	 */
-	public float getScrollPercentY(){
-		if(layout == null || itemAdapter == null) 
+	public float getScrollPercentY() {
+		if (layout == null || itemAdapter == null)
 			return 0;
 		float ht = layout.getContentHeight();
 		float scrollableHeight = ht - getHeight();
-		if(scrollableHeight == 0) 
+		if (scrollableHeight == 0)
 			return 0;
-		return viewPortY/scrollableHeight;
+		return viewPortY / scrollableHeight;
 	}
-	
-	
-	
+
 	protected void invokeOnItemScrollListeners() {
 		for (OnScrollListener l : scrollListeners) {
 			l.onScroll(this);
 		}
 	}
-	
-	protected void reportScrollStateChange(int state){
-		//TODO:
+
+	protected void reportScrollStateChange(int state) {
+		// TODO:
 	}
-	
 
 	public interface OnScrollListener {
 		public int SCROLL_STATE_IDLE = 0;
 		public int SCROLL_STATE_TOUCH_SCROLL = 1;
 		public int SCROLL_STATE_FLING = 2;
-		
+
 		public void onScroll(Container container);
 	}
 

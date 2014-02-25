@@ -26,7 +26,7 @@ public interface FreeFlowEventListener {
 
 	public void animationsStarted();
 
-	public void animationsComplete();
+	public void layoutChangeAnimationsComplete();
 
 	public void layoutComputed();
 	

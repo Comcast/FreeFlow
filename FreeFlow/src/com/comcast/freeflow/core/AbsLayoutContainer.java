@@ -197,9 +197,9 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		}
 	}
 
-	protected void dispatchAnimationsComplete() {
+	protected void dispatchLayoutChangeAnimationsComplete() {
 		for (FreeFlowEventListener listener : listeners) {
-			listener.animationsComplete();
+			listener.layoutChangeAnimationsComplete();
 		}
 	}
 
