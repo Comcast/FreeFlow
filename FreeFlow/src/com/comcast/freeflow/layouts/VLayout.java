@@ -165,8 +165,7 @@ public class VLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
-		return fd;
+		return proxies.get(data);
 	}
 
 	@Override

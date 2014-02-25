@@ -39,9 +39,9 @@ public interface FreeFlowLayout {
 	 * @param measuredHeight
 	 *            The height of the Container
 	 */
-	public  void setDimensions(int measuredWidth, int measuredHeight);
+	public void setDimensions(int measuredWidth, int measuredHeight);
 
-	public  void setAdapter(SectionedAdapter adapter);
+	public void setAdapter(SectionedAdapter adapter);
 
 	/**
 	 * Generate the item proxies of all views in the given viewport, you provide
@@ -63,24 +63,32 @@ public interface FreeFlowLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public  HashMap<? extends Object, FreeFlowItem> getItemProxies(
+	public HashMap<? extends Object, FreeFlowItem> getItemProxies(
 			int viewPortLeft, int viewPortTop);
 
 	public void setLayoutParams(FreeFlowLayoutParams params);
-	
+
 	public void prepareLayout();
 
-	public  FreeFlowItem getFreeFlowItemForItem(Object item);
+	/**
+	 * Return an instance of FreeFlowItem that represents the given data. You'll
+	 * have to recurse through your HashMap of data items and Views and return
+	 * the right FreeFlowItem.
+	 * 
+	 * @param item
+	 * @return
+	 */
+	public FreeFlowItem getFreeFlowItemForItem(Object item);
 
 	public boolean horizontalScrollEnabled();
 
 	public boolean verticalScrollEnabled();
 
-	public  int getContentWidth();
+	public int getContentWidth();
 
-	public  int getContentHeight();
+	public int getContentHeight();
 
-	public  FreeFlowItem getItemAt(float x, float y);
+	public FreeFlowItem getItemAt(float x, float y);
 
 	public static class FreeFlowLayoutParams {
 

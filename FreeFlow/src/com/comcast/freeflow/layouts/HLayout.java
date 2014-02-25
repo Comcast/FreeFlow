@@ -31,7 +31,6 @@ public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
-	private SectionedAdapter itemsAdapter;
 	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerHeight = -1;
 	private int headerWidth = -1;
@@ -173,8 +172,7 @@ public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
-		return fd;
+		return proxies.get(data);
 	}
 
 	public void setBufferCount(int bufferCount) {

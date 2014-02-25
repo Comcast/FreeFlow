@@ -248,29 +248,34 @@ public class Container extends AbsLayoutContainer {
 		if (markLayoutDirty) {
 			markLayoutDirty = false;
 		}
-		
+
 		setFrames();
-		
+
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
-		
 
 		dispatchLayoutComputed();
 
 		animateChanges(getViewChanges(oldFrames, frames));
 
 	}
-	
-	protected void setFrames(){
+
+	/**
+	 * Gets the FreeFlowItems of only the visible items from the Layout class.
+	 * The items are then cloned cause we modify the rectangles of the items as
+	 * they are moving
+	 */
+	protected void setFrames() {
 		frames = new HashMap<Object, FreeFlowItem>();
-		HashMap<? extends Object, FreeFlowItem> mp = layout.getItemProxies(viewPortX, viewPortY);
-		  Iterator it = mp.entrySet().iterator();
-		    while (it.hasNext()) {
-		        Map.Entry pairs = (Map.Entry)it.next();
-		        FreeFlowItem pr = (FreeFlowItem) pairs.getValue();
-		        pr = FreeFlowItem.clone(pr);
-		        frames.put(pairs.getKey(), pr);
-		    }
+		HashMap<? extends Object, FreeFlowItem> mp = layout.getItemProxies(
+				viewPortX, viewPortY);
+		Iterator<?> it = mp.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
+			FreeFlowItem pr = (FreeFlowItem) pairs.getValue();
+			pr = FreeFlowItem.clone(pr);
+			frames.put(pairs.getKey(), pr);
+		}
 	}
 
 	/**
@@ -279,8 +284,8 @@ public class Container extends AbsLayoutContainer {
 	 * the View class returned by the <code>Adapter</code>
 	 * 
 	 * @param freeflowItem
-	 *            <code>FreeFlowItem</code> instance that determines the View being
-	 *            positioned
+	 *            <code>FreeFlowItem</code> instance that determines the View
+	 *            being positioned
 	 */
 	protected void addAndMeasureViewIfNeeded(FreeFlowItem freeflowItem) {
 		View view;
@@ -290,8 +295,8 @@ public class Container extends AbsLayoutContainer {
 					.getViewType(freeflowItem));
 
 			if (freeflowItem.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(freeflowItem.itemSection,
-						convertView, this);
+				view = itemAdapter.getHeaderViewForSection(
+						freeflowItem.itemSection, convertView, this);
 			} else {
 				view = itemAdapter.getItemView(freeflowItem.itemSection,
 						freeflowItem.itemIndex, convertView, this);
@@ -310,8 +315,8 @@ public class Container extends AbsLayoutContainer {
 
 		int widthSpec = MeasureSpec.makeMeasureSpec(freeflowItem.frame.width(),
 				MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(freeflowItem.frame.height(),
-				MeasureSpec.EXACTLY);
+		int heightSpec = MeasureSpec.makeMeasureSpec(
+				freeflowItem.frame.height(), MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 	}
 
@@ -321,8 +326,8 @@ public class Container extends AbsLayoutContainer {
 	 * @param view
 	 *            The View that will be added to the Container
 	 * @param freeflowItem
-	 *            The <code>FreeFlowItem</code> instance that represents the view
-	 *            that will be positioned
+	 *            The <code>FreeFlowItem</code> instance that represents the
+	 *            view that will be positioned
 	 */
 	protected void prepareViewForAddition(View view, FreeFlowItem freeflowItem) {
 		if (view instanceof Checkable) {
@@ -417,7 +422,7 @@ public class Container extends AbsLayoutContainer {
 		}
 
 		FreeFlowItem freeflowItem = newLayout.getFreeFlowItemForItem(data);
-
+		freeflowItem = FreeFlowItem.clone(freeflowItem);
 		if (freeflowItem == null) {
 			viewPortX = 0;
 			viewPortY = 0;
@@ -542,8 +547,7 @@ public class Container extends AbsLayoutContainer {
 
 	public LayoutChangeset getViewChanges(
 			HashMap<Object, FreeFlowItem> oldFrames,
-			HashMap<Object, FreeFlowItem> newFrames,
-			boolean moveEvenIfSame) {
+			HashMap<Object, FreeFlowItem> newFrames, boolean moveEvenIfSame) {
 
 		// cleanupViews();
 		LayoutChangeset change = new LayoutChangeset();
@@ -572,7 +576,7 @@ public class Container extends AbsLayoutContainer {
 
 		Iterator<?> it = newFrames.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry m = (Map.Entry) it.next();
+			Map.Entry<?, ?> m = (Map.Entry<?, ?>) it.next();
 			FreeFlowItem freeflowItem = (FreeFlowItem) m.getValue();
 
 			if (oldFrames.get(m.getKey()) != null) {
@@ -584,9 +588,11 @@ public class Container extends AbsLayoutContainer {
 				// m.getValue()).frame)) {
 
 				if (moveEvenIfSame
-						|| !old.frame.equals(((FreeFlowItem) m.getValue()).frame)) {
+						|| !old.frame
+								.equals(((FreeFlowItem) m.getValue()).frame)) {
 
-					change.addToMoved(freeflowItem, getActualFrame(freeflowItem));
+					change.addToMoved(freeflowItem,
+							getActualFrame(freeflowItem));
 				}
 			} else {
 				change.addToAdded(freeflowItem);
@@ -1019,7 +1025,7 @@ public class Container extends AbsLayoutContainer {
 		HashMap<Object, FreeFlowItem> oldFrames = frames;
 
 		setFrames();
-		
+
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
 		for (FreeFlowItem freeflowItem : changeSet.added) {
@@ -1479,7 +1485,8 @@ public class Container extends AbsLayoutContainer {
 		Iterator<?> it = frames.entrySet().iterator();
 		View child = null;
 		while (it.hasNext()) {
-			Map.Entry<?, FreeFlowItem> pairs = (Map.Entry<?, FreeFlowItem>) it.next();
+			Map.Entry<?, FreeFlowItem> pairs = (Map.Entry<?, FreeFlowItem>) it
+					.next();
 			child = pairs.getValue().view;
 			boolean isChecked = isChecked(pairs.getValue().itemSection,
 					pairs.getValue().itemIndex);
@@ -1548,8 +1555,8 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section
-				.getDataAtIndex(itemIndex));
+		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section.getDataAtIndex(itemIndex));
+		freeflowItem = FreeFlowItem.clone(freeflowItem);
 
 		int newVPX = freeflowItem.frame.left;
 		int newVPY = freeflowItem.frame.top;
