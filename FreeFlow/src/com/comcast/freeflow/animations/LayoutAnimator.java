@@ -34,11 +34,5 @@ public abstract class LayoutAnimator {
 
 	public abstract void animateChanges(LayoutChangeSet changes, Container callback);
 
-	/*
-	 * public abstract void transitionToFrame(final Frame of, final ItemProxy
-	 * nf, final View v);
-	 */
-
-	public abstract void start();
 
 }

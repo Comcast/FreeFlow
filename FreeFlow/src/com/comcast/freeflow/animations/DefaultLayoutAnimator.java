@@ -310,13 +310,7 @@ public class DefaultLayoutAnimator extends LayoutAnimator {
 		});
 
 		anim.setInterpolator(new DecelerateInterpolator(2.0f));
-
 		return anim;
-
-	}
-
-	@Override
-	public void start() {
 	}
 
 	public void setDuration(int duration) {

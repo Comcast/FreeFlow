@@ -115,8 +115,4 @@ public class ScaleAnimator extends DefaultLayoutAnimator {
 		scaleSet.clear();
 	}
 
-	@Override
-	public void start() {
-	}
-
 }
