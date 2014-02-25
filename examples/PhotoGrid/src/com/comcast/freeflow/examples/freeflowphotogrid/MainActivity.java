@@ -23,6 +23,7 @@ import com.comcast.freeflow.core.ItemProxy;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 import com.comcast.freeflow.examples.freeflowphotogrid.R;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.layouts.HGridLayout;
 import com.comcast.freeflow.layouts.HLayout;
 import com.comcast.freeflow.layouts.VGridLayout;
@@ -44,16 +45,16 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private static final String TAG = "MainActivity";
-	Container container = null;
-	HLayout hLayout = null;
-	VLayout vLayout = null;
-	VGridLayout vGridLayout = null;
-	HGridLayout hGridLayout = null;
-	HLayout hLayout1 = null;
-	VLayout vLayout1 = null;
-	VGridLayout vGridLayout1 = null;
-	HGridLayout hGridLayout1 = null;
-	Button changeButton, jumpButton, jumpButtonAnim;
+	private Container container = null;
+	private HLayout hLayout = null;
+	private VLayout vLayout = null;
+	private VGridLayout vGridLayout = null;
+	private HGridLayout hGridLayout = null;
+	
+	private Button changeButton, jumpButton, jumpButtonAnim;
+	
+	private FreeFlowLayout[] layouts ;
+	private int currentLayoutIndex = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +66,6 @@ public class MainActivity extends Activity {
 		final ImageAdapter adapter = new ImageAdapter();
 
 		container = new Container(this);
-
-		// container.setOnTouchListener(this);
-		// container.setFocusable(true);
 
 		DefaultLayoutAnimator anim = (DefaultLayoutAnimator) container.getLayoutAnimator();
 		anim.animateAllSetsSequentially = false;
@@ -86,49 +84,25 @@ public class MainActivity extends Activity {
 		hGridLayout = new HGridLayout();
 		hGridLayout.setLayoutParams(new HGridLayout.LayoutParams(200, 200, 100, 600));
 	
-		hLayout1 = new HLayout();
-		hLayout1.setLayoutParams(new HLayout.LayoutParams(100, 150, 600));
-
-		vLayout1 = new VLayout();
-		vLayout1.setLayoutParams(new VLayout.LayoutParams(100, 600, 150));
-
-		vGridLayout1 = new VGridLayout();
-		vGridLayout1.setLayoutParams(new VGridLayout.LayoutParams(200,200, 600, 100));
-
-		hGridLayout1 = new HGridLayout();
-		hGridLayout1.setLayoutParams(new HGridLayout.LayoutParams(200, 200, 100, 600));
+		layouts = new FreeFlowLayout[]{hLayout, vLayout, vGridLayout, hGridLayout};
 		
 		container.setAdapter(adapter);
 		container.setLayout(hLayout);
-		// container.setLayoutAnimator(new ScaleAnimator());
 
 		frameLayout.addView(container);
 
 		changeButton = ((Button) frameLayout.findViewById(R.id.transitionButton));
 		changeButton.setText("Layout");
+		
 		changeButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if (container.getLayoutController() == hLayout) {
-					changeButton.setText("Layout");
-					container.setLayout(vLayout);
-				} else if (container.getLayoutController() == vLayout) {
-					container.setLayout(vGridLayout);
-				} else if (container.getLayoutController() == vGridLayout) {
-					container.setLayout(hGridLayout);
-				} else if (container.getLayoutController() == hGridLayout) {
-					changeButton.setText("Scale");
-					container.setLayout(hLayout1);
-				} else if (container.getLayoutController() == hLayout1) {
-					container.setLayout(vLayout1);
-				} else if (container.getLayoutController() == vLayout1) {
-					container.setLayout(vGridLayout1);
-				} else if (container.getLayoutController() == vGridLayout1) {
-					container.setLayout(hGridLayout1);
-				} else {
-					container.setLayout(hLayout);
+				currentLayoutIndex++;
+				if(currentLayoutIndex == layouts.length){
+					currentLayoutIndex = 0;
 				}
+				container.setLayout(layouts[currentLayoutIndex]);
 			}
 		});
 
@@ -186,12 +160,12 @@ public class MainActivity extends Activity {
 
 		@Override
 		public View getItemView(int section, int position, View convertView, ViewGroup parent) {
-			myTv tv = null;
+			TextView tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");
-				tv = (myTv) convertView;
+				tv = (TextView) convertView;
 			} else {
-				tv = new myTv(MainActivity.this);
+				tv = new TextView(MainActivity.this);
 			}
 
 			tv.setFocusable(false);
@@ -205,12 +179,12 @@ public class MainActivity extends Activity {
 
 		@Override
 		public View getHeaderViewForSection(int section, View convertView, ViewGroup parent) {
-			myTv tv = null;
+			TextView tv = null;
 			if (convertView != null) {
 				// Log.d(TAG, "Convert view not null");
-				tv = (myTv) convertView;
+				tv = (TextView) convertView;
 			} else {
-				tv = new myTv(MainActivity.this);
+				tv = new TextView(MainActivity.this);
 			}
 
 			tv.setFocusable(false);
@@ -223,13 +197,11 @@ public class MainActivity extends Activity {
 
 		@Override
 		public int getNumberOfSections() {
-			// TODO Auto-generated method stub
 			return sections.size();
 		}
 
 		@Override
 		public Section getSection(int index) {
-			// TODO Auto-generated method stub
 			if (index < sections.size() && index >= 0)
 				return sections.get(index);
 
@@ -238,15 +210,14 @@ public class MainActivity extends Activity {
 
 		@Override
 		public Class[] getViewTypes() {
-			Class[] types = { myTv.class, myTv.class };
+			Class[] types = { TextView.class, TextView.class };
 
 			return types;
 		}
 
 		@Override
 		public Class getViewType(ItemProxy proxy) {
-
-			return myTv.class;
+			return TextView.class;
 		}
 
 		@Override
@@ -254,38 +225,6 @@ public class MainActivity extends Activity {
 			return true;
 		}
 
-	}
-
-	class myTv extends TextView {
-
-		public myTv(Context context) {
-			super(context);
-		}
-
-		public myTv(Context context, AttributeSet attrs) {
-			super(context, attrs);
-
-		}
-
-		public myTv(Context context, AttributeSet attrs, int defStyle) {
-			super(context, attrs, defStyle);
-
-		}
-
-		@Override
-		protected void onAttachedToWindow() {
-			super.onAttachedToWindow();
-
-			// Log.d(TAG, "attached: " + this.getText());
-
-		}
-
-		@Override
-		protected void onDetachedFromWindow() {
-			super.onDetachedFromWindow();
-
-			// Log.d(TAG, "detached: " + this.getText());
-		}
 	}
 
 }
