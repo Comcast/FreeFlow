@@ -215,6 +215,9 @@ public class Container extends AbsLayoutContainer {
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
 
+		if (layout == null || itemAdapter == null)
+			return;
+
 		if (beforeWidth != afterWidth || beforeHeight != afterHeight
 				|| markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
@@ -235,32 +238,24 @@ public class Container extends AbsLayoutContainer {
 	 *            margins and padding, this is height of the container.
 	 */
 	protected void computeLayout(int w, int h) {
-
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout");
+		layout.setDimensions(w, h);
+		layout.setAdapter(itemAdapter);
+		computeViewPort(layout);
+		HashMap<? extends Object, ItemProxy> oldFrames = frames;
 
-		if (layout != null) {
-
-			layout.setDimensions(w, h);
-
-			if (this.itemAdapter != null)
-				layout.setAdapter(itemAdapter);
-
-			computeViewPort(layout);
-			HashMap<? extends Object, ItemProxy> oldFrames = frames;
-
-			if (markLayoutDirty) {
-				markLayoutDirty = false;
-			}
-
-			// Create a copy of the incoming values because the source
-			// layout may change the map inside its own class
-			frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
-					viewPortX, viewPortY));
-
-			dispatchLayoutComputed();
-
-			animateChanges(getViewChanges(oldFrames, frames));
+		if (markLayoutDirty) {
+			markLayoutDirty = false;
 		}
+		// Create a copy of the incoming values because the source
+		// layout may change the map inside its own class
+		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
+				viewPortX, viewPortY));
+
+		dispatchLayoutComputed();
+
+		animateChanges(getViewChanges(oldFrames, frames));
+
 	}
 
 	/**
@@ -595,9 +590,8 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	public void requestLayout() {
-
 		if (!preventLayout) {
-			// Log.d(TAG, "== requesting layout ===");
+			/** Ends up with a call to onMeasure where all the logic lives */
 			super.requestLayout();
 		}
 
