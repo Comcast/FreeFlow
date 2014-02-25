@@ -242,20 +242,34 @@ public class Container extends AbsLayoutContainer {
 		layout.setDimensions(w, h);
 		layout.setAdapter(itemAdapter);
 		computeViewPort(layout);
-		HashMap<? extends Object, ItemProxy> oldFrames = frames;
+		HashMap<Object, ItemProxy> oldFrames = frames;
 
 		if (markLayoutDirty) {
 			markLayoutDirty = false;
 		}
+		
+		setFrames();
+		
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
-		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
-				viewPortX, viewPortY));
+		
 
 		dispatchLayoutComputed();
 
 		animateChanges(getViewChanges(oldFrames, frames));
 
+	}
+	
+	protected void setFrames(){
+		frames = new HashMap<Object, ItemProxy>();
+		HashMap<? extends Object, ItemProxy> mp = layout.getItemProxies(viewPortX, viewPortY);
+		  Iterator it = mp.entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry pairs = (Map.Entry)it.next();
+		        ItemProxy pr = (ItemProxy) pairs.getValue();
+		        pr = ItemProxy.clone(pr);
+		        frames.put(pairs.getKey(), pr);
+		    }
 	}
 
 	/**
@@ -520,14 +534,14 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<? extends Object, ItemProxy> oldFrames,
-			HashMap<? extends Object, ItemProxy> newFrames) {
+			HashMap<Object, ItemProxy> oldFrames,
+			HashMap<Object, ItemProxy> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<? extends Object, ItemProxy> oldFrames,
-			HashMap<? extends Object, ItemProxy> newFrames,
+			HashMap<Object, ItemProxy> oldFrames,
+			HashMap<Object, ItemProxy> newFrames,
 			boolean moveEvenIfSame) {
 
 		// cleanupViews();
@@ -1001,11 +1015,10 @@ public class Container extends AbsLayoutContainer {
 			}
 
 		}
-		HashMap<? extends Object, ItemProxy> oldFrames = frames;
+		HashMap<Object, ItemProxy> oldFrames = frames;
 
-		frames = new HashMap<Object, ItemProxy>(layout.getItemProxies(
-				viewPortX, viewPortY));
-
+		setFrames();
+		
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
 		for (ItemProxy proxy : changeSet.added) {
@@ -1107,7 +1120,7 @@ public class Container extends AbsLayoutContainer {
 		return layoutAnimator;
 	}
 
-	public HashMap<? extends Object, ItemProxy> getFrames() {
+	public HashMap<Object, ItemProxy> getFrames() {
 		return frames;
 	}
 

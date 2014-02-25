@@ -167,8 +167,8 @@ public class VGridLayout implements FreeFlowLayout {
 		for (ItemProxy fd : proxies.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
 					&& fd.frame.top < viewPortTop + height + cellBufferSize) {
-				ItemProxy newDesc = ItemProxy.clone(fd);
-				desc.put(newDesc.data, newDesc);
+				
+				desc.put(fd.data, fd);
 			}
 		}
 

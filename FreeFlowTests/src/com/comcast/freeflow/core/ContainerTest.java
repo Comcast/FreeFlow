@@ -160,8 +160,8 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 	 */
 	public void testViewChangesWhenViewMovesWithinViewport(){
 		
-		HashMap<String, ItemProxy> oldMap = new HashMap<String, ItemProxy>();
-		HashMap<String, ItemProxy> newMap = new HashMap<String, ItemProxy>();
+		HashMap<Object, ItemProxy> oldMap = new HashMap<Object, ItemProxy>();
+		HashMap<Object, ItemProxy> newMap = new HashMap<Object, ItemProxy>();
 		
 		
 		String one = "one";

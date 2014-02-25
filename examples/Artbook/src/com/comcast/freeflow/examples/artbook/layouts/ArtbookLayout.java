@@ -152,7 +152,7 @@ public class ArtbookLayout implements FreeFlowLayout {
 			Entry<Object, ItemProxy> pairs = it.next();
 			ItemProxy p = (ItemProxy) pairs.getValue();
 			if ( Rect.intersects(p.frame, viewport) ) {
-				ret.put(pairs.getKey(), ItemProxy.clone(p));
+				ret.put(pairs.getKey(), p);
 			}
 		}
 		return ret;

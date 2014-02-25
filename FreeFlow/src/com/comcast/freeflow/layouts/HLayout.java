@@ -159,8 +159,7 @@ public class HLayout implements FreeFlowLayout {
 
 			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
 					&& fd.frame.left < viewPortLeft + width + cellBufferSize) {
-				ItemProxy newDesc = ItemProxy.clone(fd);
-				desc.put(newDesc.data, newDesc);
+				desc.put(fd.data, fd);
 			}
 		}
 
