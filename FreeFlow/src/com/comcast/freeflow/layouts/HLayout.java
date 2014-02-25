@@ -27,13 +27,10 @@ import com.comcast.freeflow.utils.ViewUtils;
 import android.graphics.Rect;
 import android.util.Log;
 
-public class HLayout implements FreeFlowLayout {
+public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
-	private boolean layoutChanged = false;
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
-	protected int width = -1;
-	protected int height = -1;
 	private SectionedAdapter itemsAdapter;
 	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerHeight = -1;
@@ -56,37 +53,13 @@ public class HLayout implements FreeFlowLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		layoutChanged = true;
 		
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setDimensions(int measuredWidth, int measuredHeight) {
-		if (measuredHeight == height && measuredWidth == width) {
-			return;
-		}
-		this.width = measuredWidth;
-		this.height = measuredHeight;
-		layoutChanged = true;
-	}
-
-	@Override
-	public void setAdapter(SectionedAdapter adapter) {
-		if(adapter == this.itemsAdapter)
-			return;
-		this.itemsAdapter = adapter;
-		layoutChanged = true;
-	}
-
-	public void generateItemProxies() {
+	public void prepareLayout() {
 		if (itemWidth < 0) {
 			throw new IllegalStateException("itemWidth not set");
 		}
-
-		layoutChanged = false;
 
 		proxies.clear();
 		int leftStart = 0;
@@ -151,12 +124,7 @@ public class HLayout implements FreeFlowLayout {
 	public HashMap<? extends Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		for (FreeFlowItem fd : proxies.values()) {
-
 			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
 					&& fd.frame.left < viewPortLeft + width + cellBufferSize) {
 				desc.put(fd.data, fd);
@@ -205,10 +173,6 @@ public class HLayout implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
 		return fd;
 	}

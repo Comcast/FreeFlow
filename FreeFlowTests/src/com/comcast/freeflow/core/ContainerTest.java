@@ -82,7 +82,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 						
 						// setItems will force new frames to be generated, but not set 
 						vLayout.setAdapter(adapter); 
-						vLayout.generateItemProxies() ;
+						vLayout.prepareLayout() ;
 						
 						//assertEquals("Layout frames did not generate as expected", 5*(10+1), vLayout.getAllProxies().size());
 						assertEquals("Container frames changed unexpectedly with data", frameCount, container.getFrames().size());

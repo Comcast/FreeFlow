@@ -27,25 +27,23 @@ import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
+import com.comcast.freeflow.layouts.FreeFlowLayoutBase;
 import com.comcast.freeflow.utils.ViewUtils;
 
-public class ArtbookLayout implements FreeFlowLayout {
+public class ArtbookLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	private static final String TAG = "ArtbookLayout";
 
 	private int largeItemSide;
 	private int regularItemSide;
 
-	private int viewPortWidth;
-	private int viewPortHeight;
 
 	@Override
 	public void setDimensions(int measuredWidth, int measuredHeight) {
+		super.setDimensions(measuredWidth, measuredHeight);
 		largeItemSide = measuredWidth / 2;
 		regularItemSide = measuredWidth / 4;
 
-		viewPortWidth = measuredWidth;
-		viewPortHeight = measuredHeight;
 	}
 
 	private HashMap<Object, FreeFlowItem> map;
@@ -57,6 +55,10 @@ public class ArtbookLayout implements FreeFlowLayout {
 		// assuming one section
 		map = new HashMap<Object, FreeFlowItem>();
 		s = adapter.getSection(0);
+	}
+	
+	@Override
+	public void prepareLayout(){
 
 		int rowIndex;
 
@@ -99,7 +101,7 @@ public class ArtbookLayout implements FreeFlowLayout {
 
 			case (2):
 				r.left = 3 * regularItemSide;
-				r.right = viewPortWidth;
+				r.right = width;
 				r.top = rowIndex * largeItemSide;
 				r.bottom = r.top + regularItemSide;
 				
@@ -121,7 +123,7 @@ public class ArtbookLayout implements FreeFlowLayout {
 
 			case (4):
 				r.left = 3 * regularItemSide;
-				r.right = viewPortWidth;
+				r.right = width;
 				r.top = rowIndex * largeItemSide + regularItemSide;
 				r.bottom = r.top + regularItemSide;
 				if(rowIndex % 2 != 0){
@@ -143,8 +145,8 @@ public class ArtbookLayout implements FreeFlowLayout {
 
 		Rect viewport = new Rect(viewPortLeft, 
 								viewPortTop, 
-								viewPortLeft + viewPortWidth, 
-								viewPortTop + viewPortHeight);
+								viewPortLeft + width, 
+								viewPortTop + height);
 		HashMap<Object, FreeFlowItem> ret = new HashMap<Object, FreeFlowItem>();
 
 		Iterator<Entry<Object, FreeFlowItem>> it = map.entrySet().iterator();

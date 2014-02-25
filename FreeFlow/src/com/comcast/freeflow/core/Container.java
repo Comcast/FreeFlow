@@ -241,6 +241,7 @@ public class Container extends AbsLayoutContainer {
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout");
 		layout.setDimensions(w, h);
 		layout.setAdapter(itemAdapter);
+		layout.prepareLayout();
 		computeViewPort(layout);
 		HashMap<Object, FreeFlowItem> oldFrames = frames;
 

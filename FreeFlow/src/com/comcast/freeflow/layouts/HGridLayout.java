@@ -26,14 +26,11 @@ import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 
-public class HGridLayout implements FreeFlowLayout {
+public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
-	private boolean layoutChanged = false;
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
-	private int width = -1;
-	private int height = -1;
 	private SectionedAdapter itemsAdapter;
 	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerWidth = -1;
@@ -42,21 +39,6 @@ public class HGridLayout implements FreeFlowLayout {
 	private int bufferCount = 1;
 	
 	protected FreeFlowLayoutParams layoutParams;
-	
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setDimensions(int measuredWidth, int measuredHeight) {
-		if (measuredHeight == height && measuredWidth == width) {
-			return;
-		}
-		this.width = measuredWidth;
-		this.height = measuredHeight;
-		layoutChanged = true;
-
-	}
 	
 	@Override
 	public void setLayoutParams(FreeFlowLayoutParams params){
@@ -69,18 +51,9 @@ public class HGridLayout implements FreeFlowLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		layoutChanged = true;
 	}
 
-	@Override
-	public void setAdapter(SectionedAdapter adapter) {
-		this.itemsAdapter = adapter;
-		layoutChanged = true;
-	}
-
-	public void generateItemProxies() {
-		layoutChanged = false;
-
+	public void prepareLayout() {
 		proxies.clear();
 
 		int rows = height / itemHeight;
@@ -140,10 +113,6 @@ public class HGridLayout implements FreeFlowLayout {
 	public HashMap<? extends Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		for (FreeFlowItem fd : proxies.values()) {
 
 			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
@@ -197,12 +166,7 @@ public class HGridLayout implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
-
 		return fd;
 	}
 

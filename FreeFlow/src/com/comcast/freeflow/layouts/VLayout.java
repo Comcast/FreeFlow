@@ -26,14 +26,10 @@ import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 
-public class VLayout implements FreeFlowLayout {
+public class VLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
-	private boolean layoutChanged = false;
 	private static final String TAG = "VLayout";
 	private int itemHeight = -1;
-	private int width = -1;
-	private int height = -1;
-	private SectionedAdapter itemsAdapter;
 	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerHeight = -1;
 	private int headerWidth = -1;
@@ -43,19 +39,6 @@ public class VLayout implements FreeFlowLayout {
 	
 	protected FreeFlowLayoutParams layoutParams;
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setDimensions(int measuredWidth, int measuredHeight) {
-		if (measuredHeight == height && measuredWidth == width) {
-			return;
-		}
-		this.width = measuredWidth;
-		this.height = measuredHeight;
-		layoutChanged = true;
-	}
-
 	@Override
 	public void setLayoutParams(FreeFlowLayoutParams params) {
 		if (params.equals(this.layoutParams)) {
@@ -66,23 +49,12 @@ public class VLayout implements FreeFlowLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		layoutChanged = true;
 	}
 
-	@Override
-	public void setAdapter(SectionedAdapter adapter) {
-		this.itemsAdapter = adapter;
-
-		layoutChanged = true;
-	}
-
-	public void generateItemProxies() {
+	public void prepareLayout() {
 		if (itemHeight < 0) {
 			throw new IllegalStateException("itemHeight not set");
 		}
-
-		layoutChanged = false;
-
 		proxies.clear();
 		int topStart = 0;
 
@@ -148,9 +120,6 @@ public class VLayout implements FreeFlowLayout {
 			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
 
 		for (FreeFlowItem fd : proxies.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
@@ -196,23 +165,13 @@ public class VLayout implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
-
 		return fd;
 	}
 
 	@Override
 	public FreeFlowItem getItemAt(float x, float y) {
 		return ViewUtils.getItemAt(proxies, (int) x, (int) y);
-	}
-
-	public void setHeaderItemDimensions(int hWidth, int hHeight) {
-		headerWidth = hWidth;
-		headerHeight = hHeight;
 	}
 
 	public void setBufferCount(int bufferCount) {

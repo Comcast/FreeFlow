@@ -67,6 +67,8 @@ public interface FreeFlowLayout {
 			int viewPortLeft, int viewPortTop);
 
 	public void setLayoutParams(FreeFlowLayoutParams params);
+	
+	public void prepareLayout();
 
 	public  FreeFlowItem getFreeFlowItemForItem(Object item);
 

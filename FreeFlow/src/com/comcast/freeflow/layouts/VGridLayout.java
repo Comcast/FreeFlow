@@ -25,17 +25,14 @@ import com.comcast.freeflow.utils.ViewUtils;
 
 import android.graphics.Rect;
 
-public class VGridLayout implements FreeFlowLayout {
+public class VGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
-	private boolean layoutChanged = false;
 	private static final String TAG = "VGridLayout";
 	protected int itemHeight = -1;
 	protected int itemWidth = -1;
 	protected int headerWidth = -1;
 	protected int headerHeight = -1;
-	protected int width = -1;
-	protected int height = -1;
-	protected SectionedAdapter itemsAdapter;
+	
 	protected HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 
 	private int cellBufferSize = 0;
@@ -68,33 +65,10 @@ public class VGridLayout implements FreeFlowLayout {
 		this.headerWidth = lp.headerWidth;
 		this.headerHeight = lp.headerHeight;
 		cellBufferSize = bufferCount * cellBufferSize;
-		layoutChanged = true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setDimensions(int measuredWidth, int measuredHeight) {
-		if (measuredHeight == height && measuredWidth == width) {
-			return;
-		}
-		this.width = measuredWidth;
-		this.height = measuredHeight;
-
-		layoutChanged = true;
-	}
-
-	@Override
-	public void setAdapter(SectionedAdapter adapter) {
-		this.itemsAdapter = adapter;
-		layoutChanged = true;
-	}
-
-	public void generateItemProxies() {
+	public void prepareLayout() {
 		
-		layoutChanged = false;
-
 		proxies.clear();
 
 		int cols = width / itemWidth;
@@ -147,11 +121,12 @@ public class VGridLayout implements FreeFlowLayout {
 		}
 
 	}
+	
 
 	/**
 	 * NOTE: In this instance, we subtract/add the cellBufferSize (computed when
 	 * item height is set, defaulted to 1 cell) to add a buffer of
-	 * cellBufferSize to each end of the viewport. <br>
+	 * cellBufferSize to each end of the viewport
 	 * 
 	 * {@inheritDoc}
 	 * 
@@ -159,11 +134,6 @@ public class VGridLayout implements FreeFlowLayout {
 	@Override
 	public HashMap<? extends Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
-
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		for (FreeFlowItem fd : proxies.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize
 					&& fd.frame.top < viewPortTop + height + cellBufferSize) {
@@ -214,10 +184,6 @@ public class VGridLayout implements FreeFlowLayout {
 
 	@Override
 	public FreeFlowItem getFreeFlowItemForItem(Object data) {
-		if (proxies.size() == 0 || layoutChanged) {
-			generateItemProxies();
-		}
-
 		if (proxies.get(data) == null)
 			return null;
 
@@ -248,4 +214,5 @@ public class VGridLayout implements FreeFlowLayout {
 		}
 		
 	}
+
 }
