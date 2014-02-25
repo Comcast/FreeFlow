@@ -19,15 +19,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 
 public class ViewUtils {
-	public static ItemProxy getItemAt(HashMap<? extends Object, ItemProxy> frameDescriptors, int x, int y){
+	public static FreeFlowItem getItemAt(HashMap<? extends Object, FreeFlowItem> frameDescriptors, int x, int y){
 
 		Iterator<? extends Object> it=  frameDescriptors.entrySet().iterator();
 			
 		while (it.hasNext()) {
-			Entry<Object, ItemProxy> pair = (Entry<Object, ItemProxy>) it.next();
+			Entry<Object, FreeFlowItem> pair = (Entry<Object, FreeFlowItem>) it.next();
 			if(pair.getValue().frame.contains((int)x, (int)y)) return pair.getValue();
 	      
 	    }

@@ -17,7 +17,7 @@ package com.comcast.freeflow.examples.artbook.data;
 
 import java.util.ArrayList;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 
@@ -100,7 +100,7 @@ public class DribbbleDataAdapter implements SectionedAdapter {
 	}
 
 	@Override
-	public Class getViewType(ItemProxy proxy) {
+	public Class getViewType(FreeFlowItem proxy) {
 		return LinearLayout.class;
 	}
 

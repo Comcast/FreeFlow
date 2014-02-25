@@ -160,7 +160,7 @@ public class Container extends AbsLayoutContainer {
 
 	private FreeFlowLayoutAnimator layoutAnimator = new DefaultLayoutAnimator();
 
-	private ItemProxy beginTouchAt;
+	private FreeFlowItem beginTouchAt;
 
 	private boolean markLayoutDirty = false;
 	private boolean markAdapterDirty = false;
@@ -180,13 +180,13 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void init(Context context) {
-		// usedViews = new HashMap<Object, ItemProxy>();
-		// usedHeaderViews = new HashMap<Object, ItemProxy>();
+		// usedViews = new HashMap<Object, FreeFlowItem>();
+		// usedHeaderViews = new HashMap<Object, FreeFlowItem>();
 
 		setWillNotDraw(false);
 
 		viewpool = new ViewPool();
-		frames = new HashMap<Object, ItemProxy>();
+		frames = new HashMap<Object, FreeFlowItem>();
 
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
@@ -242,7 +242,7 @@ public class Container extends AbsLayoutContainer {
 		layout.setDimensions(w, h);
 		layout.setAdapter(itemAdapter);
 		computeViewPort(layout);
-		HashMap<Object, ItemProxy> oldFrames = frames;
+		HashMap<Object, FreeFlowItem> oldFrames = frames;
 
 		if (markLayoutDirty) {
 			markLayoutDirty = false;
@@ -261,13 +261,13 @@ public class Container extends AbsLayoutContainer {
 	}
 	
 	protected void setFrames(){
-		frames = new HashMap<Object, ItemProxy>();
-		HashMap<? extends Object, ItemProxy> mp = layout.getItemProxies(viewPortX, viewPortY);
+		frames = new HashMap<Object, FreeFlowItem>();
+		HashMap<? extends Object, FreeFlowItem> mp = layout.getItemProxies(viewPortX, viewPortY);
 		  Iterator it = mp.entrySet().iterator();
 		    while (it.hasNext()) {
 		        Map.Entry pairs = (Map.Entry)it.next();
-		        ItemProxy pr = (ItemProxy) pairs.getValue();
-		        pr = ItemProxy.clone(pr);
+		        FreeFlowItem pr = (FreeFlowItem) pairs.getValue();
+		        pr = FreeFlowItem.clone(pr);
 		        frames.put(pairs.getKey(), pr);
 		    }
 	}
@@ -277,39 +277,39 @@ public class Container extends AbsLayoutContainer {
 	 * ViewPool, we dont need to construct a new instance, else we will based on
 	 * the View class returned by the <code>Adapter</code>
 	 * 
-	 * @param proxy
-	 *            <code>ItemProxy</code> instance that determines the View being
+	 * @param freeflowItem
+	 *            <code>FreeFlowItem</code> instance that determines the View being
 	 *            positioned
 	 */
-	protected void addAndMeasureViewIfNeeded(ItemProxy proxy) {
+	protected void addAndMeasureViewIfNeeded(FreeFlowItem freeflowItem) {
 		View view;
-		if (proxy.view == null) {
+		if (freeflowItem.view == null) {
 
 			View convertView = viewpool.getViewFromPool(itemAdapter
-					.getViewType(proxy));
+					.getViewType(freeflowItem));
 
-			if (proxy.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(proxy.itemSection,
+			if (freeflowItem.isHeader) {
+				view = itemAdapter.getHeaderViewForSection(freeflowItem.itemSection,
 						convertView, this);
 			} else {
-				view = itemAdapter.getItemView(proxy.itemSection,
-						proxy.itemIndex, convertView, this);
+				view = itemAdapter.getItemView(freeflowItem.itemSection,
+						freeflowItem.itemIndex, convertView, this);
 			}
 
 			if (view instanceof Container)
 				throw new IllegalStateException(
 						"A container cannot be a direct child view to a container");
 
-			proxy.view = view;
-			prepareViewForAddition(view, proxy);
+			freeflowItem.view = view;
+			prepareViewForAddition(view, freeflowItem);
 			addView(view, getChildCount(), params);
 		}
 
-		view = proxy.view;
+		view = freeflowItem.view;
 
-		int widthSpec = MeasureSpec.makeMeasureSpec(proxy.frame.width(),
+		int widthSpec = MeasureSpec.makeMeasureSpec(freeflowItem.frame.width(),
 				MeasureSpec.EXACTLY);
-		int heightSpec = MeasureSpec.makeMeasureSpec(proxy.frame.height(),
+		int heightSpec = MeasureSpec.makeMeasureSpec(freeflowItem.frame.height(),
 				MeasureSpec.EXACTLY);
 		view.measure(widthSpec, heightSpec);
 	}
@@ -319,14 +319,14 @@ public class Container extends AbsLayoutContainer {
 	 * 
 	 * @param view
 	 *            The View that will be added to the Container
-	 * @param proxy
-	 *            The <code>ItemProxy</code> instance that represents the view
+	 * @param freeflowItem
+	 *            The <code>FreeFlowItem</code> instance that represents the view
 	 *            that will be positioned
 	 */
-	protected void prepareViewForAddition(View view, ItemProxy proxy) {
+	protected void prepareViewForAddition(View view, FreeFlowItem freeflowItem) {
 		if (view instanceof Checkable) {
-			((Checkable) view).setChecked(isChecked(proxy.itemSection,
-					proxy.itemIndex));
+			((Checkable) view).setChecked(isChecked(freeflowItem.itemSection,
+					freeflowItem.itemIndex));
 		}
 	}
 
@@ -338,9 +338,9 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	protected void doLayout(ItemProxy proxy) {
-		View view = proxy.view;
-		Rect frame = proxy.frame;
+	protected void doLayout(FreeFlowItem freeflowItem) {
+		View view = freeflowItem.view;
+		Rect frame = freeflowItem.frame;
 		view.layout(frame.left - viewPortX, frame.top - viewPortY, frame.right
 				- viewPortX, frame.bottom - viewPortY);
 	}
@@ -406,7 +406,7 @@ public class Container extends AbsLayoutContainer {
 		// layout
 		// TODO: Need to make sure this item is actually being shown in the
 		// viewport and not just in some offscreen buffer
-		for (ItemProxy fd : frames.values()) {
+		for (FreeFlowItem fd : frames.values()) {
 			if (fd.itemSection < lowestSection
 					|| (fd.itemSection == lowestSection && fd.itemIndex < lowestPosition)) {
 				data = fd.data;
@@ -415,15 +415,15 @@ public class Container extends AbsLayoutContainer {
 			}
 		}
 
-		ItemProxy proxy = newLayout.getItemProxyForItem(data);
+		FreeFlowItem freeflowItem = newLayout.getFreeFlowItemForItem(data);
 
-		if (proxy == null) {
+		if (freeflowItem == null) {
 			viewPortX = 0;
 			viewPortY = 0;
 			return;
 		}
 
-		Rect vpFrame = proxy.frame;
+		Rect vpFrame = freeflowItem.frame;
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
@@ -447,16 +447,16 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	/**
-	 * Returns the actual frame for a view as its on stage. The ItemProxy's
+	 * Returns the actual frame for a view as its on stage. The FreeFlowItem's
 	 * frame object always represents the position it wants to be in but actual
 	 * frame may be different based on animation etc.
 	 * 
-	 * @param proxy
-	 *            The proxy to get the <code>Frame</code> for
-	 * @return The Frame for the proxy or null if that view doesn't exist
+	 * @param freeflowItem
+	 *            The freeflowItem to get the <code>Frame</code> for
+	 * @return The Frame for the freeflowItem or null if that view doesn't exist
 	 */
-	public Rect getActualFrame(final ItemProxy proxy) {
-		View v = proxy.view;
+	public Rect getActualFrame(final FreeFlowItem freeflowItem) {
+		View v = freeflowItem.view;
 		if (v == null) {
 			return null;
 		}
@@ -490,9 +490,9 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		for (ItemProxy proxy : changeSet.getAdded()) {
-			addAndMeasureViewIfNeeded(proxy);
-			doLayout(proxy);
+		for (FreeFlowItem freeflowItem : changeSet.getAdded()) {
+			addAndMeasureViewIfNeeded(freeflowItem);
+			doLayout(freeflowItem);
 		}
 
 		if (isAnimatingChanges) {
@@ -521,10 +521,10 @@ public class Container extends AbsLayoutContainer {
 		isAnimatingChanges = false;
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
 				"layout change animations complete");
-		for (ItemProxy proxy : anim.getChangeSet().getRemoved()) {
-			View v = proxy.view;
+		for (FreeFlowItem freeflowItem : anim.getChangeSet().getRemoved()) {
+			View v = freeflowItem.view;
 			removeView(v);
-			returnItemToPoolIfNeeded(proxy);
+			returnItemToPoolIfNeeded(freeflowItem);
 		}
 
 		dispatchLayoutChangeAnimationsComplete();
@@ -534,14 +534,14 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<Object, ItemProxy> oldFrames,
-			HashMap<Object, ItemProxy> newFrames) {
+			HashMap<Object, FreeFlowItem> oldFrames,
+			HashMap<Object, FreeFlowItem> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<Object, ItemProxy> oldFrames,
-			HashMap<Object, ItemProxy> newFrames,
+			HashMap<Object, FreeFlowItem> oldFrames,
+			HashMap<Object, FreeFlowItem> newFrames,
 			boolean moveEvenIfSame) {
 
 		// cleanupViews();
@@ -549,8 +549,8 @@ public class Container extends AbsLayoutContainer {
 
 		if (oldFrames == null) {
 			markAdapterDirty = false;
-			for (ItemProxy proxy : newFrames.values()) {
-				change.addToAdded(proxy);
+			for (FreeFlowItem freeflowItem : newFrames.values()) {
+				change.addToAdded(freeflowItem);
 			}
 
 			return change;
@@ -558,12 +558,12 @@ public class Container extends AbsLayoutContainer {
 
 		if (markAdapterDirty) {
 			markAdapterDirty = false;
-			for (ItemProxy proxy : newFrames.values()) {
-				change.addToAdded(proxy);
+			for (FreeFlowItem freeflowItem : newFrames.values()) {
+				change.addToAdded(freeflowItem);
 			}
 
-			for (ItemProxy proxy : oldFrames.values()) {
-				change.addToDeleted(proxy);
+			for (FreeFlowItem freeflowItem : oldFrames.values()) {
+				change.addToDeleted(freeflowItem);
 			}
 
 			return change;
@@ -572,29 +572,29 @@ public class Container extends AbsLayoutContainer {
 		Iterator<?> it = newFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry m = (Map.Entry) it.next();
-			ItemProxy proxy = (ItemProxy) m.getValue();
+			FreeFlowItem freeflowItem = (FreeFlowItem) m.getValue();
 
 			if (oldFrames.get(m.getKey()) != null) {
 
-				ItemProxy old = oldFrames.remove(m.getKey());
-				proxy.view = old.view;
+				FreeFlowItem old = oldFrames.remove(m.getKey());
+				freeflowItem.view = old.view;
 
-				// if (moveEvenIfSame || !old.compareRect(((ItemProxy)
+				// if (moveEvenIfSame || !old.compareRect(((FreeFlowItem)
 				// m.getValue()).frame)) {
 
 				if (moveEvenIfSame
-						|| !old.frame.equals(((ItemProxy) m.getValue()).frame)) {
+						|| !old.frame.equals(((FreeFlowItem) m.getValue()).frame)) {
 
-					change.addToMoved(proxy, getActualFrame(proxy));
+					change.addToMoved(freeflowItem, getActualFrame(freeflowItem));
 				}
 			} else {
-				change.addToAdded(proxy);
+				change.addToAdded(freeflowItem);
 			}
 
 		}
 
-		for (ItemProxy proxy : oldFrames.values()) {
-			change.addToDeleted(proxy);
+		for (FreeFlowItem freeflowItem : oldFrames.values()) {
+			change.addToDeleted(freeflowItem);
 		}
 
 		frames = newFrames;
@@ -864,7 +864,7 @@ public class Container extends AbsLayoutContainer {
 							if (mChoiceActionMode == null
 									&& mOnItemSelectedListener != null) {
 								mOnItemSelectedListener.onItemSelected(
-										Container.this, selectedItemProxy);
+										Container.this, selectedFreeFlowItem);
 							}
 
 							// setPressed(false);
@@ -874,7 +874,7 @@ public class Container extends AbsLayoutContainer {
 							// }
 						}
 					};
-					selectedItemProxy = beginTouchAt;
+					selectedFreeFlowItem = beginTouchAt;
 					postDelayed(mTouchModeReset,
 							ViewConfiguration.getPressedStateDuration());
 
@@ -892,8 +892,8 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	public ItemProxy getSelectedItemProxy() {
-		return selectedItemProxy;
+	public FreeFlowItem getSelectedFreeFlowItem() {
+		return selectedFreeFlowItem;
 	}
 
 	private Runnable flingRunnable = new Runnable() {
@@ -1015,25 +1015,25 @@ public class Container extends AbsLayoutContainer {
 			}
 
 		}
-		HashMap<Object, ItemProxy> oldFrames = frames;
+		HashMap<Object, FreeFlowItem> oldFrames = frames;
 
 		setFrames();
 		
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
-		for (ItemProxy proxy : changeSet.added) {
-			addAndMeasureViewIfNeeded(proxy);
-			doLayout(proxy);
+		for (FreeFlowItem freeflowItem : changeSet.added) {
+			addAndMeasureViewIfNeeded(freeflowItem);
+			doLayout(freeflowItem);
 		}
 
-		for (Pair<ItemProxy, Rect> proxyPair : changeSet.moved) {
-			doLayout(proxyPair.first);
+		for (Pair<FreeFlowItem, Rect> freeflowItemPair : changeSet.moved) {
+			doLayout(freeflowItemPair.first);
 		}
 
-		for (ItemProxy proxy : changeSet.removed) {
-			proxy.view.setAlpha(0.3f);
-			removeViewInLayout(proxy.view);
-			returnItemToPoolIfNeeded(proxy);
+		for (FreeFlowItem freeflowItem : changeSet.removed) {
+			freeflowItem.view.setAlpha(0.3f);
+			removeViewInLayout(freeflowItem.view);
+			returnItemToPoolIfNeeded(freeflowItem);
 		}
 
 	}
@@ -1096,8 +1096,8 @@ public class Container extends AbsLayoutContainer {
 
 	}
 
-	protected void returnItemToPoolIfNeeded(ItemProxy proxy) {
-		View v = proxy.view;
+	protected void returnItemToPoolIfNeeded(FreeFlowItem freeflowItem) {
+		View v = freeflowItem.view;
 		v.setTranslationX(0);
 		v.setTranslationY(0);
 		v.setRotation(0);
@@ -1120,7 +1120,7 @@ public class Container extends AbsLayoutContainer {
 		return layoutAnimator;
 	}
 
-	public HashMap<Object, ItemProxy> getFrames() {
+	public HashMap<Object, FreeFlowItem> getFrames() {
 		return frames;
 	}
 
@@ -1478,7 +1478,7 @@ public class Container extends AbsLayoutContainer {
 		Iterator<?> it = frames.entrySet().iterator();
 		View child = null;
 		while (it.hasNext()) {
-			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
+			Map.Entry<?, FreeFlowItem> pairs = (Map.Entry<?, FreeFlowItem>) it.next();
 			child = pairs.getValue().view;
 			boolean isChecked = isChecked(pairs.getValue().itemSection,
 					pairs.getValue().itemIndex);
@@ -1547,11 +1547,11 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		ItemProxy proxy = layout.getItemProxyForItem(section
+		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section
 				.getDataAtIndex(itemIndex));
 
-		int newVPX = proxy.frame.left;
-		int newVPY = proxy.frame.top;
+		int newVPX = freeflowItem.frame.left;
+		int newVPY = freeflowItem.frame.top;
 
 		if (newVPX > layout.getContentWidth() - getMeasuredWidth())
 			newVPX = layout.getContentWidth() - getMeasuredWidth();

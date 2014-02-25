@@ -18,7 +18,7 @@ package com.comcast.freeflow.examples.artbook;
 import com.comcast.freeflow.core.AbsLayoutContainer;
 import com.comcast.freeflow.core.AbsLayoutContainer.OnItemClickListener;
 import com.comcast.freeflow.core.Container;
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Container.OnScrollListener;
 import com.comcast.freeflow.layouts.VGridLayout;
 import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
@@ -70,7 +70,7 @@ public class ArtbookActivity extends Activity {
 		container.setAdapter(adapter);
 		container.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AbsLayoutContainer parent, ItemProxy proxy) {
+			public void onItemClick(AbsLayoutContainer parent, FreeFlowItem proxy) {
 				
 			}
 		});

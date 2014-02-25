@@ -17,7 +17,7 @@ package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
@@ -35,7 +35,7 @@ public class HLayout implements FreeFlowLayout {
 	protected int width = -1;
 	protected int height = -1;
 	private SectionedAdapter itemsAdapter;
-	private HashMap<Object, ItemProxy> proxies = new HashMap<Object, ItemProxy>();
+	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerHeight = -1;
 	private int headerWidth = -1;
 
@@ -104,7 +104,7 @@ public class HLayout implements FreeFlowLayout {
 					throw new IllegalStateException("headerHeight not set");
 				}
 
-				ItemProxy header = new ItemProxy();
+				FreeFlowItem header = new FreeFlowItem();
 				Rect hframe = new Rect();
 				header.itemSection = i;
 				header.itemIndex = -1;
@@ -121,7 +121,7 @@ public class HLayout implements FreeFlowLayout {
 			}
 
 			for (int j = 0; j < s.getDataCount(); j++) {
-				ItemProxy descriptor = new ItemProxy();
+				FreeFlowItem descriptor = new FreeFlowItem();
 				Rect frame = new Rect();
 				descriptor.itemSection = i;
 				descriptor.itemIndex = j;
@@ -148,14 +148,14 @@ public class HLayout implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<? extends Object, ItemProxy> getItemProxies(int viewPortLeft, int viewPortTop) {
-		HashMap<Object, ItemProxy> desc = new HashMap<Object, ItemProxy>();
+	public HashMap<? extends Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
+		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
 		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		for (ItemProxy fd : proxies.values()) {
+		for (FreeFlowItem fd : proxies.values()) {
 
 			if (fd.frame.left + itemWidth > viewPortLeft - cellBufferSize
 					&& fd.frame.left < viewPortLeft + width + cellBufferSize) {
@@ -167,7 +167,7 @@ public class HLayout implements FreeFlowLayout {
 	}
 	
 	@Override
-	public ItemProxy getItemAt(float x, float y){
+	public FreeFlowItem getItemAt(float x, float y){
 		return ViewUtils.getItemAt(proxies, (int)x, (int)y);
 	}
 
@@ -193,7 +193,7 @@ public class HLayout implements FreeFlowLayout {
 			return 0;
 
 		Object lastFrameData = s.getDataAtIndex(s.getDataCount() - 1);
-		ItemProxy fd = proxies.get(lastFrameData);
+		FreeFlowItem fd = proxies.get(lastFrameData);
 
 		return (fd.frame.left + fd.frame.width());
 	}
@@ -204,12 +204,12 @@ public class HLayout implements FreeFlowLayout {
 	}
 
 	@Override
-	public ItemProxy getItemProxyForItem(Object data) {
+	public FreeFlowItem getFreeFlowItemForItem(Object data) {
 		if (proxies.size() == 0 || layoutChanged) {
 			generateItemProxies();
 		}
 
-		ItemProxy fd = ItemProxy.clone(proxies.get(data));
+		FreeFlowItem fd = FreeFlowItem.clone(proxies.get(data));
 		return fd;
 	}
 

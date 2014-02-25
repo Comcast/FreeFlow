@@ -17,7 +17,7 @@ package com.comcast.freeflow.helpers;
 
 import java.util.ArrayList;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 
@@ -116,7 +116,7 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 	}
 
 	@Override
-	public Class getViewType(ItemProxy proxy) {
+	public Class getViewType(FreeFlowItem proxy) {
 
 		return TextView.class;
 	}

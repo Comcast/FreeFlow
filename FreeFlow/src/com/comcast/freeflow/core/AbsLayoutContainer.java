@@ -33,7 +33,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 public abstract class AbsLayoutContainer extends ViewGroup {
 
-	protected HashMap<Object, ItemProxy> frames = null;
+	protected HashMap<Object, FreeFlowItem> frames = null;
 
 	protected ArrayList<FreeFlowEventListener> listeners = new ArrayList<FreeFlowEventListener>();
 
@@ -57,7 +57,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 	}
 
 	// //////////////////CLICK BEHAVIOR //////
-	protected ItemProxy selectedItemProxy;
+	protected FreeFlowItem selectedFreeFlowItem;
 
 	public interface OnItemClickListener {
 
@@ -78,7 +78,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		 * @param id
 		 *            The row id of the item that was clicked.
 		 */
-		void onItemClick(AbsLayoutContainer parent, ItemProxy proxy);
+		void onItemClick(AbsLayoutContainer parent, FreeFlowItem proxy);
 	}
 
 	protected OnItemClickListener mOnItemClickListener;
@@ -122,7 +122,7 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 			if (view != null) {
 				view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
 			}
-			mOnItemClickListener.onItemClick(this, getItemProxyForVisibleItemAt(sectionIndex, positionInSection));
+			mOnItemClickListener.onItemClick(this, getFreeFlowItemForVisibleItemAt(sectionIndex, positionInSection));
 			return true;
 		}
 
@@ -150,11 +150,11 @@ public abstract class AbsLayoutContainer extends ViewGroup {
 		 * @param parent
 		 *            The AdapterView where the selection happened
 		 * @param proxy
-		 *            The ItemProxy instance representing the item selected
+		 *            The FreeFlowItem instance representing the item selected
 		 * @param id
 		 *            The row id of the item that is selected
 		 */
-		void onItemSelected(AbsLayoutContainer parent, ItemProxy proxy);
+		void onItemSelected(AbsLayoutContainer parent, FreeFlowItem proxy);
 
 		/**
 		 * Callback method to be invoked when the selection disappears from this
@@ -288,17 +288,17 @@ public abstract class AbsLayoutContainer extends ViewGroup {
     }
     
     /**
-     * Returns the ItemProxy instance of a view at position if that
+     * Returns the FreeFlowItem instance of a view at position if that
      * view is visible or null if thats not currently visible
      * @param 	section 	The section index of the item 
      * @param	position	The position of the item in the particular section
-     * @return	The <code>ItemProxy</code> instance representing that section and index. The proxy is guaranteed to have a view associated with it 
+     * @return	The <code>FreeFlowItem</code> instance representing that section and index. The proxy is guaranteed to have a view associated with it 
      */
-	public ItemProxy getItemProxyForVisibleItemAt(int section, int position) {
+	public FreeFlowItem getFreeFlowItemForVisibleItemAt(int section, int position) {
 		Iterator<?> it = frames.entrySet().iterator();
-		ItemProxy proxy = null;
+		FreeFlowItem proxy = null;
 		while (it.hasNext()) {
-			Map.Entry<?, ItemProxy> pairs = (Map.Entry<?, ItemProxy>) it.next();
+			Map.Entry<?, FreeFlowItem> pairs = (Map.Entry<?, FreeFlowItem>) it.next();
 			proxy = pairs.getValue();
 			if (proxy.itemSection == section
 					&& proxy.itemIndex == position) {

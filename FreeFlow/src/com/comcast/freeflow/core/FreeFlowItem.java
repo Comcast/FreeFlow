@@ -19,7 +19,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 
-public class ItemProxy {
+public class FreeFlowItem {
 	public int itemIndex;
 	public int itemSection;
 	public Object data;
@@ -28,11 +28,11 @@ public class ItemProxy {
 	public View view;
 	public Bundle extras;
 
-	public static ItemProxy clone(ItemProxy desc) {
+	public static FreeFlowItem clone(FreeFlowItem desc) {
 		if (desc == null)
 			return null;
 
-		ItemProxy fd = new ItemProxy();
+		FreeFlowItem fd = new FreeFlowItem();
 		fd.itemIndex = desc.itemIndex;
 		fd.itemSection = desc.itemSection;
 		fd.data = desc.data;

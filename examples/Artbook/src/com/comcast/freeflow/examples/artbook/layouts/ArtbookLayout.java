@@ -22,7 +22,7 @@ import java.util.Map.Entry;
 import android.graphics.Rect;
 import android.util.Log;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
@@ -48,14 +48,14 @@ public class ArtbookLayout implements FreeFlowLayout {
 		viewPortHeight = measuredHeight;
 	}
 
-	private HashMap<Object, ItemProxy> map;
+	private HashMap<Object, FreeFlowItem> map;
 	private Section s;
 
 	@Override
 	public void setAdapter(SectionedAdapter adapter) {
 
 		// assuming one section
-		map = new HashMap<Object, ItemProxy>();
+		map = new HashMap<Object, FreeFlowItem>();
 		s = adapter.getSection(0);
 
 		int rowIndex;
@@ -63,7 +63,7 @@ public class ArtbookLayout implements FreeFlowLayout {
 		for (int i = 0; i < s.getDataCount(); i++) {
 			rowIndex = i / 5;
 
-			ItemProxy p = new ItemProxy();
+			FreeFlowItem p = new FreeFlowItem();
 			p.isHeader = false;
 			p.itemIndex = i;
 			p.itemSection = 0;
@@ -138,19 +138,19 @@ public class ArtbookLayout implements FreeFlowLayout {
 	}
 
 	@Override
-	public HashMap<? extends Object, ItemProxy> getItemProxies(
+	public HashMap<? extends Object, FreeFlowItem> getItemProxies(
 			int viewPortLeft, int viewPortTop) {
 
 		Rect viewport = new Rect(viewPortLeft, 
 								viewPortTop, 
 								viewPortLeft + viewPortWidth, 
 								viewPortTop + viewPortHeight);
-		HashMap<Object, ItemProxy> ret = new HashMap<Object, ItemProxy>();
+		HashMap<Object, FreeFlowItem> ret = new HashMap<Object, FreeFlowItem>();
 
-		Iterator<Entry<Object, ItemProxy>> it = map.entrySet().iterator();
+		Iterator<Entry<Object, FreeFlowItem>> it = map.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<Object, ItemProxy> pairs = it.next();
-			ItemProxy p = (ItemProxy) pairs.getValue();
+			Entry<Object, FreeFlowItem> pairs = it.next();
+			FreeFlowItem p = (FreeFlowItem) pairs.getValue();
 			if ( Rect.intersects(p.frame, viewport) ) {
 				ret.put(pairs.getKey(), p);
 			}
@@ -160,7 +160,7 @@ public class ArtbookLayout implements FreeFlowLayout {
 	}
 
 	@Override
-	public ItemProxy getItemProxyForItem(Object item) {
+	public FreeFlowItem getFreeFlowItemForItem(Object item) {
 		Log.d(TAG, " returing item: " + map.get(item));
 		return map.get(item);
 	}
@@ -176,8 +176,8 @@ public class ArtbookLayout implements FreeFlowLayout {
 	}
 
 	@Override
-	public ItemProxy getItemAt(float x, float y) {
-		return (ItemProxy) ViewUtils.getItemAt(map, (int) x, (int) y);
+	public FreeFlowItem getItemAt(float x, float y) {
+		return (FreeFlowItem) ViewUtils.getItemAt(map, (int) x, (int) y);
 	}
 
 	@Override

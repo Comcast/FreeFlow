@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.comcast.freeflow.core.Container;
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.LayoutChangeset;
 
 import android.animation.Animator;
@@ -118,21 +118,21 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		appearingSet = null;
 		movingSet = null;
 
-		Comparator<ItemProxy> cmp = new Comparator<ItemProxy>() {
+		Comparator<FreeFlowItem> cmp = new Comparator<FreeFlowItem>() {
 
 			@Override
-			public int compare(ItemProxy lhs, ItemProxy rhs) {
+			public int compare(FreeFlowItem lhs, FreeFlowItem rhs) {
 				return (lhs.itemSection * 1000 + lhs.itemIndex) - (rhs.itemSection * 1000 + rhs.itemIndex);
 			}
 		};
 
-		ArrayList<ItemProxy> removed = changeSet.getRemoved();
+		ArrayList<FreeFlowItem> removed = changeSet.getRemoved();
 		if (removed.size() > 0) {
 			Collections.sort(removed, cmp);
 			disappearingSet = getItemsRemovedAnimation(changeSet.getRemoved());
 		}
 
-		ArrayList<ItemProxy> added = changeSet.getAdded();
+		ArrayList<FreeFlowItem> added = changeSet.getAdded();
 		if (added.size() > 0) {
 			Collections.sort(added, cmp);
 			appearingSet = getItemsAddedAnimation(added);
@@ -178,13 +178,13 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	 * The animation to run on the items being removed
 	 * 
 	 * @param removed
-	 *            An ArrayList of <code>ItemProxys</code> removed
+	 *            An ArrayList of <code>FreeFlowItems</code> removed
 	 * @return The AnimatorSet of the removed objects
 	 */
-	protected AnimatorSet getItemsRemovedAnimation(ArrayList<ItemProxy> removed) {
+	protected AnimatorSet getItemsRemovedAnimation(ArrayList<FreeFlowItem> removed) {
 		AnimatorSet disappearingSet = new AnimatorSet();
 		ArrayList<Animator> fades = new ArrayList<Animator>();
-		for (ItemProxy proxy : removed) {
+		for (FreeFlowItem proxy : removed) {
 			fades.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 0));
 		}
 		disappearingSet.setDuration(oldCellsRemovalAnimationDuration);
@@ -201,10 +201,10 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	/**
 	 * 
 	 */
-	protected AnimatorSet getItemsAddedAnimation(ArrayList<ItemProxy> added) {
+	protected AnimatorSet getItemsAddedAnimation(ArrayList<FreeFlowItem> added) {
 		AnimatorSet appearingSet = new AnimatorSet();
 		ArrayList<Animator> fadeIns = new ArrayList<Animator>();
-		for (ItemProxy proxy : added) {
+		for (FreeFlowItem proxy : added) {
 			proxy.view.setAlpha(0);
 			fadeIns.add(ObjectAnimator.ofFloat(proxy.view, "alpha", 1));
 		}
@@ -245,12 +245,12 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		return allAnim;
 	}
 
-	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<ItemProxy, Rect>> moved) {
+	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<FreeFlowItem, Rect>> moved) {
 
 		AnimatorSet anim = new AnimatorSet();
 		ArrayList<Animator> moves = new ArrayList<Animator>();
-		for (Pair<ItemProxy, Rect> item : moved) {
-			ItemProxy proxy = ItemProxy.clone(item.first);
+		for (Pair<FreeFlowItem, Rect> item : moved) {
+			FreeFlowItem proxy = FreeFlowItem.clone(item.first);
 			View v = proxy.view;
 
 			proxy.frame.left -= callback.getViewportLeft();
@@ -270,7 +270,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	}
 
 	// @Override
-	public ValueAnimator transitionToFrame(final Rect of, final ItemProxy nf, final View v) {
+	public ValueAnimator transitionToFrame(final Rect of, final FreeFlowItem nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
 //

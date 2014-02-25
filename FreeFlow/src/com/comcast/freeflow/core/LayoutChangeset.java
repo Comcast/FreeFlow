@@ -21,34 +21,34 @@ import android.graphics.Rect;
 import android.util.Pair;
 
 public class LayoutChangeset {
-	protected ArrayList<Pair<ItemProxy, Rect>> moved = new ArrayList<Pair<ItemProxy, Rect>>();
-	protected ArrayList<ItemProxy> removed = new ArrayList<ItemProxy>();
-	protected ArrayList<ItemProxy> added = new ArrayList<ItemProxy>();
+	protected ArrayList<Pair<FreeFlowItem, Rect>> moved = new ArrayList<Pair<FreeFlowItem, Rect>>();
+	protected ArrayList<FreeFlowItem> removed = new ArrayList<FreeFlowItem>();
+	protected ArrayList<FreeFlowItem> added = new ArrayList<FreeFlowItem>();
 
 	public LayoutChangeset() {
 	}
 
-	public void addToMoved(ItemProxy proxy, Rect oldFrame) {
-		moved.add(new Pair<ItemProxy, Rect>(proxy, oldFrame));
+	public void addToMoved(FreeFlowItem proxy, Rect oldFrame) {
+		moved.add(new Pair<FreeFlowItem, Rect>(proxy, oldFrame));
 	}
 
-	public void addToDeleted(ItemProxy proxy) {
+	public void addToDeleted(FreeFlowItem proxy) {
 		removed.add(proxy);
 	}
 
-	public void addToAdded(ItemProxy proxy) {
+	public void addToAdded(FreeFlowItem proxy) {
 		added.add(proxy);
 	}
 
-	public ArrayList<ItemProxy> getAdded() {
+	public ArrayList<FreeFlowItem> getAdded() {
 		return added;
 	}
 	
-	public ArrayList<ItemProxy> getRemoved() {
+	public ArrayList<FreeFlowItem> getRemoved() {
 		return removed;
 	}
 
-	public ArrayList<Pair<ItemProxy, Rect>> getMoved() {
+	public ArrayList<Pair<FreeFlowItem, Rect>> getMoved() {
 		return moved;
 	}
 

@@ -20,7 +20,7 @@ import java.util.HashMap;
 import com.comcast.freeflow.helpers.DefaultSectionAdapter;
 import com.comcast.freeflow.teststub.MainActivity;
 
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 
 import android.test.ActivityInstrumentationTestCase2;
 
@@ -38,7 +38,7 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 		
 		vGrid.setDimensions(600, 1000);
 		
-		HashMap<? extends Object , ItemProxy> map ;
+		HashMap<? extends Object , FreeFlowItem> map ;
 		map = vGrid.getItemProxies(0, 0);
 		
 		assertEquals("VGridLayout did not generate correct number of frames", 5, map.size());
@@ -46,7 +46,7 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 		map = vGrid.getItemProxies(0, 0);
 		assertEquals("VGridLayout did not generate correct number of frames (2) ", 6, map.size());
 		
-		ItemProxy proxy = map.get( adapter.getSection(0).getSectionTitle() );
+		FreeFlowItem proxy = map.get( adapter.getSection(0).getSectionTitle() );
 		
 		assertNotNull("Header frame was null", proxy);
 		

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 import com.comcast.freeflow.animations.DefaultLayoutAnimator;
 import com.comcast.freeflow.core.Container;
-import com.comcast.freeflow.core.ItemProxy;
+import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 import com.comcast.freeflow.examples.freeflowphotogrid.R;
@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
 		}
 
 		@Override
-		public Class getViewType(ItemProxy proxy) {
+		public Class getViewType(FreeFlowItem proxy) {
 			return TextView.class;
 		}
 

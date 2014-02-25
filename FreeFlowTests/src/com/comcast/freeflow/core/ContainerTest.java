@@ -160,17 +160,17 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 	 */
 	public void testViewChangesWhenViewMovesWithinViewport(){
 		
-		HashMap<Object, ItemProxy> oldMap = new HashMap<Object, ItemProxy>();
-		HashMap<Object, ItemProxy> newMap = new HashMap<Object, ItemProxy>();
+		HashMap<Object, FreeFlowItem> oldMap = new HashMap<Object, FreeFlowItem>();
+		HashMap<Object, FreeFlowItem> newMap = new HashMap<Object, FreeFlowItem>();
 		
 		
 		String one = "one";
-		ItemProxy proxy = new ItemProxy();
+		FreeFlowItem proxy = new FreeFlowItem();
 		proxy.data = one;
 		proxy.frame = new Rect(0,0, 20, 20);
 		oldMap.put(one, proxy);
 		
-		ItemProxy proxy2 = new ItemProxy();
+		FreeFlowItem proxy2 = new FreeFlowItem();
 		proxy.data = one;
 		proxy.frame =  new Rect(20,20,20+40,20+40);
 		newMap.put(one, proxy2);

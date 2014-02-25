@@ -32,7 +32,7 @@ public interface SectionedAdapter {
 
 	public Class[] getViewTypes();
 
-	public Class getViewType(ItemProxy proxy);
+	public Class getViewType(FreeFlowItem proxy);
 	
 	public boolean shouldDisplaySectionHeaders();
 
