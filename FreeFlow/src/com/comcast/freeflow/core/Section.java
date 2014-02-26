@@ -27,7 +27,7 @@ public class Section {
 		data = new ArrayList<Object>();
 	}
 
-	private ArrayList<Object> getData() {
+	public ArrayList<Object> getData() {
 		return data;
 	}
 	

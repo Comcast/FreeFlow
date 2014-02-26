@@ -38,7 +38,7 @@ public class DribbbleFetch {
 	public static final String TAG = "DribbbleFetch";
 
 	
-	public void load(final ArtbookActivity caller) {
+	public void load(final ArtbookActivity caller, int itemsPerPage, int page) {
 		
 		new AsyncTask<String, Void, String>() {
 
@@ -66,7 +66,6 @@ public class DribbbleFetch {
 				HttpURLConnection connection = client.open(url);
 				InputStream in = null;
 				try {
-					// Read the response.
 					in = connection.getInputStream();
 					byte[] response = readFully(in);
 					return new String(response, "UTF-8");
@@ -85,7 +84,7 @@ public class DribbbleFetch {
 				return out.toByteArray();
 			}
 
-		}.execute("http://api.dribbble.com/shots/popular?per_page=30");
+		}.execute("http://api.dribbble.com/shots/popular?per_page="+itemsPerPage+"&page="+page);
 	}
 
 }

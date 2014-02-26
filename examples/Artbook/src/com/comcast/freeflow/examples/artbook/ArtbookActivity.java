@@ -35,8 +35,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 
-public class ArtbookActivity extends Activity {
+public class ArtbookActivity extends Activity implements OnClickListener{
 
 	public static final String TAG = "ArtbookActivity";
 
@@ -44,32 +46,46 @@ public class ArtbookActivity extends Activity {
 	private VGridLayout grid;
 	private ArtbookLayout custom;
 
+	private DribbbleFetch fetch;
+	private int itemsPerPage = 5;
+	private int pageIndex = 1;
+	
+	DribbbleDataAdapter adapter;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_artbook);
-		DribbbleFetch fetch = new DribbbleFetch();
-		fetch.load(this);
+		
 
 		container = (Container) findViewById(R.id.container);
 
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
+		
+		findViewById(R.id.load_more).setOnClickListener(this);
 
 		grid = new VGridLayout();
 		VGridLayout.LayoutParams params = new VGridLayout.LayoutParams(size.x/2, size.x/2);
 		grid.setLayoutParams(params);
-
+		
+		adapter = new DribbbleDataAdapter(this);
 		custom = new ArtbookLayout();
+		container.setLayout(custom);
+		container.setAdapter(adapter);
+		
+		
+		fetch = new DribbbleFetch();
+		
+		fetch.load(this,itemsPerPage , pageIndex);
 
 	}
 
 	public void onDataLoaded(DribbbleFeed feed) {
 		Log.d(TAG, "photo: " + feed.getShots().get(0).getImage_teaser_url());
-		DribbbleDataAdapter adapter = new DribbbleDataAdapter(this, feed);
-		container.setLayout(custom);
-		container.setAdapter(adapter);
+		adapter.update(feed);
+		container.dataInvalidated();
 		container.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AbsLayoutContainer parent, FreeFlowItem proxy) {
@@ -78,10 +94,10 @@ public class ArtbookActivity extends Activity {
 		});
 		
 		container.addScrollListener( new OnScrollListener() {
-			
+			 
 			@Override
 			public void onScroll(Container container) {
-				Log.d(TAG, "scroll percent "+ container.getScrollPercentX() );
+				Log.d(TAG, "scroll percent "+ container.getScrollPercentY() );
 			}
 		});
 	}
@@ -111,5 +127,12 @@ public class ArtbookActivity extends Activity {
 		
 		return true;
 		
+	}
+
+	@Override
+	public void onClick(View v) {
+		Log.d(TAG, "Loading data");
+		pageIndex++;
+		fetch.load(this, itemsPerPage, pageIndex);
 	}
 }

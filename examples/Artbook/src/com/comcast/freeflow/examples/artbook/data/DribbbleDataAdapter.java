@@ -22,6 +22,7 @@ import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,14 @@ import android.widget.LinearLayout;
 
 import com.comcast.freeflow.examples.artbook.R;
 import com.comcast.freeflow.examples.artbook.models.DribbbleFeed;
+import com.comcast.freeflow.examples.artbook.models.Shot;
 import com.squareup.picasso.Picasso;
 
 public class DribbbleDataAdapter implements SectionedAdapter {
-
+	
+	public static final  String TAG = "DribbbleDataAdapter";
+	
 	private Context context;
-	private DribbbleFeed feed;
 	private Section section;
 
 	private int[] colors = new int[] { 0xcc152431, 0xff264C58, 0xffF5C543,
@@ -44,12 +47,21 @@ public class DribbbleDataAdapter implements SectionedAdapter {
 	
 	private boolean hideImages = false;
 
-	public DribbbleDataAdapter(Context context, DribbbleFeed feed) {
-		this.feed = feed;
+	public DribbbleDataAdapter(Context context) {
 		this.context = context;
 		section = new Section();
 		section.setSectionTitle("Pics");
-		section.setData(new ArrayList<Object>(feed.getShots()));
+		
+	}
+	
+	public void update(DribbbleFeed feed){
+		
+		for(Object o : feed.getShots()){
+			section.getData().add(o);
+		}
+		
+		Log.d(TAG, "Data updated to: "+section.getDataCount());
+		
 	}
 
 	@Override
@@ -58,7 +70,7 @@ public class DribbbleDataAdapter implements SectionedAdapter {
 	}
 
 	@Override
-	public View getItemView(int section, int position, View convertView,
+	public View getItemView(int sectionIndex, int position, View convertView,
 			ViewGroup parent) {
 		if (convertView == null) {
 			convertView = LayoutInflater.from(context).inflate(
@@ -70,8 +82,9 @@ public class DribbbleDataAdapter implements SectionedAdapter {
 			img.setBackgroundColor(colors[idx]);
 
 		} else {
+			Shot s = (Shot)(this.section.getData().get(position));
 			Picasso.with(context)
-					.load(feed.getShots().get(position).getImage_teaser_url())
+					.load(s.getImage_teaser_url())
 					.into(img);
 		}
 
@@ -86,6 +99,7 @@ public class DribbbleDataAdapter implements SectionedAdapter {
 
 	@Override
 	public int getNumberOfSections() {
+		if(section.getData().size() == 0) return 0;
 		return 1;
 	}
 

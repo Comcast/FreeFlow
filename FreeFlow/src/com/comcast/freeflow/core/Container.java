@@ -20,12 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.comcast.freeflow.animations.DefaultLayoutAnimator;
-import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
-import com.comcast.freeflow.debug.TouchDebugUtils;
-import com.comcast.freeflow.layouts.FreeFlowLayout;
-import com.comcast.freeflow.utils.ViewUtils;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -45,6 +39,11 @@ import android.view.ViewConfiguration;
 import android.widget.Checkable;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
+
+import com.comcast.freeflow.animations.DefaultLayoutAnimator;
+import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
+import com.comcast.freeflow.utils.ViewUtils;
 
 public class Container extends AbsLayoutContainer {
 
@@ -164,6 +163,16 @@ public class Container extends AbsLayoutContainer {
 
 	private boolean markLayoutDirty = false;
 	private boolean markAdapterDirty = false;
+
+	/**
+	 * When Layout is computed, should scroll positions be recalculated? When a
+	 * new layout is set, the Container can try to make sure an item that was
+	 * visible in one layout is also visible in the new layout. However when
+	 * data is just invalidated and additional data is loaded, you don't want
+	 * the Viewport to be jumping around.
+	 */
+	private boolean shouldRecalculateScrollWhenComputingLayout = true;
+	
 	private FreeFlowLayout oldLayout;
 
 	public Container(Context context) {
@@ -206,7 +215,7 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onMeasure");
 		int beforeWidth = getWidth();
 		int beforeHeight = getHeight();
 
@@ -215,14 +224,34 @@ public class Container extends AbsLayoutContainer {
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-		if (layout == null || itemAdapter == null)
+		if (layout == null || itemAdapter == null
+				|| itemAdapter.getNumberOfSections() == 0)
 			return;
 
-		if (beforeWidth != afterWidth || beforeHeight != afterHeight
-				|| markLayoutDirty) {
+		boolean sizeChanged = false;
+		if (beforeWidth != afterWidth || beforeHeight != afterHeight) {
+			sizeChanged = true;
+		}
+
+		layout.setDimensions(afterWidth, afterHeight);
+
+		Log.d(TAG, "sizeChanged || markAdapterDirty || markLayoutDirty) "
+				+ sizeChanged + "," + markAdapterDirty + "," + markLayoutDirty);
+
+		if (sizeChanged || markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
 
+	}
+
+	public void dataInvalidated() {
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Data Invalidated");
+		if (layout == null || itemAdapter == null) {
+			return;
+		}
+		shouldRecalculateScrollWhenComputingLayout = false;
+		markAdapterDirty = true;
+		requestLayout();
 	}
 
 	/**
@@ -238,19 +267,19 @@ public class Container extends AbsLayoutContainer {
 	 *            margins and padding, this is height of the container.
 	 */
 	protected void computeLayout(int w, int h) {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout");
-		layout.setDimensions(w, h);
-		layout.setAdapter(itemAdapter);
+		markLayoutDirty = false;
+		markAdapterDirty = false;
+
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout for "
+				+ itemAdapter.getSection(0).getDataCount());
 		layout.prepareLayout();
-		computeViewPort(layout);
+		if (shouldRecalculateScrollWhenComputingLayout) {
+			computeViewPort(layout);
+		}
 		HashMap<Object, FreeFlowItem> oldFrames = frames;
 
-		if (markLayoutDirty) {
-			markLayoutDirty = false;
-		}
 		frames = new HashMap<Object, FreeFlowItem>();
 		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
-
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
 
@@ -364,6 +393,10 @@ public class Container extends AbsLayoutContainer {
 
 		oldLayout = layout;
 		layout = lc;
+		shouldRecalculateScrollWhenComputingLayout = true;
+		if (itemAdapter != null) {
+			layout.setAdapter(itemAdapter);
+		}
 
 		dispatchLayoutChanging(oldLayout, lc);
 
@@ -487,6 +520,8 @@ public class Container extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeset changeSet) {
+		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
+				"animating changes: " + changeSet.toString());
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
 				&& changeSet.moved.size() == 0) {
 			return;
@@ -501,9 +536,6 @@ public class Container extends AbsLayoutContainer {
 			layoutAnimator.cancel();
 		}
 		isAnimatingChanges = true;
-
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
-				"animating changes: " + changeSet.toString());
 
 		dispatchAnimationsStarted();
 
@@ -608,7 +640,10 @@ public class Container extends AbsLayoutContainer {
 	@Override
 	public void requestLayout() {
 		if (!preventLayout) {
-			/** Ends up with a call to onMeasure where all the logic lives */
+			/**
+			 * Ends up with a call to <code>onMeasure</code> where all the logic
+			 * lives
+			 */
 			super.requestLayout();
 		}
 
@@ -623,17 +658,22 @@ public class Container extends AbsLayoutContainer {
 	 *            Collection
 	 */
 	public void setAdapter(SectionedAdapter adapter) {
-
+		if (adapter == itemAdapter) {
+			return;
+		}
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "setting adapter");
-		markLayoutDirty = true;
 		markAdapterDirty = true;
+
 		viewPortX = 0;
 		viewPortY = 0;
-
+		shouldRecalculateScrollWhenComputingLayout = true;
 		this.itemAdapter = adapter;
-		if (adapter != null)
+		if (adapter != null) {
 			viewpool.initializeViewPool(adapter.getViewTypes());
-
+		}
+		if (layout != null) {
+			layout.setAdapter(itemAdapter);
+		}
 		requestLayout();
 	}
 
@@ -984,7 +1024,7 @@ public class Container extends AbsLayoutContainer {
 			mScrollableHeight = 0;
 		}
 
-		if (!isInFlingMode) {
+		if (!isInFlingMode && overflingDistance > 0) {
 			if (viewPortX < -overflingDistance) {
 				viewPortX = -overflingDistance;
 			} else if (viewPortX > mScrollableWidth + overflingDistance) {

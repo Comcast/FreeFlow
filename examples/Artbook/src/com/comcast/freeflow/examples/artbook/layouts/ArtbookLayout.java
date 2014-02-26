@@ -51,10 +51,11 @@ public class ArtbookLayout extends FreeFlowLayoutBase implements FreeFlowLayout 
 	
 	@Override
 	public void prepareLayout(){
+		Log.d(TAG, "prepare layout!!!");
 		map = new HashMap<Object, FreeFlowItem>();
 		s = itemsAdapter.getSection(0);
 		int rowIndex;
-
+		Log.d(TAG, "prepare layout for: "+s.getDataCount());
 		for (int i = 0; i < s.getDataCount(); i++) {
 			rowIndex = i / 5;
 
@@ -140,6 +141,8 @@ public class ArtbookLayout extends FreeFlowLayoutBase implements FreeFlowLayout 
 								viewPortTop, 
 								viewPortLeft + width, 
 								viewPortTop + height);
+		
+		//Log.d(TAG, "Viewport: "+viewPortLeft+", "+viewPortTop+", "+viewport.width()+","+viewport.height());
 		HashMap<Object, FreeFlowItem> ret = new HashMap<Object, FreeFlowItem>();
 
 		Iterator<Entry<Object, FreeFlowItem>> it = map.entrySet().iterator();

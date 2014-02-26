@@ -17,7 +17,7 @@ package com.comcast.freeflow.examples.artbook.models;
 
 import com.google.gson.annotations.Expose;
 
-public class Shot {
+public class Shot extends Object {
 
 	@Expose
 	private Integer id;
@@ -258,6 +258,13 @@ public class Shot {
 	public Shot withImage_400_url(String image_400_url) {
 		this.image_400_url = image_400_url;
 		return this;
+	}
+	
+	@Override
+	public boolean equals(Object other){
+		if(! (other instanceof Shot)) return false;
+		Shot oShot = (Shot)other;
+		return oShot.image_url.equals(image_url) && (oShot.id == this.id);
 	}
 
 }

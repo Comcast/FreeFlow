@@ -32,7 +32,8 @@ public interface FreeFlowLayout {
 	/**
 	 * Called whenever Container's onMeasure is triggered Note: We don't support
 	 * margin and padding yet, so the dimensions are the entire actual of the
-	 * Container
+	 * Container. Note that setDimensions can be called multiple times, so don't
+	 * use it to recompute your frames, use computeLayout instead
 	 * 
 	 * @param measuredWidth
 	 *            The width of the Container
@@ -63,8 +64,8 @@ public interface FreeFlowLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public HashMap<Object, FreeFlowItem> getItemProxies(
-			int viewPortLeft, int viewPortTop);
+	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft,
+			int viewPortTop);
 
 	public void setLayoutParams(FreeFlowLayoutParams params);
 
