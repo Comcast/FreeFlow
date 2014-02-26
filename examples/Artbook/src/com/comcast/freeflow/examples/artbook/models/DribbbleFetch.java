@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.comcast.freeflow.examples.artbook;
+package com.comcast.freeflow.examples.artbook.models;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
+import com.comcast.freeflow.examples.artbook.ArtbookActivity;
 import com.google.gson.Gson;
 import com.squareup.okhttp.OkHttpClient;
 

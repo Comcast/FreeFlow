@@ -21,9 +21,9 @@
         android:showAsAction="always"
         android:title="@string/change_layout"/>
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_about"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:title="@string/action_about"/>
 
 </menu>

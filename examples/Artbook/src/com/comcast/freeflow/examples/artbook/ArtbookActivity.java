@@ -22,12 +22,14 @@ import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Container.OnScrollListener;
 import com.comcast.freeflow.layouts.VGridLayout;
 import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
-
 import com.comcast.freeflow.examples.artbook.data.DribbbleDataAdapter;
 import com.comcast.freeflow.examples.artbook.layouts.ArtbookLayout;
+import com.comcast.freeflow.examples.artbook.models.DribbbleFeed;
+import com.comcast.freeflow.examples.artbook.models.DribbbleFetch;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
@@ -101,6 +103,10 @@ public class ArtbookActivity extends Activity {
 			else{
 				container.setLayout(grid);
 			}
+			break;
+		case (R.id.action_about): Intent about = new Intent(this, AboutActivity.class);
+			startActivity(about);
+			break;
 		}
 		
 		return true;

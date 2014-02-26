@@ -28,8 +28,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.comcast.freeflow.examples.artbook.DribbbleFeed;
 import com.comcast.freeflow.examples.artbook.R;
+import com.comcast.freeflow.examples.artbook.models.DribbbleFeed;
 import com.squareup.picasso.Picasso;
 
 public class DribbbleDataAdapter implements SectionedAdapter {

@@ -22,9 +22,10 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="18" />
-	
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
-    
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -39,6 +40,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.comcast.freeflow.examples.artbook.AboutActivity" />
     </application>
 
 </manifest>
