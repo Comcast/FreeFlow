@@ -116,7 +116,7 @@ public class VLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<? extends Object, FreeFlowItem> getItemProxies(
+	public HashMap<Object, FreeFlowItem> getItemProxies(
 			int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 

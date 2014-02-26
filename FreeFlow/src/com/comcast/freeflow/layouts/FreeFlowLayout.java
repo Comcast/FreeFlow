@@ -63,7 +63,7 @@ public interface FreeFlowLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public HashMap<? extends Object, FreeFlowItem> getItemProxies(
+	public HashMap<Object, FreeFlowItem> getItemProxies(
 			int viewPortLeft, int viewPortTop);
 
 	public void setLayoutParams(FreeFlowLayoutParams params);

@@ -109,7 +109,7 @@ public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<? extends Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
+	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
 		for (FreeFlowItem fd : proxies.values()) {

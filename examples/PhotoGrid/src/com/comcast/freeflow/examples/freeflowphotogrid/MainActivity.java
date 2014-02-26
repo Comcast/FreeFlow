@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -84,10 +85,10 @@ public class MainActivity extends Activity {
 		hGridLayout = new HGridLayout();
 		hGridLayout.setLayoutParams(new HGridLayout.LayoutParams(200, 200, 100, 600));
 	
-		layouts = new FreeFlowLayout[]{hLayout, vLayout, vGridLayout, hGridLayout};
+		layouts = new FreeFlowLayout[]{ vLayout,hLayout, vGridLayout, hGridLayout};
 		
 		container.setAdapter(adapter);
-		container.setLayout(hLayout);
+		container.setLayout(layouts[currentLayoutIndex]);
 
 		frameLayout.addView(container);
 
@@ -113,7 +114,8 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				int section = (int) (adapter.getNumberOfSections() * Math.random());
 				int index = (int) (adapter.getSection(section).getDataCount() * Math.random());
-				Log.d(TAG, "section = " + section + ", index = " + index);
+				String s = "section = " + section + ", index = " + index;
+				Toast.makeText(MainActivity.this,s , Toast.LENGTH_SHORT ).show();
 				container.scrollToItem(section, index, false);
 
 			}
@@ -126,7 +128,8 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				int section = (int) (adapter.getNumberOfSections() * Math.random());
 				int index = (int) (adapter.getSection(section).getDataCount() * Math.random());
-				Log.d(TAG, "section = " + section + ", index = " + index);
+				String s = "section = " + section + ", index = " + index;
+				Toast.makeText(MainActivity.this,s , Toast.LENGTH_SHORT ).show();
 				container.scrollToItem(section, index, true);
 
 			}

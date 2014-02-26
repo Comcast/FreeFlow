@@ -133,7 +133,7 @@ public class ArtbookLayout extends FreeFlowLayoutBase implements FreeFlowLayout 
 	}
 
 	@Override
-	public HashMap<? extends Object, FreeFlowItem> getItemProxies(
+	public HashMap<Object, FreeFlowItem> getItemProxies(
 			int viewPortLeft, int viewPortTop) {
 
 		Rect viewport = new Rect(viewPortLeft, 

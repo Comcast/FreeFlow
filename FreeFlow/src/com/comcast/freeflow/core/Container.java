@@ -248,8 +248,8 @@ public class Container extends AbsLayoutContainer {
 		if (markLayoutDirty) {
 			markLayoutDirty = false;
 		}
-
-		setFrames();
+		frames = new HashMap<Object, FreeFlowItem>();
+		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
 
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
@@ -261,20 +261,17 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	/**
-	 * Gets the FreeFlowItems of only the visible items from the Layout class.
-	 * The items are then cloned cause we modify the rectangles of the items as
-	 * they are moving
+	 * Copies the frames from one HashMap into another. The items are cloned
+	 * cause we modify the rectangles of the items as they are moving
 	 */
-	protected void setFrames() {
-		frames = new HashMap<Object, FreeFlowItem>();
-		HashMap<? extends Object, FreeFlowItem> mp = layout.getItemProxies(
-				viewPortX, viewPortY);
-		Iterator<?> it = mp.entrySet().iterator();
+	protected void copyFrames(HashMap<Object, FreeFlowItem> srcFrames,
+			HashMap<Object, FreeFlowItem> destFrames) {
+		Iterator<?> it = srcFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
 			FreeFlowItem pr = (FreeFlowItem) pairs.getValue();
 			pr = FreeFlowItem.clone(pr);
-			frames.put(pairs.getKey(), pr);
+			destFrames.put(pairs.getKey(), pr);
 		}
 	}
 
@@ -433,7 +430,6 @@ public class Container extends AbsLayoutContainer {
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
-
 		mScrollableWidth = layout.getContentWidth() - getWidth();
 		mScrollableHeight = layout.getContentHeight() - getHeight();
 
@@ -912,47 +908,45 @@ public class Container extends AbsLayoutContainer {
 				invokeOnItemScrollListeners();
 				return;
 			}
-
 			boolean more = scroller.computeScrollOffset();
-
-			if (mLeftEdge.isFinished() && viewPortX < 0
-					&& layout.horizontalScrollEnabled()) {
-				mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
-			}
-
-			if (mRightEdge.isFinished()
-					&& viewPortX > layout.getContentWidth()
-							- getMeasuredWidth()
-					&& layout.horizontalScrollEnabled()) {
-				mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
-			}
-
-			if (mTopEdge.isFinished() && viewPortY < 0
-					&& layout.verticalScrollEnabled()) {
-				mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
-			}
-
-			if (mBottomEdge.isFinished()
-					&& viewPortY > layout.getContentHeight()
-							- getMeasuredHeight()
-					&& layout.verticalScrollEnabled()) {
-				mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
-			}
-
+			checkEdgeEffectDuringScroll();
 			if (layout.horizontalScrollEnabled()) {
 				viewPortX = scroller.getCurrX();
 			}
 			if (layout.verticalScrollEnabled()) {
 				viewPortY = scroller.getCurrY();
 			}
-
 			moveViewport(true);
-
 			if (more) {
 				post(flingRunnable);
 			}
 		}
 	};
+
+	protected void checkEdgeEffectDuringScroll() {
+		if (mLeftEdge.isFinished() && viewPortX < 0
+				&& layout.horizontalScrollEnabled()) {
+			mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
+		}
+
+		if (mRightEdge.isFinished()
+				&& viewPortX > layout.getContentWidth() - getMeasuredWidth()
+				&& layout.horizontalScrollEnabled()) {
+			mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
+		}
+
+		if (mTopEdge.isFinished() && viewPortY < 0
+				&& layout.verticalScrollEnabled()) {
+			mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
+		}
+
+		if (mBottomEdge.isFinished()
+				&& viewPortY > layout.getContentHeight() - getMeasuredHeight()
+				&& layout.verticalScrollEnabled()) {
+			mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
+		}
+
+	}
 
 	protected void moveViewportBy(float movementX, float movementY,
 			boolean fling) {
@@ -1005,26 +999,24 @@ public class Container extends AbsLayoutContainer {
 
 			if (viewPortX <= 0) {
 				mLeftEdge.onPull(viewPortX / (-overflingDistance));
-				invalidate();
 			} else if (viewPortX >= mScrollableWidth) {
 				mRightEdge.onPull((viewPortX - mScrollableWidth)
 						/ (-overflingDistance));
-				invalidate();
 			}
 
 			if (viewPortY <= 0) {
 				mTopEdge.onPull(viewPortY / (-overflingDistance));
-				invalidate();
 			} else if (viewPortY >= mScrollableHeight) {
 				mBottomEdge.onPull((viewPortY - mScrollableHeight)
 						/ (-overflingDistance));
-				invalidate();
 			}
 
 		}
-		HashMap<Object, FreeFlowItem> oldFrames = frames;
 
-		setFrames();
+		HashMap<Object, FreeFlowItem> oldFrames = new HashMap<Object, FreeFlowItem>();
+		copyFrames(frames, oldFrames);
+		frames = new HashMap<Object, FreeFlowItem>();
+		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
 
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
@@ -1042,6 +1034,8 @@ public class Container extends AbsLayoutContainer {
 			removeViewInLayout(freeflowItem.view);
 			returnItemToPoolIfNeeded(freeflowItem);
 		}
+
+		invalidate();
 
 	}
 
@@ -1555,7 +1549,8 @@ public class Container extends AbsLayoutContainer {
 			return;
 		}
 
-		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section.getDataAtIndex(itemIndex));
+		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section
+				.getDataAtIndex(itemIndex));
 		freeflowItem = FreeFlowItem.clone(freeflowItem);
 
 		int newVPX = freeflowItem.frame.left;
@@ -1569,7 +1564,7 @@ public class Container extends AbsLayoutContainer {
 
 		if (animate) {
 			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX),
-					(viewPortY - newVPY), 1500);
+					(newVPY - viewPortY), 1500);
 			post(flingRunnable);
 		} else {
 			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
