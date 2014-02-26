@@ -92,7 +92,7 @@ public class VGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 				hframe.right = headerWidth;
 				hframe.bottom = topStart + headerHeight;
 				header.frame = hframe;
-				header.data = s.getSectionTitle();
+				header.data = s.getHeaderData();
 				proxies.put(header.data, header);
 				topStart += headerHeight;
 			}

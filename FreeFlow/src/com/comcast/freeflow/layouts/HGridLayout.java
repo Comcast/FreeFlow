@@ -74,7 +74,7 @@ public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 				hframe.right = leftStart + headerWidth;
 				hframe.bottom = headerHeight;
 				header.frame = hframe;
-				header.data = s.getSectionTitle();
+				header.data = s.getHeaderData();
 				proxies.put(header.data, header);
 
 				leftStart += headerWidth;

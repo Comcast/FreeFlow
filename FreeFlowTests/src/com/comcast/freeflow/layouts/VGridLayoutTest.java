@@ -37,6 +37,7 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 		vGrid.setAdapter(adapter);
 		
 		vGrid.setDimensions(600, 1000);
+		vGrid.prepareLayout();
 		
 		HashMap<? extends Object , FreeFlowItem> map ;
 		map = vGrid.getItemProxies(0, 0);
@@ -46,7 +47,7 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 		map = vGrid.getItemProxies(0, 0);
 		assertEquals("VGridLayout did not generate correct number of frames (2) ", 6, map.size());
 		
-		FreeFlowItem proxy = map.get( adapter.getSection(0).getSectionTitle() );
+		FreeFlowItem proxy = map.get( adapter.getSection(0).getHeaderData() );
 		
 		assertNotNull("Header frame was null", proxy);
 		

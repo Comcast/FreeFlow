@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class Section {
 
 	protected ArrayList<Object> data;
-	protected String sectionTitle;
+	protected Object headerData;
 	protected int selectedIndex = 0;
 
 	public Section() {
@@ -43,16 +43,24 @@ public class Section {
 		return data.size();
 	}
 
-	public String getSectionTitle() {
-		return sectionTitle;
-	}
-
 	public void setData(ArrayList<Object> data) {
 		this.data = data;
 	}
 
 	public void setSectionTitle(String sectionTitle) {
-		this.sectionTitle = sectionTitle;
+		this.headerData = new StringHolder(sectionTitle) ;
+	}
+	
+	public String getSectionTitle() {
+		return headerData.toString();
+	}
+	
+	public void setHeaderData(Object headerData){
+		this.headerData = headerData;
+	}
+	
+	public Object getHeaderData(){
+		return headerData;
 	}
 
 	public void addItem(Object item) {
@@ -65,6 +73,18 @@ public class Section {
 
 	public void setSelectedIndex(int selectedIndex) {
 		this.selectedIndex = selectedIndex;
+	}
+	
+	public class StringHolder{
+		public String str;
+		public StringHolder(String str){
+			this.str = str;
+		}
+		
+		@Override
+		public String toString(){
+			return str;
+		}
 	}
 
 }
