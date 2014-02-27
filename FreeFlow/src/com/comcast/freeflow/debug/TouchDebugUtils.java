@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.comcast.freeflow.debug;
 
-import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.FreeFlowContainer;
 
 import android.view.MotionEvent;
 
@@ -23,12 +23,12 @@ public class TouchDebugUtils {
 	
 	public static String getTouchModeString(int touchMode){
 		switch(touchMode){
-			case (Container.TOUCH_MODE_REST): return "touch_mode_rest";
-			case (Container.TOUCH_MODE_DOWN): return "touch_mode_down";
-			case (Container.TOUCH_MODE_TAP): return "touch_mode_tap";
-			case (Container.TOUCH_MODE_SCROLL): return "touch_mode_scroll";
-			case (Container.TOUCH_MODE_FLING): return "touch_mode_fling";
-			case (Container.TOUCH_MODE_DONE_WAITING): return "touch_mode_done_waiting";
+			case (FreeFlowContainer.TOUCH_MODE_REST): return "touch_mode_rest";
+			case (FreeFlowContainer.TOUCH_MODE_DOWN): return "touch_mode_down";
+			case (FreeFlowContainer.TOUCH_MODE_TAP): return "touch_mode_tap";
+			case (FreeFlowContainer.TOUCH_MODE_SCROLL): return "touch_mode_scroll";
+			case (FreeFlowContainer.TOUCH_MODE_FLING): return "touch_mode_fling";
+			case (FreeFlowContainer.TOUCH_MODE_DONE_WAITING): return "touch_mode_done_waiting";
 		}
 		return "unknown touch event: "+touchMode;
 	}

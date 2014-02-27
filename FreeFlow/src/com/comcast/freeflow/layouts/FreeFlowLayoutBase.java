@@ -1,5 +1,7 @@
 package com.comcast.freeflow.layouts;
 
+import android.util.Log;
+
 import com.comcast.freeflow.core.SectionedAdapter;
 
 public abstract class FreeFlowLayoutBase implements FreeFlowLayout {
@@ -11,6 +13,7 @@ public abstract class FreeFlowLayoutBase implements FreeFlowLayout {
 	
 	@Override
 	public void setDimensions(int measuredWidth, int measuredHeight) {
+		Log.d("dimen",this.getClass().getName()+"set dimension: "+measuredWidth+", "+measuredHeight);
 		if (measuredHeight == height && measuredWidth == width) {
 			return;
 		}

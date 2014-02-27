@@ -45,7 +45,7 @@ import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.utils.ViewUtils;
 
-public class Container extends AbsLayoutContainer {
+public class FreeFlowContainer extends AbsLayoutContainer {
 
 	private static final String TAG = "Container";
 
@@ -102,7 +102,7 @@ public class Container extends AbsLayoutContainer {
 
 	protected EdgeEffect mLeftEdge, mRightEdge, mTopEdge, mBottomEdge;
 
-	private ArrayList<OnScrollListener> scrollListeners = new ArrayList<Container.OnScrollListener>();
+	private ArrayList<OnScrollListener> scrollListeners = new ArrayList<FreeFlowContainer.OnScrollListener>();
 
 	// This flag controls whether onTap/onLongPress/onTouch trigger
 	// the ActionMode
@@ -174,15 +174,15 @@ public class Container extends AbsLayoutContainer {
 
 	private FreeFlowLayout oldLayout;
 
-	public Container(Context context) {
+	public FreeFlowContainer(Context context) {
 		super(context);
 	}
 
-	public Container(Context context, AttributeSet attrs) {
+	public FreeFlowContainer(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
-	public Container(Context context, AttributeSet attrs, int defStyle) {
+	public FreeFlowContainer(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 
@@ -214,17 +214,24 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		logLifecycleEvent("onMeasure");
+		logLifecycleEvent(this.getClass().getName()+" onMeasure ");
+		
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
-
+		if(this.layout != null){
+			layout.setDimensions(afterWidth, afterHeight);
+		}
+		
 		if (layout == null || itemAdapter == null
-				|| itemAdapter.getNumberOfSections() == 0)
+				|| itemAdapter.getNumberOfSections() == 0){
+			logLifecycleEvent("Nothing to do: returning");
 			return;
+			
+		}
+			
 
-		layout.setDimensions(afterWidth, afterHeight);
+		
 
 		if (markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
@@ -316,7 +323,7 @@ public class Container extends AbsLayoutContainer {
 						freeflowItem.itemIndex, convertView, this);
 			}
 
-			if (view instanceof Container)
+			if (view instanceof FreeFlowContainer)
 				throw new IllegalStateException(
 						"A container cannot be a direct child view to a container");
 
@@ -895,7 +902,7 @@ public class Container extends AbsLayoutContainer {
 							if (mChoiceActionMode == null
 									&& mOnItemSelectedListener != null) {
 								mOnItemSelectedListener.onItemSelected(
-										Container.this, selectedFreeFlowItem);
+										FreeFlowContainer.this, selectedFreeFlowItem);
 							}
 
 							// setPressed(false);
@@ -1645,7 +1652,7 @@ public class Container extends AbsLayoutContainer {
 		public int SCROLL_STATE_TOUCH_SCROLL = 1;
 		public int SCROLL_STATE_FLING = 2;
 
-		public void onScroll(Container container);
+		public void onScroll(FreeFlowContainer container);
 	}
 	
 	/******** DEBUGGING HELPERS *******/
@@ -1654,7 +1661,7 @@ public class Container extends AbsLayoutContainer {
 	 * A flag for conditionally printing Container lifecycle events to LogCat
 	 * for debugging
 	 */
-	public boolean logDebugEvents = false;
+	public boolean logDebugEvents = true;
 
 	/**
 	 * A utility method for debugging lifecycle events and putting them in the

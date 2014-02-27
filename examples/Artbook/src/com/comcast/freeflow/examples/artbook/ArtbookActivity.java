@@ -17,9 +17,9 @@ package com.comcast.freeflow.examples.artbook;
 
 import com.comcast.freeflow.core.AbsLayoutContainer;
 import com.comcast.freeflow.core.AbsLayoutContainer.OnItemClickListener;
-import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
-import com.comcast.freeflow.core.Container.OnScrollListener;
+import com.comcast.freeflow.core.FreeFlowContainer.OnScrollListener;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.layouts.VGridLayout;
 import com.comcast.freeflow.layouts.VLayout;
@@ -44,7 +44,7 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 
 	public static final String TAG = "ArtbookActivity";
 
-	private Container container;
+	private FreeFlowContainer container;
 	private VGridLayout grid;
 	private ArtbookLayout custom;
 
@@ -63,7 +63,7 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_artbook);
 		
 
-		container = (Container) findViewById(R.id.container);
+		container = (FreeFlowContainer) findViewById(R.id.container);
 
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -113,7 +113,7 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 		container.addScrollListener( new OnScrollListener() {
 			 
 			@Override
-			public void onScroll(Container container) {
+			public void onScroll(FreeFlowContainer container) {
 				Log.d(TAG, "scroll percent "+ container.getScrollPercentY() );
 			}
 		});

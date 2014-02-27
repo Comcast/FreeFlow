@@ -27,7 +27,7 @@
         
         android:orientation="horizontal" >
 
-        <com.comcast.freeflow.core.Container
+        <com.comcast.freeflow.core.FreeFlowContainer
             android:id="@+id/container"
             android:layout_width="0dp"
             android:layout_height="match_parent"

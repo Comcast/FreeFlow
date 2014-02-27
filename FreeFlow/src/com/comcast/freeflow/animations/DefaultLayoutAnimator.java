@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.LayoutChangeset;
 
@@ -77,7 +77,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	 */
 	public boolean animateIndividualCellsSequentially = false;
 
-	protected Container callback;
+	protected FreeFlowContainer callback;
 	protected AnimatorSet disappearingSet = null;
 	protected AnimatorSet appearingSet = null;
 	protected AnimatorSet movingSet = null;
@@ -104,7 +104,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	protected boolean mIsRunning = false;
 
 	@Override
-	public void animateChanges(LayoutChangeset changeSet, final Container callback) {
+	public void animateChanges(LayoutChangeset changeSet, final FreeFlowContainer callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
 

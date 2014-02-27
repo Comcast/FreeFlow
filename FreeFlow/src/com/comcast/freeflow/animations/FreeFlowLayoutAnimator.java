@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.comcast.freeflow.animations;
 
-import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.LayoutChangeset;
 
 public interface FreeFlowLayoutAnimator {
@@ -40,7 +40,7 @@ public interface FreeFlowLayoutAnimator {
 	 * <code>Container</code> when the animations are done by calling the
 	 * <code>onLayoutChangeAnimationsCompleted</code> method on it.
 	 * 
-	 * @see Container#onLayoutChangeAnimationsCompleted(LayoutAnimator)
+	 * @see FreeFlowContainer#onLayoutChangeAnimationsCompleted(LayoutAnimator)
 	 * 
 	 * @param changes
 	 *            The Changeset to be animated
@@ -48,7 +48,7 @@ public interface FreeFlowLayoutAnimator {
 	 *            The Container instance to be informed when your animations are
 	 *            complete
 	 */
-	public void animateChanges(LayoutChangeset changes, Container callback);
+	public void animateChanges(LayoutChangeset changes, FreeFlowContainer callback);
 
 	/**
 	 * @return Whether the layout animation is currently playing

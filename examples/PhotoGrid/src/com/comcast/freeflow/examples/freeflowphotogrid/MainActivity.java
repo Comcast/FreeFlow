@@ -18,7 +18,7 @@ package com.comcast.freeflow.examples.freeflowphotogrid;
 import java.util.ArrayList;
 
 import com.comcast.freeflow.animations.DefaultLayoutAnimator;
-import com.comcast.freeflow.core.Container;
+import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
@@ -46,7 +46,7 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
 	private static final String TAG = "MainActivity";
-	private Container container = null;
+	private FreeFlowContainer container = null;
 	private HLayout hLayout = null;
 	private VLayout vLayout = null;
 	private VGridLayout vGridLayout = null;
@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
 
 		final ImageAdapter adapter = new ImageAdapter();
 
-		container = new Container(this);
+		container = new FreeFlowContainer(this);
 
 		DefaultLayoutAnimator anim = (DefaultLayoutAnimator) container.getLayoutAnimator();
 		anim.animateAllSetsSequentially = false;

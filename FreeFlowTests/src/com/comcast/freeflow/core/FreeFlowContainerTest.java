@@ -29,11 +29,11 @@ import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
-public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity> {
+public class FreeFlowContainerTest extends ActivityInstrumentationTestCase2<MainActivity> {
 	
 	Activity main ;
 	
-	public ContainerTest() {
+	public FreeFlowContainerTest() {
 		super(MainActivity.class);
 		
 	}
@@ -53,14 +53,14 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 	 * 
 	 * @throws InterruptedException
 	 */
-	public void testSourceCannotModifyContainerReferences() throws InterruptedException{
+	public void testSourceCannotModifyFreeFlowContainerReferences() throws InterruptedException{
 		final CountDownLatch lock = new CountDownLatch(1);
 		main.runOnUiThread(new Runnable() {
 			
 			@Override
 			public void run() {
 				
-				final Container container = new Container(main);
+				final FreeFlowContainer container = new FreeFlowContainer(main);
 							
 				
 				final VLayout vLayout = new VLayout();
@@ -85,7 +85,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 						vLayout.prepareLayout() ;
 						
 						//assertEquals("Layout frames did not generate as expected", 5*(10+1), vLayout.getAllProxies().size());
-						assertEquals("Container frames changed unexpectedly with data", frameCount, container.getFrames().size());
+						assertEquals("FreeFlowContainer frames changed unexpectedly with data", frameCount, container.getFrames().size());
 						
 						lock.countDown();
 						return false;
@@ -108,7 +108,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 			@Override
 			public void run() {
 				
-				final Container container = new Container(main);
+				final FreeFlowContainer container = new FreeFlowContainer(main);
 				
 				DefaultSectionAdapter adapter = new DefaultSectionAdapter(main, 1, 2);
 				container.setAdapter(adapter);
@@ -175,7 +175,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 		proxy.frame =  new Rect(20,20,20+40,20+40);
 		newMap.put(one, proxy2);
 		
-		Container container = new Container(getActivity());
+		FreeFlowContainer container = new FreeFlowContainer(getActivity());
 		LayoutChangeset changes = container.getViewChanges(oldMap, newMap);
 		
 		assertTrue(changes.getMoved().size() == 1);
@@ -185,7 +185,7 @@ public class ContainerTest extends ActivityInstrumentationTestCase2<MainActivity
 	
 	
 //	public void testAsync(){
-//		Container c = new Container(getActivity());
+//		FreeFlowContainer c = new FreeFlowContainer(getActivity());
 //		c.setLayoutParams(new LayoutParams(400,400));
 //		
 //	}
