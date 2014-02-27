@@ -1,0 +1,20 @@
+buildscript {
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.8.+'
+  }
+}
+
+apply plugin: 'android'
+
+dependencies {
+  compile project(':FreeFlow')
+}
+
+android {
+  compileSdkVersion 19
+  buildToolsVersion '19.0.2'
+
+  lintOptions {
+    abortOnError false
+  }
+}

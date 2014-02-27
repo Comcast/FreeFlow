@@ -1,19 +1,7 @@
-bin/AndroidManifest.xml
-bin/CollectionViewForAndroid.apk
-bin/classes.dex
-bin/classes/com/example/collectionviewforandroid/CollectionViewTest.class
-bin/dexedLibs/android-support-v4-13cdbed5f27b224680d6f7e538f76de2.jar
-bin/dexedLibs/annotations-389a629b573b08336a2f5f1feecb16de.jar
-bin/res/drawable-hdpi/ic_launcher.png
-bin/res/drawable-mdpi/ic_launcher.png
-bin/res/drawable-xhdpi/ic_launcher.png
-bin/resources.ap_
-bin
-bin/*
-CollectionViews2/bin/*
-CollectionViews2/gen/*
-examples/PhotoGrid/gen/*
-examples/PhotoGrid/bin/*
+# Gradle
+build
+.gradle
+local.properties
 
 # IDEA files
 .idea
