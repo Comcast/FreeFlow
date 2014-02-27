@@ -216,9 +216,6 @@ public class Container extends AbsLayoutContainer {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onMeasure");
-		int beforeWidth = getWidth();
-		int beforeHeight = getHeight();
-
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -228,17 +225,10 @@ public class Container extends AbsLayoutContainer {
 				|| itemAdapter.getNumberOfSections() == 0)
 			return;
 
-		boolean sizeChanged = false;
-		if (beforeWidth != afterWidth || beforeHeight != afterHeight) {
-			sizeChanged = true;
-		}
 
 		layout.setDimensions(afterWidth, afterHeight);
 
-		Log.d(TAG, "sizeChanged || markAdapterDirty || markLayoutDirty) "
-				+ sizeChanged + "," + markAdapterDirty + "," + markLayoutDirty);
-
-		if (sizeChanged || markAdapterDirty || markLayoutDirty) {
+		if (markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
 		}
 
