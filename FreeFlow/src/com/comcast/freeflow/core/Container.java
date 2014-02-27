@@ -48,7 +48,6 @@ import com.comcast.freeflow.utils.ViewUtils;
 public class Container extends AbsLayoutContainer {
 
 	private static final String TAG = "Container";
-	private static final String DEBUG_CONTAINER_LIFECYCLE_TAG = "ContainerLifecycle";
 
 	// ViewPool class
 	protected ViewPool viewpool;
@@ -172,7 +171,7 @@ public class Container extends AbsLayoutContainer {
 	 * the Viewport to be jumping around.
 	 */
 	private boolean shouldRecalculateScrollWhenComputingLayout = true;
-	
+
 	private FreeFlowLayout oldLayout;
 
 	public Container(Context context) {
@@ -215,7 +214,7 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onMeasure");
+		logLifecycleEvent("onMeasure");
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -224,7 +223,6 @@ public class Container extends AbsLayoutContainer {
 		if (layout == null || itemAdapter == null
 				|| itemAdapter.getNumberOfSections() == 0)
 			return;
-
 
 		layout.setDimensions(afterWidth, afterHeight);
 
@@ -235,7 +233,7 @@ public class Container extends AbsLayoutContainer {
 	}
 
 	public void dataInvalidated() {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Data Invalidated");
+		logLifecycleEvent( "Data Invalidated");
 		if (layout == null || itemAdapter == null) {
 			return;
 		}
@@ -260,7 +258,7 @@ public class Container extends AbsLayoutContainer {
 		markLayoutDirty = false;
 		markAdapterDirty = false;
 
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Computing layout for "
+		logLifecycleEvent( "Computing layout for "
 				+ itemAdapter.getSection(0).getDataCount());
 		layout.prepareLayout();
 		if (shouldRecalculateScrollWhenComputingLayout) {
@@ -354,7 +352,7 @@ public class Container extends AbsLayoutContainer {
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "onLayout");
+		logLifecycleEvent( "onLayout");
 		dispatchLayoutComplete(isAnimatingChanges);
 		// mDataChanged = false;
 
@@ -394,7 +392,7 @@ public class Container extends AbsLayoutContainer {
 		viewPortX = 0;
 		viewPortY = 0;
 
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "Setting layout");
+		logLifecycleEvent( "Setting layout");
 		requestLayout();
 
 	}
@@ -501,7 +499,7 @@ public class Container extends AbsLayoutContainer {
 	 * changed
 	 */
 	public void layoutChanged() {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "layoutChanged");
+		logLifecycleEvent( "layoutChanged");
 		markLayoutDirty = true;
 		dispatchDataChanged();
 		requestLayout();
@@ -510,7 +508,7 @@ public class Container extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeset changeSet) {
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
+		logLifecycleEvent(
 				"animating changes: " + changeSet.toString());
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
 				&& changeSet.moved.size() == 0) {
@@ -543,7 +541,7 @@ public class Container extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(FreeFlowLayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG,
+		logLifecycleEvent(
 				"layout change animations complete");
 		for (FreeFlowItem freeflowItem : anim.getChangeSet().getRemoved()) {
 			View v = freeflowItem.view;
@@ -651,7 +649,7 @@ public class Container extends AbsLayoutContainer {
 		if (adapter == itemAdapter) {
 			return;
 		}
-		Log.d(DEBUG_CONTAINER_LIFECYCLE_TAG, "setting adapter");
+		logLifecycleEvent( "setting adapter");
 		markAdapterDirty = true;
 
 		viewPortX = 0;
@@ -1648,6 +1646,26 @@ public class Container extends AbsLayoutContainer {
 		public int SCROLL_STATE_FLING = 2;
 
 		public void onScroll(Container container);
+	}
+	
+	/******** DEBUGGING HELPERS *******/
+
+	/**
+	 * A flag for conditionally printing Container lifecycle events to LogCat
+	 * for debugging
+	 */
+	public boolean logDebugEvents = false;
+
+	/**
+	 * A utility method for debugging lifecycle events and putting them in the
+	 * log messages
+	 * 
+	 * @param msg
+	 */
+	private void logLifecycleEvent(String msg) {
+		if(logDebugEvents){
+			Log.d("ContainerLifecycleEvent", msg);
+		}
 	}
 
 }
