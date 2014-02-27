@@ -20,7 +20,9 @@ import com.comcast.freeflow.core.AbsLayoutContainer.OnItemClickListener;
 import com.comcast.freeflow.core.Container;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Container.OnScrollListener;
+import com.comcast.freeflow.layouts.FreeFlowLayout;
 import com.comcast.freeflow.layouts.VGridLayout;
+import com.comcast.freeflow.layouts.VLayout;
 import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
 import com.comcast.freeflow.examples.artbook.data.DribbbleDataAdapter;
 import com.comcast.freeflow.examples.artbook.layouts.ArtbookLayout;
@@ -47,10 +49,13 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 	private ArtbookLayout custom;
 
 	private DribbbleFetch fetch;
-	private int itemsPerPage = 5;
+	private int itemsPerPage = 25;
 	private int pageIndex = 1;
 	
 	DribbbleDataAdapter adapter;
+	
+	FreeFlowLayout[] layouts;
+	int currLayoutIndex = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +70,26 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 		display.getSize(size);
 		
 		findViewById(R.id.load_more).setOnClickListener(this);
-
+		//Our new layout
+		custom = new ArtbookLayout();
+		
+		//Grid Layout
 		grid = new VGridLayout();
 		VGridLayout.LayoutParams params = new VGridLayout.LayoutParams(size.x/2, size.x/2);
 		grid.setLayoutParams(params);
 		
+		//Vertical Layout
+		VLayout vert = new VLayout();
+		VLayout.LayoutParams params2 = new VLayout.LayoutParams(size.x);
+		vert.setLayoutParams(params2);
+		
+		
+		layouts = new FreeFlowLayout[]{custom, grid, vert};
+		
 		adapter = new DribbbleDataAdapter(this);
-		custom = new ArtbookLayout();
-		container.setLayout(custom);
+		
+		
+		container.setLayout(layouts[currLayoutIndex]);
 		container.setAdapter(adapter);
 		
 		
@@ -113,12 +130,12 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 		super.onOptionsItemSelected(item);
 		switch(item.getItemId()){
 		case (R.id.action_change_layout):
-			if(container.getLayout() == grid){
-				container.setLayout(custom);
+			currLayoutIndex++;
+			if(currLayoutIndex == layouts.length){
+				currLayoutIndex =  0;
 			}
-			else{
-				container.setLayout(grid);
-			}
+			container.setLayout(layouts[currLayoutIndex]);
+			
 			break;
 		case (R.id.action_about): Intent about = new Intent(this, AboutActivity.class);
 			startActivity(about);
