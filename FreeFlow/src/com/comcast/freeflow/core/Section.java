@@ -16,10 +16,11 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Section {
 
-	protected ArrayList<Object> data;
+	protected List<Object> data;
 	protected Object headerData;
 	protected int selectedIndex = 0;
 
@@ -27,7 +28,7 @@ public class Section {
 		data = new ArrayList<Object>();
 	}
 
-	public ArrayList<Object> getData() {
+	public List<Object> getData() {
 		return data;
 	}
 	
@@ -43,7 +44,7 @@ public class Section {
 		return data.size();
 	}
 
-	public void setData(ArrayList<Object> data) {
+	public void setData(List<Object> data) {
 		this.data = data;
 	}
 

@@ -18,6 +18,7 @@ package com.comcast.freeflow.animations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
@@ -181,7 +182,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	 *            An ArrayList of <code>FreeFlowItems</code> removed
 	 * @return The AnimatorSet of the removed objects
 	 */
-	protected AnimatorSet getItemsRemovedAnimation(ArrayList<FreeFlowItem> removed) {
+	protected AnimatorSet getItemsRemovedAnimation(List<FreeFlowItem> removed) {
 		AnimatorSet disappearingSet = new AnimatorSet();
 		ArrayList<Animator> fades = new ArrayList<Animator>();
 		for (FreeFlowItem proxy : removed) {
@@ -201,7 +202,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	/**
 	 * 
 	 */
-	protected AnimatorSet getItemsAddedAnimation(ArrayList<FreeFlowItem> added) {
+	protected AnimatorSet getItemsAddedAnimation(List<FreeFlowItem> added) {
 		AnimatorSet appearingSet = new AnimatorSet();
 		ArrayList<Animator> fadeIns = new ArrayList<Animator>();
 		for (FreeFlowItem proxy : added) {
@@ -245,7 +246,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		return allAnim;
 	}
 
-	protected AnimatorSet getItemsMovedAnimation(ArrayList<Pair<FreeFlowItem, Rect>> moved) {
+	protected AnimatorSet getItemsMovedAnimation(List<Pair<FreeFlowItem, Rect>> moved) {
 
 		AnimatorSet anim = new AnimatorSet();
 		ArrayList<Animator> moves = new ArrayList<Animator>();
