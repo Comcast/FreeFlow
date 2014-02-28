@@ -21,6 +21,7 @@ import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.FreeFlowContainer.OnScrollListener;
 import com.comcast.freeflow.layouts.FreeFlowLayout;
+import com.comcast.freeflow.layouts.HLayout;
 import com.comcast.freeflow.layouts.VGridLayout;
 import com.comcast.freeflow.layouts.VLayout;
 import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
@@ -79,12 +80,16 @@ public class ArtbookActivity extends Activity implements OnClickListener{
 		grid.setLayoutParams(params);
 		
 		//Vertical Layout
-		VLayout vert = new VLayout();
+		VLayout vlayout = new VLayout();
 		VLayout.LayoutParams params2 = new VLayout.LayoutParams(size.x);
-		vert.setLayoutParams(params2);
+		vlayout.setLayoutParams(params2);
+		
+		//HLayout
+		HLayout hlayout = new HLayout();
+		hlayout.setLayoutParams(new HLayout.LayoutParams(size.x));
 		
 		
-		layouts = new FreeFlowLayout[]{custom, grid, vert};
+		layouts = new FreeFlowLayout[]{custom, grid, vlayout, hlayout};
 		
 		adapter = new DribbbleDataAdapter(this);
 		
