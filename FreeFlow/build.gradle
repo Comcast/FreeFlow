@@ -1,0 +1,16 @@
+buildscript {
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.8.+'
+  }
+}
+
+apply plugin: 'android-library'
+
+dependencies {
+  compile 'com.android.support:support-v4:19.0.+'
+}
+
+android {
+  compileSdkVersion 19
+  buildToolsVersion '19.0.2'
+}
