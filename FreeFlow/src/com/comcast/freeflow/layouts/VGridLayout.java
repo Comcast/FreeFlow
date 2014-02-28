@@ -16,14 +16,13 @@
 package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
+import java.util.Map;
+
+import android.graphics.Rect;
 
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
-import com.comcast.freeflow.core.SectionedAdapter;
-import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
 import com.comcast.freeflow.utils.ViewUtils;
-
-import android.graphics.Rect;
 
 public class VGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
@@ -33,7 +32,7 @@ public class VGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	protected int headerWidth = -1;
 	protected int headerHeight = -1;
 	
-	protected HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
+	protected Map<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 
 	private int cellBufferSize = 0;
 	private int bufferCount = 1;
@@ -132,7 +131,7 @@ public class VGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
+	public Map<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 		for (FreeFlowItem fd : proxies.values()) {
 			if (fd.frame.top + itemHeight > viewPortTop - cellBufferSize

@@ -33,7 +33,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 public abstract class AbsLayoutContainer extends ViewGroup {
 
-	protected HashMap<Object, FreeFlowItem> frames = null;
+	protected Map<Object, FreeFlowItem> frames = null;
 
 	protected ArrayList<FreeFlowEventListener> listeners = new ArrayList<FreeFlowEventListener>();
 

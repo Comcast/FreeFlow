@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.comcast.freeflow.layouts;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.SectionedAdapter;
 
@@ -64,7 +63,7 @@ public interface FreeFlowLayout {
 	 * @return HashMap of Data to itemProxies All itemProxies returned will be
 	 *         renedered, sized, laid out, and animated
 	 */
-	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft,
+	public Map<Object, FreeFlowItem> getItemProxies(int viewPortLeft,
 			int viewPortTop);
 
 	public void setLayoutParams(FreeFlowLayoutParams params);

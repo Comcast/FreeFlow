@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.comcast.freeflow.utils;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.comcast.freeflow.core.FreeFlowItem;
 
 public class ViewUtils {
-	public static FreeFlowItem getItemAt(HashMap<? extends Object, FreeFlowItem> frameDescriptors, int x, int y){
+	public static FreeFlowItem getItemAt(Map<? extends Object, FreeFlowItem> frameDescriptors, int x, int y){
 
 		Iterator<? extends Object> it=  frameDescriptors.entrySet().iterator();
 			

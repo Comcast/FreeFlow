@@ -16,10 +16,10 @@
 package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.comcast.freeflow.helpers.DefaultSectionAdapter;
 import com.comcast.freeflow.teststub.MainActivity;
-
 import com.comcast.freeflow.core.FreeFlowItem;
 
 import android.test.ActivityInstrumentationTestCase2;
@@ -39,7 +39,7 @@ public class VGridLayoutTest extends ActivityInstrumentationTestCase2<MainActivi
 		vGrid.setDimensions(600, 1000);
 		vGrid.prepareLayout();
 		
-		HashMap<? extends Object , FreeFlowItem> map ;
+		Map<? extends Object , FreeFlowItem> map ;
 		map = vGrid.getItemProxies(0, 0);
 		
 		assertEquals("VGridLayout did not generate correct number of frames", 5, map.size());

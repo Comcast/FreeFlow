@@ -16,6 +16,7 @@
 package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
@@ -31,7 +32,7 @@ public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	private static final String TAG = "HLayout";
 	private int itemWidth = -1;
-	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
+	private Map<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerHeight = -1;
 	private int headerWidth = -1;
 
@@ -120,7 +121,7 @@ public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
+	public Map<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
 		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
 
 		for (FreeFlowItem fd : proxies.values()) {

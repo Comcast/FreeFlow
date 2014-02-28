@@ -16,6 +16,7 @@
 package com.comcast.freeflow.layouts;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
@@ -31,7 +32,7 @@ public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
-	private HashMap<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
+	private Map<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
 	private int headerWidth = -1;
 	private int headerHeight = -1;
 	private int cellBufferSize = 0;

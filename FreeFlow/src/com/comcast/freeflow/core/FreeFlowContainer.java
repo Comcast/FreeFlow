@@ -271,7 +271,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (shouldRecalculateScrollWhenComputingLayout) {
 			computeViewPort(layout);
 		}
-		HashMap<Object, FreeFlowItem> oldFrames = frames;
+		Map<Object, FreeFlowItem> oldFrames = frames;
 
 		frames = new HashMap<Object, FreeFlowItem>();
 		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
@@ -288,8 +288,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * Copies the frames from one HashMap into another. The items are cloned
 	 * cause we modify the rectangles of the items as they are moving
 	 */
-	protected void copyFrames(HashMap<Object, FreeFlowItem> srcFrames,
-			HashMap<Object, FreeFlowItem> destFrames) {
+	protected void copyFrames(Map<Object, FreeFlowItem> srcFrames,
+			Map<Object, FreeFlowItem> destFrames) {
 		Iterator<?> it = srcFrames.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
@@ -563,14 +563,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<Object, FreeFlowItem> oldFrames,
-			HashMap<Object, FreeFlowItem> newFrames) {
+			Map<Object, FreeFlowItem> oldFrames,
+			Map<Object, FreeFlowItem> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
 	public LayoutChangeset getViewChanges(
-			HashMap<Object, FreeFlowItem> oldFrames,
-			HashMap<Object, FreeFlowItem> newFrames, boolean moveEvenIfSame) {
+			Map<Object, FreeFlowItem> oldFrames,
+			Map<Object, FreeFlowItem> newFrames, boolean moveEvenIfSame) {
 
 		// cleanupViews();
 		LayoutChangeset change = new LayoutChangeset();
@@ -1156,7 +1156,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		return layoutAnimator;
 	}
 
-	public HashMap<Object, FreeFlowItem> getFrames() {
+	public Map<Object, FreeFlowItem> getFrames() {
 		return frames;
 	}
 
