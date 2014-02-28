@@ -127,13 +127,13 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 			}
 		};
 
-		ArrayList<FreeFlowItem> removed = changeSet.getRemoved();
+		List<FreeFlowItem> removed = changeSet.getRemoved();
 		if (removed.size() > 0) {
 			Collections.sort(removed, cmp);
 			disappearingSet = getItemsRemovedAnimation(changeSet.getRemoved());
 		}
 
-		ArrayList<FreeFlowItem> added = changeSet.getAdded();
+		List<FreeFlowItem> added = changeSet.getAdded();
 		if (added.size() > 0) {
 			Collections.sort(added, cmp);
 			appearingSet = getItemsAddedAnimation(added);

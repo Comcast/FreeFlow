@@ -16,16 +16,20 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.graphics.Rect;
 import android.util.Pair;
 
 public class LayoutChangeset {
-	protected ArrayList<Pair<FreeFlowItem, Rect>> moved = new ArrayList<Pair<FreeFlowItem, Rect>>();
-	protected ArrayList<FreeFlowItem> removed = new ArrayList<FreeFlowItem>();
-	protected ArrayList<FreeFlowItem> added = new ArrayList<FreeFlowItem>();
+	protected List<Pair<FreeFlowItem, Rect>> moved;
+	protected List<FreeFlowItem> removed;
+	protected List<FreeFlowItem> added;
 
 	public LayoutChangeset() {
+		moved = new ArrayList<Pair<FreeFlowItem, Rect>>();
+		removed = new ArrayList<FreeFlowItem>();
+		added = new ArrayList<FreeFlowItem>();
 	}
 
 	public void addToMoved(FreeFlowItem proxy, Rect oldFrame) {
@@ -40,15 +44,15 @@ public class LayoutChangeset {
 		added.add(proxy);
 	}
 
-	public ArrayList<FreeFlowItem> getAdded() {
+	public List<FreeFlowItem> getAdded() {
 		return added;
 	}
 	
-	public ArrayList<FreeFlowItem> getRemoved() {
+	public List<FreeFlowItem> getRemoved() {
 		return removed;
 	}
 
-	public ArrayList<Pair<FreeFlowItem, Rect>> getMoved() {
+	public List<Pair<FreeFlowItem, Rect>> getMoved() {
 		return moved;
 	}
 
