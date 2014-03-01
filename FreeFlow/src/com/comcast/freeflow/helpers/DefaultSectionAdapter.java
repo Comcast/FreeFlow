@@ -31,7 +31,7 @@ import android.widget.TextView;
 public class DefaultSectionAdapter implements SectionedAdapter {
 
 	private ArrayList<Section> sections = new ArrayList<Section>();
-	private Context context;
+	protected Context context;
 	public int headerHeight = 20;
 	public int itemHeight = 20;
 
