@@ -228,6 +228,12 @@ public class MainActivity extends Activity {
 			return true;
 		}
 
+		@Override
+		public Object getMappedItemForLayoutChange(Object data) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 	}
 
 }
