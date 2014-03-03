@@ -38,7 +38,7 @@ import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
 
 public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
-	
+
 	protected LayoutChangeset changeSet;
 
 	public static final String TAG = "DefaultLayoutAnimator";
@@ -82,6 +82,7 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	protected AnimatorSet disappearingSet = null;
 	protected AnimatorSet appearingSet = null;
 	protected AnimatorSet movingSet = null;
+	protected AnimatorSet mappedSet = null;
 
 	public DefaultLayoutAnimator() {
 	}
@@ -97,33 +98,36 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 
 		if (movingSet != null)
 			movingSet.cancel();
-		
+
+		if (mappedSet != null) {
+			mappedSet.cancel();
+		}
+
 		mIsRunning = false;
 
 	}
-	
+
 	protected boolean mIsRunning = false;
 
 	@Override
-	public void animateChanges(LayoutChangeset changeSet, final FreeFlowContainer callback) {
+	public void animateChanges(LayoutChangeset changeSet,
+			final FreeFlowContainer callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
-
-		Log.d(TAG, "Changes: " + changeSet.toString());
-
 		cancel();
-
 		mIsRunning = true;
-		
+
 		disappearingSet = null;
 		appearingSet = null;
 		movingSet = null;
+		mappedSet = null;
 
 		Comparator<FreeFlowItem> cmp = new Comparator<FreeFlowItem>() {
 
 			@Override
 			public int compare(FreeFlowItem lhs, FreeFlowItem rhs) {
-				return (lhs.itemSection * 1000 + lhs.itemIndex) - (rhs.itemSection * 1000 + rhs.itemIndex);
+				return (lhs.itemSection * 1000 + lhs.itemIndex)
+						- (rhs.itemSection * 1000 + rhs.itemIndex);
 			}
 		};
 
@@ -141,6 +145,11 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 
 		if (changeSet.getMoved().size() > 0) {
 			movingSet = getItemsMovedAnimation(changeSet.getMoved());
+		}
+
+		if (changeSet.getMappedBetweenAdapters().size() > 0) {
+			mappedSet = getItemsMappedAnimation(changeSet
+					.getMappedBetweenAdapters());
 		}
 
 		AnimatorSet all = getAnimationSequence();
@@ -222,7 +231,8 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 
 	protected AnimatorSet getAnimationSequence() {
 
-		if (disappearingSet == null && appearingSet == null && movingSet == null)
+		if (disappearingSet == null && appearingSet == null
+				&& movingSet == null)
 			return null;
 
 		AnimatorSet allAnim = new AnimatorSet();
@@ -238,6 +248,10 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		if (movingSet != null)
 			all.add(movingSet);
 
+		if (mappedSet != null) {
+			all.add(mappedSet);
+		}
+
 		if (animateAllSetsSequentially)
 			allAnim.playSequentially(all);
 		else
@@ -246,7 +260,8 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		return allAnim;
 	}
 
-	protected AnimatorSet getItemsMovedAnimation(List<Pair<FreeFlowItem, Rect>> moved) {
+	protected AnimatorSet getItemsMovedAnimation(
+			List<Pair<FreeFlowItem, Rect>> moved) {
 
 		AnimatorSet anim = new AnimatorSet();
 		ArrayList<Animator> moves = new ArrayList<Animator>();
@@ -258,10 +273,6 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 			proxy.frame.top -= callback.getViewportTop();
 			proxy.frame.right -= callback.getViewportLeft();
 			proxy.frame.bottom -= callback.getViewportTop();
-
-			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
-			// callback.viewPortY);
-
 			moves.add(transitionToFrame(item.second, proxy, v));
 
 		}
@@ -270,14 +281,46 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		return anim;
 	}
 
+	protected AnimatorSet getItemsMappedAnimation(
+			List<Pair<FreeFlowItem, FreeFlowItem>> mapped) {
+		AnimatorSet anim = new AnimatorSet();
+		ArrayList<Animator> moves = new ArrayList<Animator>();
+		for (Pair<FreeFlowItem, FreeFlowItem> item : mapped) {
+			final FreeFlowItem oldItem = item.first;
+			final FreeFlowItem newItem = item.second;
+			ValueAnimator va = transitionToFrame(oldItem.frame, newItem,
+					newItem.view);
+			va.addListener(new AnimatorListener() {
+
+				@Override
+				public void onAnimationStart(Animator animation) {
+					oldItem.view.setVisibility(View.GONE);
+				}
+
+				@Override
+				public void onAnimationRepeat(Animator animation) {
+				}
+
+				@Override
+				public void onAnimationEnd(Animator animation) {
+				}
+
+				@Override
+				public void onAnimationCancel(Animator animation) {
+				}
+			});
+
+			moves.add(va);
+		}
+		anim.playTogether(moves);
+		return anim;
+	}
+
 	// @Override
-	public ValueAnimator transitionToFrame(final Rect of, final FreeFlowItem nf, final View v) {
+	public ValueAnimator transitionToFrame(final Rect of,
+			final FreeFlowItem nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
-//
-//		Log.d(TAG, "of width = " + of.width() + ", nf width = " + nf.frame.width());
-//		Log.d(TAG, "of height = " + of.height() + ", nf height = " + nf.frame.height());
-
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
 			@Override
@@ -286,23 +329,31 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 				try {
 
 					int itemWidth = of.width()
-							+ (int) ((nf.frame.width() - of.width()) * animation.getAnimatedFraction());
+							+ (int) ((nf.frame.width() - of.width()) * animation
+									.getAnimatedFraction());
 					int itemHeight = of.height()
-							+ (int) ((nf.frame.height() - of.height()) * animation.getAnimatedFraction());
-					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth, MeasureSpec.EXACTLY);
-					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight, MeasureSpec.EXACTLY);
+							+ (int) ((nf.frame.height() - of.height()) * animation
+									.getAnimatedFraction());
+					int widthSpec = MeasureSpec.makeMeasureSpec(itemWidth,
+							MeasureSpec.EXACTLY);
+					int heightSpec = MeasureSpec.makeMeasureSpec(itemHeight,
+							MeasureSpec.EXACTLY);
 
 					v.measure(widthSpec, heightSpec);
 
 					Rect frame = new Rect();
 					Rect nff = nf.frame;
 
-					frame.left = (int) (of.left + (nff.left - of.left) * animation.getAnimatedFraction());
-					frame.top = (int) (of.top + (nff.top - of.top) * animation.getAnimatedFraction());
+					frame.left = (int) (of.left + (nff.left - of.left)
+							* animation.getAnimatedFraction());
+					frame.top = (int) (of.top + (nff.top - of.top)
+							* animation.getAnimatedFraction());
 					frame.right = frame.left
-							+ (int) (of.width() + (nff.width() - of.width()) * animation.getAnimatedFraction());
+							+ (int) (of.width() + (nff.width() - of.width())
+									* animation.getAnimatedFraction());
 					frame.bottom = frame.top
-							+ (int) (of.height() + (nff.height() - of.height()) * animation.getAnimatedFraction());
+							+ (int) (of.height() + (nff.height() - of.height())
+									* animation.getAnimatedFraction());
 
 					v.layout(frame.left, frame.top, frame.right, frame.bottom);
 

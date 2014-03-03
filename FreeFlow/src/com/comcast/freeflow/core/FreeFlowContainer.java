@@ -526,6 +526,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			addAndMeasureViewIfNeeded(freeflowItem);
 			doLayout(freeflowItem);
 		}
+		
+		for (Pair<FreeFlowItem, FreeFlowItem> items : changeSet.getMappedBetweenAdapters()) {
+			FreeFlowItem item2 = items.second;
+			addAndMeasureViewIfNeeded(item2);
+			doLayout(item2);
+		}
 
 		if (isAnimatingChanges) {
 			layoutAnimator.cancel();
@@ -570,7 +576,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	public LayoutChangeset getViewChanges(
 			Map<Object, FreeFlowItem> oldFrames,
-			Map<Object, FreeFlowItem> newFrames, boolean moveEvenIfSame) {
+			Map<Object, FreeFlowItem> newFrames, boolean isScrolling) {
 
 		// cleanupViews();
 		LayoutChangeset change = new LayoutChangeset();
@@ -601,18 +607,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		while (it.hasNext()) {
 			Map.Entry<?, ?> m = (Map.Entry<?, ?>) it.next();
 			FreeFlowItem freeflowItem = (FreeFlowItem) m.getValue();
+			Object dataItem = m.getKey();
+			if (oldFrames.get(dataItem) != null) {
 
-			if (oldFrames.get(m.getKey()) != null) {
-
-				FreeFlowItem old = oldFrames.remove(m.getKey());
+				FreeFlowItem old = oldFrames.remove(dataItem);
 				freeflowItem.view = old.view;
-
-				// if (moveEvenIfSame || !old.compareRect(((FreeFlowItem)
-				// m.getValue()).frame)) {
-
-				if (moveEvenIfSame
+				if (isScrolling
 						|| !old.frame
-								.equals(((FreeFlowItem) m.getValue()).frame)) {
+								.equals(freeflowItem.frame)) {
 
 					change.addToMoved(freeflowItem,
 							getActualFrame(freeflowItem));
@@ -620,18 +622,37 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			} else {
 				change.addToAdded(freeflowItem);
 			}
-
 		}
 
 		for (FreeFlowItem freeflowItem : oldFrames.values()) {
 			change.addToDeleted(freeflowItem);
 		}
-
+		
+		if(!isScrolling){
+			Iterator<FreeFlowItem> iter =  change.getRemoved().iterator();
+			while(iter.hasNext()){
+				FreeFlowItem item = iter.next();
+				Object mappedItem = itemAdapter.getMappedItemForLayoutChange(item.data);
+				if(mappedItem != null){
+					iter.remove();
+					Iterator<FreeFlowItem> iter2 = change.getAdded().iterator();
+					while(iter2.hasNext()){
+						FreeFlowItem item2 = iter2.next();
+						if(item2.data.equals(mappedItem)){
+							iter2.remove();
+							change.addToItemsFromPreviousAdapterPresentInNewAdapter(item, item2);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		frames = newFrames;
 
 		return change;
 	}
-
+	
 	@Override
 	public void requestLayout() {
 		if (!preventLayout) {

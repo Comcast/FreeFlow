@@ -35,5 +35,7 @@ public interface SectionedAdapter {
 	public Class getViewType(FreeFlowItem proxy);
 	
 	public boolean shouldDisplaySectionHeaders();
+	
+	public Object getMappedItemForLayoutChange(Object data);
 
 }

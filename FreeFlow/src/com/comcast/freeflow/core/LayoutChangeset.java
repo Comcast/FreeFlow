@@ -23,13 +23,24 @@ import android.util.Pair;
 
 public class LayoutChangeset {
 	protected List<Pair<FreeFlowItem, Rect>> moved;
+	protected List<Pair<FreeFlowItem, FreeFlowItem>> mappedBetweenAdapters;
 	protected List<FreeFlowItem> removed;
 	protected List<FreeFlowItem> added;
+
 
 	public LayoutChangeset() {
 		moved = new ArrayList<Pair<FreeFlowItem, Rect>>();
 		removed = new ArrayList<FreeFlowItem>();
 		added = new ArrayList<FreeFlowItem>();
+		mappedBetweenAdapters = new ArrayList<Pair<FreeFlowItem,FreeFlowItem>>();
+	}
+	
+	public void addToItemsFromPreviousAdapterPresentInNewAdapter(FreeFlowItem oldItem, FreeFlowItem newItem){
+		mappedBetweenAdapters.add(new Pair<FreeFlowItem, FreeFlowItem>(oldItem, newItem));
+	}
+	
+	public List<Pair<FreeFlowItem, FreeFlowItem>> getMappedBetweenAdapters(){
+		return mappedBetweenAdapters;
 	}
 
 	public void addToMoved(FreeFlowItem proxy, Rect oldFrame) {
@@ -60,7 +71,8 @@ public class LayoutChangeset {
 	public String toString() {
 		return 	"Added: " + added.size() + "," +
 				"Removed: " + removed.size()+ ","+
-				"Moved: " + moved.size();
+				"Moved: " + moved.size()+", "+
+				"Mapped: "+mappedBetweenAdapters.size();
 	}
 
 	public boolean isEmpty() {

@@ -126,4 +126,9 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 		return true;
 	}
 
+	@Override
+	public Object getMappedItemForLayoutChange(Object data) {
+		return null;
+	}
+
 }
