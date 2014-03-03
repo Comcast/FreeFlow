@@ -223,8 +223,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			layout.setDimensions(afterWidth, afterHeight);
 		}
 		
-		if (layout == null || itemAdapter == null
-				|| itemAdapter.getNumberOfSections() == 0){
+		if (layout == null || itemAdapter == null){
 			logLifecycleEvent("Nothing to do: returning");
 			return;
 			
@@ -264,9 +263,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	protected void computeLayout(int w, int h) {
 		markLayoutDirty = false;
 		markAdapterDirty = false;
-
-		logLifecycleEvent( "Computing layout for "
-				+ itemAdapter.getSection(0).getDataCount());
 		layout.prepareLayout();
 		if (shouldRecalculateScrollWhenComputingLayout) {
 			computeViewPort(layout);
@@ -382,7 +378,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 */
 	public void setLayout(FreeFlowLayout lc) {
 
-		if (lc == layout) {
+		if (lc == layout || lc == null) {
 			return;
 		}
 
