@@ -561,6 +561,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			removeView(v);
 			returnItemToPoolIfNeeded(freeflowItem);
 		}
+		
+		for (Pair <FreeFlowItem, FreeFlowItem> pair : anim.getChangeSet().getMappedBetweenAdapters()) {
+			View v = pair.first.view;
+			removeView(v);
+			returnItemToPoolIfNeeded(pair.first);
+		}
 
 		dispatchLayoutChangeAnimationsComplete();
 
