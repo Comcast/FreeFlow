@@ -22,15 +22,15 @@ import java.util.Map.Entry;
 import com.comcast.freeflow.core.FreeFlowItem;
 
 public class ViewUtils {
-	public static FreeFlowItem getItemAt(Map<? extends Object, FreeFlowItem> frameDescriptors, int x, int y){
+	public static FreeFlowItem getItemAt(Map<?, FreeFlowItem> frameDescriptors, int x, int y){
+        FreeFlowItem returnValue = null;
 
-		Iterator<? extends Object> it=  frameDescriptors.entrySet().iterator();
-			
-		while (it.hasNext()) {
-			Entry<Object, FreeFlowItem> pair = (Entry<Object, FreeFlowItem>) it.next();
-			if(pair.getValue().frame.contains((int)x, (int)y)) return pair.getValue();
+		for(FreeFlowItem item : frameDescriptors.values()) {
+			if(item.frame.contains((int)x, (int)y)) {
+                returnValue =  item;
+            }
 	      
 	    }
-		return null;
+		return returnValue;
 	}
 }
