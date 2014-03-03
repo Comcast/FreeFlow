@@ -214,23 +214,20 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		logLifecycleEvent(this.getClass().getName()+" onMeasure ");
-		
+		logLifecycleEvent(this.getClass().getName() + " onMeasure ");
+
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
-		if(this.layout != null){
+		if (this.layout != null) {
 			layout.setDimensions(afterWidth, afterHeight);
 		}
-		
-		if (layout == null || itemAdapter == null){
+
+		if (layout == null || itemAdapter == null) {
 			logLifecycleEvent("Nothing to do: returning");
 			return;
-			
-		}
-			
 
-		
+		}
 
 		if (markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
@@ -239,7 +236,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	public void dataInvalidated() {
-		logLifecycleEvent( "Data Invalidated");
+		logLifecycleEvent("Data Invalidated");
 		if (layout == null || itemAdapter == null) {
 			return;
 		}
@@ -355,7 +352,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		logLifecycleEvent( "onLayout");
+		logLifecycleEvent("onLayout");
 		dispatchLayoutComplete(isAnimatingChanges);
 		// mDataChanged = false;
 
@@ -395,7 +392,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		viewPortX = 0;
 		viewPortY = 0;
 
-		logLifecycleEvent( "Setting layout");
+		logLifecycleEvent("Setting layout");
 		requestLayout();
 
 	}
@@ -498,11 +495,29 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	/**
+	 * Returns the <code>FreeFlowItem</code> representing the data passed in IF
+	 * that item is being rendered in the Container.
+	 * 
+	 * @param dataItem
+	 *            The data object being rendered in a View managed by the
+	 *            Container, null otherwise
+	 * @return
+	 */
+	public FreeFlowItem getFreeFlowItem(Object dataItem) {
+		for (FreeFlowItem item : frames.values()) {
+			if (item.data.equals(dataItem)) {
+				return item;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * TODO: This should be renamed to layoutInvalidated, since the layout isn't
 	 * changed
 	 */
 	public void layoutChanged() {
-		logLifecycleEvent( "layoutChanged");
+		logLifecycleEvent("layoutChanged");
 		markLayoutDirty = true;
 		dispatchDataChanged();
 		requestLayout();
@@ -511,8 +526,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	protected boolean isAnimatingChanges = false;
 
 	private void animateChanges(LayoutChangeset changeSet) {
-		logLifecycleEvent(
-				"animating changes: " + changeSet.toString());
+		logLifecycleEvent("animating changes: " + changeSet.toString());
 		if (changeSet.added.size() == 0 && changeSet.removed.size() == 0
 				&& changeSet.moved.size() == 0) {
 			return;
@@ -544,8 +558,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	public void onLayoutChangeAnimationsCompleted(FreeFlowLayoutAnimator anim) {
 		// preventLayout = false;
 		isAnimatingChanges = false;
-		logLifecycleEvent(
-				"layout change animations complete");
+		logLifecycleEvent("layout change animations complete");
 		for (FreeFlowItem freeflowItem : anim.getChangeSet().getRemoved()) {
 			View v = freeflowItem.view;
 			removeView(v);
@@ -558,14 +571,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	}
 
-	public LayoutChangeset getViewChanges(
-			Map<Object, FreeFlowItem> oldFrames,
+	public LayoutChangeset getViewChanges(Map<Object, FreeFlowItem> oldFrames,
 			Map<Object, FreeFlowItem> newFrames) {
 		return getViewChanges(oldFrames, newFrames, false);
 	}
 
-	public LayoutChangeset getViewChanges(
-			Map<Object, FreeFlowItem> oldFrames,
+	public LayoutChangeset getViewChanges(Map<Object, FreeFlowItem> oldFrames,
 			Map<Object, FreeFlowItem> newFrames, boolean moveEvenIfSame) {
 
 		// cleanupViews();
@@ -652,7 +663,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (adapter == itemAdapter) {
 			return;
 		}
-		logLifecycleEvent( "setting adapter");
+		logLifecycleEvent("setting adapter");
 		markAdapterDirty = true;
 
 		viewPortX = 0;
@@ -898,7 +909,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 							if (mChoiceActionMode == null
 									&& mOnItemSelectedListener != null) {
 								mOnItemSelectedListener.onItemSelected(
-										FreeFlowContainer.this, selectedFreeFlowItem);
+										FreeFlowContainer.this,
+										selectedFreeFlowItem);
 							}
 
 							// setPressed(false);
@@ -1650,7 +1662,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		public void onScroll(FreeFlowContainer container);
 	}
-	
+
 	/******** DEBUGGING HELPERS *******/
 
 	/**
@@ -1666,7 +1678,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @param msg
 	 */
 	private void logLifecycleEvent(String msg) {
-		if(logDebugEvents){
+		if (logDebugEvents) {
 			Log.d("ContainerLifecycleEvent", msg);
 		}
 	}
