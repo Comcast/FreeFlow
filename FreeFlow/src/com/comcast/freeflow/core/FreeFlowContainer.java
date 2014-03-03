@@ -56,8 +56,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	// prevent layout in <code>layout()</code> method
 	private boolean preventLayout = false;
 
-	protected SectionedAdapter itemAdapter;
-	protected FreeFlowLayout layout;
+	protected SectionedAdapter mAdapter;
+	protected FreeFlowLayout mLayout;
 
 	/**
 	 * The X position of the active ViewPort
@@ -219,11 +219,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
-		if (this.layout != null) {
-			layout.setDimensions(afterWidth, afterHeight);
+		if (this.mLayout != null) {
+			mLayout.setDimensions(afterWidth, afterHeight);
 		}
 
-		if (layout == null || itemAdapter == null) {
+		if (mLayout == null || mAdapter == null) {
 			logLifecycleEvent("Nothing to do: returning");
 			return;
 
@@ -237,7 +237,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	public void dataInvalidated() {
 		logLifecycleEvent("Data Invalidated");
-		if (layout == null || itemAdapter == null) {
+		if (mLayout == null || mAdapter == null) {
 			return;
 		}
 		shouldRecalculateScrollWhenComputingLayout = false;
@@ -260,14 +260,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	protected void computeLayout(int w, int h) {
 		markLayoutDirty = false;
 		markAdapterDirty = false;
-		layout.prepareLayout();
+		mLayout.prepareLayout();
 		if (shouldRecalculateScrollWhenComputingLayout) {
-			computeViewPort(layout);
+			computeViewPort(mLayout);
 		}
 		Map<Object, FreeFlowItem> oldFrames = frames;
 
 		frames = new HashMap<Object, FreeFlowItem>();
-		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
+		copyFrames(mLayout.getItemProxies(viewPortX, viewPortY), frames);
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
 
@@ -305,14 +305,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		View view;
 		if (freeflowItem.view == null) {
 
-			View convertView = viewpool.getViewFromPool(itemAdapter
+			View convertView = viewpool.getViewFromPool(mAdapter
 					.getViewType(freeflowItem));
 
 			if (freeflowItem.isHeader) {
-				view = itemAdapter.getHeaderViewForSection(
+				view = mAdapter.getHeaderViewForSection(
 						freeflowItem.itemSection, convertView, this);
 			} else {
-				view = itemAdapter.getItemView(freeflowItem.itemSection,
+				view = mAdapter.getItemView(freeflowItem.itemSection,
 						freeflowItem.itemIndex, convertView, this);
 			}
 
@@ -371,22 +371,22 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * Scroll positions will also be reset.
 	 * 
 	 * @see FreeFlowLayout
-	 * @param lc
+	 * @param newLayout
 	 */
-	public void setLayout(FreeFlowLayout lc) {
+	public void setLayout(FreeFlowLayout newLayout) {
 
-		if (lc == layout || lc == null) {
+		if (newLayout == mLayout || newLayout == null) {
 			return;
 		}
 
-		oldLayout = layout;
-		layout = lc;
+		oldLayout = mLayout;
+		mLayout = newLayout;
 		shouldRecalculateScrollWhenComputingLayout = true;
-		if (itemAdapter != null) {
-			layout.setAdapter(itemAdapter);
+		if (mAdapter != null) {
+			mLayout.setAdapter(mAdapter);
 		}
 
-		dispatchLayoutChanging(oldLayout, lc);
+		dispatchLayoutChanging(oldLayout, newLayout);
 
 		markLayoutDirty = true;
 		viewPortX = 0;
@@ -401,7 +401,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @return The layout currently applied to the Container
 	 */
 	public FreeFlowLayout getLayout() {
-		return layout;
+		return mLayout;
 	}
 
 	/**
@@ -414,7 +414,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * 
 	 */
 	private void computeViewPort(FreeFlowLayout newLayout) {
-		if (layout == null || frames == null || frames.size() == 0) {
+		if (mLayout == null || frames == null || frames.size() == 0) {
 			viewPortX = 0;
 			viewPortY = 0;
 			return;
@@ -451,8 +451,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		viewPortX = vpFrame.left;
 		viewPortY = vpFrame.top;
-		mScrollableWidth = layout.getContentWidth() - getWidth();
-		mScrollableHeight = layout.getContentHeight() - getHeight();
+		mScrollableWidth = mLayout.getContentWidth() - getWidth();
+		mScrollableHeight = mLayout.getContentHeight() - getHeight();
 
 		if (mScrollableWidth < 0) {
 			mScrollableWidth = 0;
@@ -660,7 +660,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 *            Collection
 	 */
 	public void setAdapter(SectionedAdapter adapter) {
-		if (adapter == itemAdapter) {
+		if (adapter == mAdapter) {
 			return;
 		}
 		logLifecycleEvent("setting adapter");
@@ -669,18 +669,18 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		viewPortX = 0;
 		viewPortY = 0;
 		shouldRecalculateScrollWhenComputingLayout = true;
-		this.itemAdapter = adapter;
+		this.mAdapter = adapter;
 		if (adapter != null) {
 			viewpool.initializeViewPool(adapter.getViewTypes());
 		}
-		if (layout != null) {
-			layout.setAdapter(itemAdapter);
+		if (mLayout != null) {
+			mLayout.setAdapter(mAdapter);
 		}
 		requestLayout();
 	}
 
 	public FreeFlowLayout getLayoutController() {
-		return layout;
+		return mLayout;
 	}
 
 	/**
@@ -766,17 +766,17 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	public boolean onTouchEvent(MotionEvent event) {
 
 		super.onTouchEvent(event);
-		if (layout == null)
+		if (mLayout == null)
 			return false;
 
 		boolean canScroll = false;
 
-		if (layout.horizontalScrollEnabled()
-				&& this.layout.getContentWidth() > getWidth()) {
+		if (mLayout.horizontalScrollEnabled()
+				&& this.mLayout.getContentWidth() > getWidth()) {
 			canScroll = true;
 		}
-		if (layout.verticalScrollEnabled()
-				&& layout.getContentHeight() > getHeight()) {
+		if (mLayout.verticalScrollEnabled()
+				&& mLayout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
 
@@ -874,8 +874,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity
 						|| Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
-					int maxX = layout.getContentWidth() - getWidth();
-					int maxY = layout.getContentHeight() - getHeight();
+					int maxX = mLayout.getContentWidth() - getWidth();
+					int maxY = mLayout.getContentHeight() - getHeight();
 
 					scroller.fling(viewPortX, viewPortY,
 							-(int) mVelocityTracker.getXVelocity(),
@@ -953,10 +953,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			}
 			boolean more = scroller.computeScrollOffset();
 			checkEdgeEffectDuringScroll();
-			if (layout.horizontalScrollEnabled()) {
+			if (mLayout.horizontalScrollEnabled()) {
 				viewPortX = scroller.getCurrX();
 			}
-			if (layout.verticalScrollEnabled()) {
+			if (mLayout.verticalScrollEnabled()) {
 				viewPortY = scroller.getCurrY();
 			}
 			moveViewport(true);
@@ -968,24 +968,24 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	protected void checkEdgeEffectDuringScroll() {
 		if (mLeftEdge.isFinished() && viewPortX < 0
-				&& layout.horizontalScrollEnabled()) {
+				&& mLayout.horizontalScrollEnabled()) {
 			mLeftEdge.onAbsorb((int) scroller.getCurrVelocity());
 		}
 
 		if (mRightEdge.isFinished()
-				&& viewPortX > layout.getContentWidth() - getMeasuredWidth()
-				&& layout.horizontalScrollEnabled()) {
+				&& viewPortX > mLayout.getContentWidth() - getMeasuredWidth()
+				&& mLayout.horizontalScrollEnabled()) {
 			mRightEdge.onAbsorb((int) scroller.getCurrVelocity());
 		}
 
 		if (mTopEdge.isFinished() && viewPortY < 0
-				&& layout.verticalScrollEnabled()) {
+				&& mLayout.verticalScrollEnabled()) {
 			mTopEdge.onAbsorb((int) scroller.getCurrVelocity());
 		}
 
 		if (mBottomEdge.isFinished()
-				&& viewPortY > layout.getContentHeight() - getMeasuredHeight()
-				&& layout.verticalScrollEnabled()) {
+				&& viewPortY > mLayout.getContentHeight() - getMeasuredHeight()
+				&& mLayout.verticalScrollEnabled()) {
 			mBottomEdge.onAbsorb((int) scroller.getCurrVelocity());
 		}
 
@@ -994,11 +994,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	protected void moveViewportBy(float movementX, float movementY,
 			boolean fling) {
 
-		if (layout.horizontalScrollEnabled()) {
+		if (mLayout.horizontalScrollEnabled()) {
 			viewPortX = (int) (viewPortX - movementX);
 		}
 
-		if (layout.verticalScrollEnabled()) {
+		if (mLayout.verticalScrollEnabled()) {
 			viewPortY = (int) (viewPortY - movementY);
 		}
 		moveViewport(fling);
@@ -1018,11 +1018,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 */
 	protected void moveViewport(boolean isInFlingMode) {
 
-		mScrollableWidth = layout.getContentWidth() - getWidth();
+		mScrollableWidth = mLayout.getContentWidth() - getWidth();
 		if (mScrollableWidth < 0) {
 			mScrollableWidth = 0;
 		}
-		mScrollableHeight = layout.getContentHeight() - getHeight();
+		mScrollableHeight = mLayout.getContentHeight() - getHeight();
 		if (mScrollableHeight < 0) {
 			mScrollableHeight = 0;
 		}
@@ -1059,7 +1059,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		HashMap<Object, FreeFlowItem> oldFrames = new HashMap<Object, FreeFlowItem>();
 		copyFrames(frames, oldFrames);
 		frames = new HashMap<Object, FreeFlowItem>();
-		copyFrames(layout.getItemProxies(viewPortX, viewPortY), frames);
+		copyFrames(mLayout.getItemProxies(viewPortX, viewPortY), frames);
 
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
 
@@ -1153,7 +1153,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	public SectionedAdapter getAdapter() {
-		return itemAdapter;
+		return mAdapter;
 	}
 
 	public void setLayoutAnimator(FreeFlowLayoutAnimator anim) {
@@ -1306,7 +1306,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 
 		boolean handled = false;
-		final long longPressId = itemAdapter.getItemId(
+		final long longPressId = mAdapter.getItemId(
 				beginTouchAt.itemSection, beginTouchAt.itemSection);
 		if (mOnItemLongClickListener != null) {
 			handled = mOnItemLongClickListener.onItemLongClick(this,
@@ -1439,7 +1439,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 			setCheckedValue(sectionIndex, positionInSection, value);
 			if (mChoiceActionMode != null) {
-				final long id = itemAdapter.getItemId(sectionIndex,
+				final long id = mAdapter.getItemId(sectionIndex,
 						positionInSection);
 				mMultiChoiceModeCallback.onItemCheckedStateChanged(
 						mChoiceActionMode, sectionIndex, positionInSection, id,
@@ -1505,7 +1505,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			View view = beginTouchAt.view;
 			if (view != null) {
 				performItemClick(view, beginTouchAt.itemSection,
-						beginTouchAt.itemIndex, itemAdapter.getItemId(
+						beginTouchAt.itemIndex, mAdapter.getItemId(
 								beginTouchAt.itemSection,
 								beginTouchAt.itemIndex));
 			}
@@ -1582,9 +1582,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	public void scrollToItem(int sectionIndex, int itemIndex, boolean animate) {
 		Section section;
 
-		if (sectionIndex > itemAdapter.getNumberOfSections()
+		if (sectionIndex > mAdapter.getNumberOfSections()
 				|| sectionIndex < 0
-				|| (section = itemAdapter.getSection(sectionIndex)) == null) {
+				|| (section = mAdapter.getSection(sectionIndex)) == null) {
 			return;
 		}
 
@@ -1592,18 +1592,18 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			return;
 		}
 
-		FreeFlowItem freeflowItem = layout.getFreeFlowItemForItem(section
+		FreeFlowItem freeflowItem = mLayout.getFreeFlowItemForItem(section
 				.getDataAtIndex(itemIndex));
 		freeflowItem = FreeFlowItem.clone(freeflowItem);
 
 		int newVPX = freeflowItem.frame.left;
 		int newVPY = freeflowItem.frame.top;
 
-		if (newVPX > layout.getContentWidth() - getMeasuredWidth())
-			newVPX = layout.getContentWidth() - getMeasuredWidth();
+		if (newVPX > mLayout.getContentWidth() - getMeasuredWidth())
+			newVPX = mLayout.getContentWidth() - getMeasuredWidth();
 
-		if (newVPY > layout.getContentHeight() - getMeasuredHeight())
-			newVPY = layout.getContentHeight() - getMeasuredHeight();
+		if (newVPY > mLayout.getContentHeight() - getMeasuredHeight())
+			newVPY = mLayout.getContentHeight() - getMeasuredHeight();
 
 		if (animate) {
 			scroller.startScroll(viewPortX, viewPortY, (newVPX - viewPortX),
@@ -1621,9 +1621,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @return
 	 */
 	public float getScrollPercentX() {
-		if (layout == null || itemAdapter == null)
+		if (mLayout == null || mAdapter == null)
 			return 0;
-		float w = layout.getContentWidth();
+		float w = mLayout.getContentWidth();
 		float scrollableWidth = w - getWidth();
 		if (scrollableWidth == 0)
 			return 0;
@@ -1636,9 +1636,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @return
 	 */
 	public float getScrollPercentY() {
-		if (layout == null || itemAdapter == null)
+		if (mLayout == null || mAdapter == null)
 			return 0;
-		float ht = layout.getContentHeight();
+		float ht = mLayout.getContentHeight();
 		float scrollableHeight = ht - getHeight();
 		if (scrollableHeight == 0)
 			return 0;
