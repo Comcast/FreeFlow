@@ -1137,7 +1137,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 
 		if (needsInvalidate)
-            ViewCompat.postInvalidateOnAnimation(this);
+			ViewCompat.postInvalidateOnAnimation(this);
 
 	}
 
