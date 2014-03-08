@@ -32,7 +32,7 @@ The Artbook example in this repository is a good example of whats possible with 
 
 Join the [Google+ community][12] for questions or keeping up with upcoming features, releases, etc
 
-If you have changes you'd like to commit to the repo, you will need to sign the [Comcast Contributor License Agreement](Comcast Contributor License Agreement (03-07-14.pdf)) available at the root of this repository.
+If you have changes you'd like to commit to the repo, you will need to sign the [Comcast Contributor License Agreement](Comcast Contributor License Agreement (03-07-14).pdf) available at the root of this repository.
 
 
 
