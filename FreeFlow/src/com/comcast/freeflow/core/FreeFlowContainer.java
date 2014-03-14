@@ -1084,8 +1084,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	@Override
-	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
+	public void draw(Canvas canvas) {
+		super.draw(canvas);
 
 		boolean needsInvalidate = false;
 
