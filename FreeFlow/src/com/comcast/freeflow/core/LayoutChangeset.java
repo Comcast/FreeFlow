@@ -21,6 +21,8 @@ import java.util.List;
 import android.graphics.Rect;
 import android.util.Pair;
 
+import com.comcast.freeflow.animations.FreeFlowLayoutAnimator;
+
 public class LayoutChangeset {
 	protected List<Pair<FreeFlowItem, Rect>> moved;
 	protected List<FreeFlowItem> removed;
@@ -44,27 +46,57 @@ public class LayoutChangeset {
 		added.add(proxy);
 	}
 
+	/**
+	 * Returns the list of FreeFlowItems that will be added because they are
+	 * present in the new Layout that the FreeFlowContainer is transitioning to.
+	 * The views representing these items are already placed on the stage before
+	 * the LayoutAnimator is called.
+	 * 
+	 */
 	public List<FreeFlowItem> getAdded() {
 		return added;
 	}
-	
+
+	/**
+	 * Returns the list of FreeFlowItems that are not present in the current
+	 * viewport of the layout that the FreeFlowContainer is transitioning to,
+	 * and needs to be removed.
+	 * 
+	 * The views represnting the FreeFlowItems in this list are still on the
+	 * stage when the LayoutAnimator is given control if you want to animate the
+	 * removal. You don't have to call removeView on these items, the
+	 * FreeFlowContainer will do that when the animator relinquishes control by
+	 * calling the
+	 * {@link com.comcast.freeflow.core.FreeFlowContainer#onLayoutChangeAnimationsCompleted(FreeFlowLayoutAnimator anim)}
+	 * 
+	 * @return
+	 */
 	public List<FreeFlowItem> getRemoved() {
 		return removed;
 	}
 
+	/**
+	 * Returns all the items that will move when the layouts change (not added
+	 * or removed). The returned item is a Pair: the first item representing the
+	 * FreeFlowItem that represents the view being moved and the second the Rect
+	 * it is moving from.
+	 * 
+	 * To get a reference to the view thats moving, you can call item.view on
+	 * the FreeFlowItem. To get a reference to the Rect its moving to, call
+	 * item.frame.
+	 */
 	public List<Pair<FreeFlowItem, Rect>> getMoved() {
 		return moved;
 	}
 
 	@Override
 	public String toString() {
-		return 	"Added: " + added.size() + "," +
-				"Removed: " + removed.size()+ ","+
-				"Moved: " + moved.size();
+		return "Added: " + added.size() + "," + "Removed: " + removed.size()
+				+ "," + "Moved: " + moved.size();
 	}
 
 	public boolean isEmpty() {
-		return (added.size() == 0 && removed.size() == 0 && moved.size() == 0);	
+		return (added.size() == 0 && removed.size() == 0 && moved.size() == 0);
 	}
 
 }
