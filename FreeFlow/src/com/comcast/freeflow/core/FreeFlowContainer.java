@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.support.v4.util.SimpleArrayMap;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -1135,9 +1136,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			canvas.restoreToCount(restoreCount);
 		}
 
-		if (needsInvalidate)
-			postInvalidateOnAnimation();
-
+		if (needsInvalidate){
+			ViewCompat.postInvalidateOnAnimation(this);
+		}
 	}
 
 	protected void returnItemToPoolIfNeeded(FreeFlowItem freeflowItem) {
