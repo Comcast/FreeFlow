@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.freeflow.BuildConfig;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -1702,7 +1704,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * A flag for conditionally printing Container lifecycle events to LogCat
 	 * for debugging
 	 */
-	public boolean logDebugEvents = true;
+	public boolean logDebugEvents = false;
 
 	/**
 	 * A utility method for debugging lifecycle events and putting them in the
@@ -1711,7 +1713,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @param msg
 	 */
 	private void logLifecycleEvent(String msg) {
-		if (logDebugEvents) {
+		if (logDebugEvents && BuildConfig.DEBUG) {
 			Log.d("ContainerLifecycleEvent", msg);
 		}
 	}

@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.freeflow.BuildConfig;
+
 import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.LayoutChangeset;
@@ -108,9 +110,6 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	public void animateChanges(LayoutChangeset changeSet, final FreeFlowContainer callback) {
 		this.changeSet = changeSet;
 		this.callback = callback;
-
-		Log.d(TAG, "Changes: " + changeSet.toString());
-
 		cancel();
 
 		mIsRunning = true;
@@ -259,9 +258,6 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 			proxy.frame.right -= callback.getViewportLeft();
 			proxy.frame.bottom -= callback.getViewportTop();
 
-			// Log.d(TAG, "vpx = " + callback.viewPortX + ", vpy = " +
-			// callback.viewPortY);
-
 			moves.add(transitionToFrame(item.second, proxy, v));
 
 		}
@@ -274,9 +270,6 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	public ValueAnimator transitionToFrame(final Rect of, final FreeFlowItem nf, final View v) {
 		ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
 		anim.setDuration(cellPositionTransitionAnimationDuration);
-//
-//		Log.d(TAG, "of width = " + of.width() + ", nf width = " + nf.frame.width());
-//		Log.d(TAG, "of height = " + of.height() + ", nf height = " + nf.frame.height());
 
 		anim.addUpdateListener(new AnimatorUpdateListener() {
 
@@ -312,7 +305,9 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 					// v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
 					// + alpha);
 				} catch (NullPointerException e) {
-					Log.e(TAG, "Nullpointer exception");
+					if(BuildConfig.DEBUG){
+						Log.e(TAG, "Nullpointer exception");
+					}
 					e.printStackTrace();
 					animation.cancel();
 				}

@@ -18,15 +18,11 @@ package com.comcast.freeflow.layouts;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.graphics.Rect;
+
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
-import com.comcast.freeflow.core.SectionedAdapter;
-import com.comcast.freeflow.layouts.FreeFlowLayout.FreeFlowLayoutParams;
-import com.comcast.freeflow.layouts.VGridLayout.LayoutParams;
 import com.comcast.freeflow.utils.ViewUtils;
-
-import android.graphics.Rect;
-import android.util.Log;
 
 public class HLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
