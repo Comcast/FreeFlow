@@ -375,11 +375,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @param newLayout
 	 */
 	public void setLayout(FreeFlowLayout newLayout) {
-
 		if (newLayout == mLayout || newLayout == null) {
 			return;
 		}
-
+		stopScrolling();
 		oldLayout = mLayout;
 		mLayout = newLayout;
 		shouldRecalculateScrollWhenComputingLayout = true;
@@ -396,6 +395,20 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		logLifecycleEvent("Setting layout");
 		requestLayout();
 
+	}
+	
+	private void stopScrolling(){
+		removeCallbacks(flingRunnable);
+		if (mPendingCheckForTap != null) {
+			removeCallbacks(mPendingCheckForTap);
+			mPendingCheckForTap = null;
+		}
+		
+		if(mPendingCheckForLongPress != null){
+			removeCallbacks(mPendingCheckForLongPress);
+			mPendingCheckForLongPress = null;
+		}
+		mTouchMode = TOUCH_MODE_REST;
 	}
 
 	/**
@@ -664,6 +677,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (adapter == mAdapter) {
 			return;
 		}
+		stopScrolling();
 		logLifecycleEvent("setting adapter");
 		markAdapterDirty = true;
 
