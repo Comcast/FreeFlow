@@ -189,8 +189,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	@Override
 	protected void init(Context context) {
-		// usedViews = new HashMap<Object, FreeFlowItem>();
-		// usedHeaderViews = new HashMap<Object, FreeFlowItem>();
 
 		setWillNotDraw(false);
 
@@ -396,19 +394,40 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		requestLayout();
 
 	}
-	
-	private void stopScrolling(){
+
+	/**
+	 * Stops the scrolling immediately
+	 */
+	public void stopScrolling() {
+		if (!scroller.isFinished()) {
+			scroller.forceFinished(true);
+		}
 		removeCallbacks(flingRunnable);
+		resetAllCallbacks();
+		mTouchMode = TOUCH_MODE_REST;
+	}
+
+	/**
+	 * Resets all Runnables that are checking on various statuses
+	 */
+	protected void resetAllCallbacks() {
 		if (mPendingCheckForTap != null) {
 			removeCallbacks(mPendingCheckForTap);
 			mPendingCheckForTap = null;
 		}
-		
-		if(mPendingCheckForLongPress != null){
+
+		if (mPendingCheckForLongPress != null) {
 			removeCallbacks(mPendingCheckForLongPress);
 			mPendingCheckForLongPress = null;
 		}
-		mTouchMode = TOUCH_MODE_REST;
+		if (mTouchModeReset != null) {
+			removeCallbacks(mTouchModeReset);
+			mTouchModeReset = null;
+		}
+		if (mPerformClick != null) {
+			removeCallbacks(mPerformClick);
+			mPerformClick = null;
+		}
 	}
 
 	/**
@@ -1150,7 +1169,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			canvas.restoreToCount(restoreCount);
 		}
 
-		if (needsInvalidate){
+		if (needsInvalidate) {
 			ViewCompat.postInvalidateOnAnimation(this);
 		}
 	}
@@ -1321,8 +1340,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 
 		boolean handled = false;
-		final long longPressId = mAdapter.getItemId(
-				beginTouchAt.itemSection, beginTouchAt.itemSection);
+		final long longPressId = mAdapter.getItemId(beginTouchAt.itemSection,
+				beginTouchAt.itemSection);
 		if (mOnItemLongClickListener != null) {
 			handled = mOnItemLongClickListener.onItemLongClick(this,
 					beginTouchAt.view, beginTouchAt.itemSection,
@@ -1597,8 +1616,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	public void scrollToItem(int sectionIndex, int itemIndex, boolean animate) {
 		Section section;
 
-		if (sectionIndex > mAdapter.getNumberOfSections()
-				|| sectionIndex < 0
+		if (sectionIndex > mAdapter.getNumberOfSections() || sectionIndex < 0
 				|| (section = mAdapter.getSection(sectionIndex)) == null) {
 			return;
 		}
