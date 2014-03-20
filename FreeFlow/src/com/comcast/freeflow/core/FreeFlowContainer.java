@@ -448,7 +448,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @see getViewportLeft
 	 * 
 	 */
-	private void computeViewPort(FreeFlowLayout newLayout) {
+	protected void computeViewPort(FreeFlowLayout newLayout) {
 		if (mLayout == null || frames == null || frames.size() == 0) {
 			viewPortX = 0;
 			viewPortY = 0;
