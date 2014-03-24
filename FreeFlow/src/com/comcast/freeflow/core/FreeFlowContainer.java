@@ -1109,7 +1109,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 
 		for (FreeFlowItem freeflowItem : changeSet.removed) {
-			freeflowItem.view.setAlpha(0.3f);
 			removeViewInLayout(freeflowItem.view);
 			returnItemToPoolIfNeeded(freeflowItem);
 		}
@@ -1184,7 +1183,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		v.setScaleX(1f);
 		v.setScaleY(1f);
 
-		v.setAlpha(1);
 		viewpool.returnViewToPool(v);
 	}
 
