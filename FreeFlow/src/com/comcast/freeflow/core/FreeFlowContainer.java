@@ -177,6 +177,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	private FreeFlowLayout oldLayout;
 
+    private TouchModeListener mTouchModeListener;
+
+    public void setTouchModeListener(TouchModeListener touchModeListener) {
+        mTouchModeListener = touchModeListener;
+    }
+
 	public FreeFlowContainer(Context context) {
 		super(context);
 	}
@@ -407,6 +413,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		removeCallbacks(flingRunnable);
 		resetAllCallbacks();
 		mTouchMode = TOUCH_MODE_REST;
+
+        if (mTouchModeListener != null) {
+            mTouchModeListener.touchModeChanged(mTouchMode);
+        }
 	}
 
 	/**
@@ -850,6 +860,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			}
 			mTouchMode = TOUCH_MODE_DOWN;
 
+            if (mTouchModeListener != null) {
+                mTouchModeListener.touchModeChanged(mTouchMode);
+            }
+
 			if (mPendingCheckForTap != null) {
 				removeCallbacks(mPendingCheckForTap);
 				mPendingCheckForLongPress = null;
@@ -873,6 +887,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 						&& distance > touchSlop) {
 					mTouchMode = TOUCH_MODE_SCROLL;
 
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
+
 					if (mPendingCheckForTap != null) {
 						removeCallbacks(mPendingCheckForTap);
 						mPendingCheckForTap = null;
@@ -893,6 +911,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		} else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 			mTouchMode = TOUCH_MODE_REST;
+
+            if (mTouchModeListener != null) {
+                mTouchModeListener.touchModeChanged(mTouchMode);
+            }
 
 			if (canScroll) {
 				mVelocityTracker.recycle();
@@ -919,10 +941,19 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 							maxY, overflingDistance, overflingDistance);
 
 					mTouchMode = TOUCH_MODE_FLING;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
+
 					post(flingRunnable);
 
 				} else {
 					mTouchMode = TOUCH_MODE_REST;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
 				}
 
 			} else if (mTouchMode == TOUCH_MODE_DOWN
@@ -938,6 +969,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 						public void run() {
 							mTouchModeReset = null;
 							mTouchMode = TOUCH_MODE_REST;
+
+                            if (mTouchModeListener != null) {
+                                mTouchModeListener.touchModeChanged(mTouchMode);
+                            }
+
 							if (beginTouchAt != null
 									&& beginTouchAt.view != null) {
 								beginTouchAt.view.setPressed(false);
@@ -961,8 +997,16 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 							ViewConfiguration.getPressedStateDuration());
 
 					mTouchMode = TOUCH_MODE_TAP;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
 				} else {
 					mTouchMode = TOUCH_MODE_REST;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
 				}
 
 			}
@@ -984,6 +1028,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		public void run() {
 			if (scroller.isFinished()) {
 				mTouchMode = TOUCH_MODE_REST;
+
+                if (mTouchModeListener != null) {
+                    mTouchModeListener.touchModeChanged(mTouchMode);
+                }
+
 				invokeOnItemScrollListeners();
 				return;
 			}
@@ -1277,6 +1326,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		public void run() {
 			if (mTouchMode == TOUCH_MODE_DOWN) {
 				mTouchMode = TOUCH_MODE_TAP;
+
+                if (mTouchModeListener != null) {
+                    mTouchModeListener.touchModeChanged(mTouchMode);
+                }
+
 				if (beginTouchAt != null && beginTouchAt.view != null) {
 					beginTouchAt.view.setPressed(true);
 					// setPressed(true);
@@ -1294,6 +1348,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 					postDelayed(mPendingCheckForLongPress, longPressTimeout);
 				} else {
 					mTouchMode = TOUCH_MODE_DONE_WAITING;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
 				}
 			}
 		}
@@ -1317,10 +1375,19 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				// }
 				if (handled) {
 					mTouchMode = TOUCH_MODE_REST;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
+
 					// setPressed(false);
 					child.setPressed(false);
 				} else {
 					mTouchMode = TOUCH_MODE_DONE_WAITING;
+
+                    if (mTouchModeListener != null) {
+                        mTouchModeListener.touchModeChanged(mTouchMode);
+                    }
 				}
 			}
 		}
@@ -1426,6 +1493,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			}
 		}
 	}
+
+    public interface TouchModeListener {
+        void touchModeChanged(int touchMode);
+    }
 
 	public interface MultiChoiceModeListener extends ActionMode.Callback {
 		/**
