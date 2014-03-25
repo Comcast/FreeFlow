@@ -198,8 +198,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
     @Override
     protected void init(Context context) {
 
-        setWillNotDraw(false);
-
         viewpool = new ViewPool();
         frames = new HashMap<Object, FreeFlowItem>();
 
@@ -212,10 +210,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
         touchSlop = configuration.getScaledTouchSlop();
 
         scroller = new OverScroller(context);
-        mLeftEdge = new EdgeEffect(context);
-        mRightEdge = new EdgeEffect(context);
-        mTopEdge = new EdgeEffect(context);
-        mBottomEdge = new EdgeEffect(context);
+        
+        setEdgeEffectsEnabled(true);
 
     }
 
@@ -984,20 +980,16 @@ public class FreeFlowContainer extends AbsLayoutContainer {
                                         FreeFlowContainer.this,
                                         selectedFreeFlowItem);
                             }
-
-                            // setPressed(false);
-                            // if (!mDataChanged) {
-                            mPerformClick = new PerformClick();
-                            mPerformClick.run();
-                            // }
                         }
                     };
                     selectedFreeFlowItem = beginTouchAt;
                     postDelayed(mTouchModeReset,
                             ViewConfiguration.getPressedStateDuration());
-
+                    
                     mTouchMode = TOUCH_MODE_TAP;
-
+                    mPerformClick = new PerformClick();
+                    mPerformClick.run();
+                    
                     if (mOnTouchModeChangedListener != null) {
                         mOnTouchModeChangedListener.onTouchModeChanged(mTouchMode);
                     }
@@ -1037,7 +1029,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
                 return;
             }
             boolean more = scroller.computeScrollOffset();
-            checkEdgeEffectDuringScroll();
+            if(mEdgeEffectsEnabled){
+            	checkEdgeEffectDuringScroll();
+            }
             if (mLayout.horizontalScrollEnabled()) {
                 viewPortX = scroller.getCurrX();
             }
@@ -1124,21 +1118,22 @@ public class FreeFlowContainer extends AbsLayoutContainer {
             } else if (viewPortY > mScrollableHeight + overflingDistance) {
                 viewPortY = (int) (mScrollableHeight + overflingDistance);
             }
+            
+            if(mEdgeEffectsEnabled){
+            	if (viewPortX <= 0) {
+                    mLeftEdge.onPull(viewPortX / (-overflingDistance));
+                } else if (viewPortX >= mScrollableWidth) {
+                    mRightEdge.onPull((viewPortX - mScrollableWidth)
+                            / (-overflingDistance));
+                }
 
-            if (viewPortX <= 0) {
-                mLeftEdge.onPull(viewPortX / (-overflingDistance));
-            } else if (viewPortX >= mScrollableWidth) {
-                mRightEdge.onPull((viewPortX - mScrollableWidth)
-                        / (-overflingDistance));
+                if (viewPortY <= 0) {
+                    mTopEdge.onPull(viewPortY / (-overflingDistance));
+                } else if (viewPortY >= mScrollableHeight) {
+                    mBottomEdge.onPull((viewPortY - mScrollableHeight)
+                            / (-overflingDistance));
+                }
             }
-
-            if (viewPortY <= 0) {
-                mTopEdge.onPull(viewPortY / (-overflingDistance));
-            } else if (viewPortY >= mScrollableHeight) {
-                mBottomEdge.onPull((viewPortY - mScrollableHeight)
-                        / (-overflingDistance));
-            }
-
         }
 
         HashMap<Object, FreeFlowItem> oldFrames = new HashMap<Object, FreeFlowItem>();
@@ -1164,6 +1159,28 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
         invalidate();
 
+    }
+    
+    
+    protected boolean mEdgeEffectsEnabled = true;
+    
+    /**
+     * Controls whether the edge glows are enabled or not 
+     */
+    public void setEdgeEffectsEnabled(boolean val){
+    	mEdgeEffectsEnabled = val;
+    	if(val){
+    		Context context = getContext();
+    		setWillNotDraw(false);
+            mLeftEdge = new EdgeEffect(context);
+            mRightEdge = new EdgeEffect(context);
+            mTopEdge = new EdgeEffect(context);
+            mBottomEdge = new EdgeEffect(context);
+    	}
+    	else{
+    		setWillNotDraw(true);
+    		mLeftEdge = mRightEdge = mTopEdge = mBottomEdge = null;
+    	}
     }
 
     @Override
