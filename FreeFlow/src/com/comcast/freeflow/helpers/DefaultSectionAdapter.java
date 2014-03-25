@@ -20,9 +20,17 @@ import java.util.ArrayList;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
 import com.comcast.freeflow.core.SectionedAdapter;
+import com.comcast.freeflow.utils.ViewUtils;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
+import android.graphics.drawable.shapes.Shape;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -32,11 +40,17 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 
 	private ArrayList<Section> sections = new ArrayList<Section>();
 	protected Context context;
+	protected boolean showHeaders;
 	public int headerHeight = 20;
 	public int itemHeight = 20;
 
 	public DefaultSectionAdapter(Context context, int headerCount, int itemCount) {
+		this(context, headerCount,itemCount, true);
+	}
+	
+	public DefaultSectionAdapter(Context context, int headerCount, int itemCount, boolean showHeaders) {
 		this.context = context;
+		this.showHeaders = showHeaders;
 		setData(headerCount, itemCount);
 	}
 
@@ -59,18 +73,21 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 	}
 
 	@Override
+	@SuppressWarnings(value = { "deprecation" })
 	public View getItemView(int section, int position, View convertView, ViewGroup parent) {
 		TextView tv = null;
 		if (convertView != null) {
 			tv = (TextView) convertView;
 		} else {
 			tv = new TextView(context);
+			RectShape rs = new RectShape();
+			ShapeDrawable sd = new  BottomBorderBackground(rs, Color.WHITE, Color.GRAY);
+			tv.setBackgroundDrawable(sd);
+			tv.setPadding(20, 0, 0, 0);
+			tv.setGravity(Gravity.CENTER_VERTICAL);
 		}
 		tv.setLayoutParams(new LayoutParams(300, itemHeight));
-		tv.setFocusable(false);
-		tv.setBackgroundColor(Color.LTGRAY);
 		tv.setText("s" + section + " p" + position);
-
 		return tv;
 	}
 
@@ -123,7 +140,27 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 
 	@Override
 	public boolean shouldDisplaySectionHeaders() {
-		return true;
+		return showHeaders;
+	}
+	
+	public class BottomBorderBackground extends ShapeDrawable {
+	    private final Paint fillpaint, strokepaint;
+	 
+	    public BottomBorderBackground(Shape s, int fill, int stroke) {
+	        super(s);
+	        fillpaint = new Paint(this.getPaint());
+	        fillpaint.setColor(fill);
+	        strokepaint = new Paint(fillpaint);
+	        strokepaint.setStyle(Paint.Style.STROKE);
+	        strokepaint.setStrokeWidth(2);
+	        strokepaint.setColor(stroke);
+	    }
+	 
+	    @Override
+	    protected void onDraw(Shape shape, Canvas canvas, Paint paint) {
+	        shape.draw(canvas, fillpaint);
+	        canvas.drawLine(0, shape.getHeight(), shape.getWidth(), shape.getHeight(), strokepaint);   
+	    }
 	}
 
 }
