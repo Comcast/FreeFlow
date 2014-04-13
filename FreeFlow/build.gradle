@@ -1,0 +1,24 @@
+buildscript {
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.9.+'
+  }
+}
+
+apply plugin: 'android-library'
+
+dependencies {
+  compile 'com.android.support:support-v4:19.0.+'
+}
+
+android{
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+        }
+    }
+}
+android {
+  compileSdkVersion 19
+  buildToolsVersion '19.0.3'
+}
