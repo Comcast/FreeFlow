@@ -1,3 +1,4 @@
 include ':FreeFlow'
-include ':examples:Artbook'
+
 include ':examples:PhotoGrid'
+include ':examples:Artbook'
