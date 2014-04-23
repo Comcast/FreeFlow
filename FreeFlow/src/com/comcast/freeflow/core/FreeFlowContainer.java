@@ -857,6 +857,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchDown(MotionEvent event) {
+
+		/*
+		 * Recompute this just to be safe. TODO: We should optimize this to be
+		 * only calculated when a data or layout change happens
+		 */
+		mScrollableHeight = mLayout.getContentHeight() - getHeight();
+		mScrollableWidth = mLayout.getContentWidth() - getWidth();
+
 		if (mTouchMode == TOUCH_MODE_FLING) {
 			// Wait for some time to see if the user is just trying
 			// to speed up the scroll
@@ -902,6 +910,47 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		float yDiff = event.getY() - deltaY;
 
 		double distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+		if (mLayout.verticalScrollEnabled()) {
+			if (yDiff > 0 && viewPortY == 0) {
+				if (mEdgeEffectsEnabled) {
+					float str = (float) distance / getHeight();
+					mTopEdge.onPull(str);
+					invalidate();
+				}
+				return;
+			}
+
+			if (yDiff < 0 && viewPortY == mScrollableHeight) {
+				if (mEdgeEffectsEnabled) {
+					float str = (float) distance / getHeight();
+					mBottomEdge.onPull(str);
+					invalidate();
+				}
+				return;
+			}
+		}
+
+		if (mLayout.horizontalScrollEnabled()) {
+			if (xDiff > 0 && viewPortX == 0) {
+				if (mEdgeEffectsEnabled) {
+					float str = (float) distance / getWidth();
+					mLeftEdge.onPull(str);
+					invalidate();
+				}
+				return;
+			}
+
+			if (xDiff < 0 && viewPortY == mScrollableWidth) {
+				if (mEdgeEffectsEnabled) {
+					float str = (float) distance / getWidth();
+					mRightEdge.onPull(str);
+					invalidate();
+				}
+				return;
+			}
+		}
+
 		if ((mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_REST)
 				&& distance > touchSlop) {
 			mTouchMode = TOUCH_MODE_SCROLL;
@@ -942,25 +991,21 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
-		if (mTouchMode == TOUCH_MODE_SCROLL || mTouchMode == TOUCH_MODE_OVERFLING) {
-			
-			
-			mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-			
+		if (mTouchMode == TOUCH_MODE_SCROLL
+				|| mTouchMode == TOUCH_MODE_OVERFLING) {
 
-			Log.d(TAG, "Velocity: "+Math.abs(mVelocityTracker.getYVelocity())+" / "+minFlingVelocity);
-			
+			mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+
 			if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity
 					|| Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
 				int maxX = mLayout.getContentWidth() - getWidth();
 				int maxY = mLayout.getContentHeight() - getHeight();
-				
+
 				int allowedScrollOffset;
-				if(mTouchMode == TOUCH_MODE_SCROLL){
+				if (mTouchMode == TOUCH_MODE_SCROLL) {
 					allowedScrollOffset = 0;
-				}
-				else{
+				} else {
 					allowedScrollOffset = overflingDistance;
 				}
 
@@ -1132,14 +1177,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (mScrollableHeight < 0) {
 			mScrollableHeight = 0;
 		}
-		
-		if(isInFlingMode){
-			if(viewPortX < 0 || viewPortX > mScrollableWidth || viewPortY < 0 || viewPortY > mScrollableHeight){
+
+		if (isInFlingMode) {
+			if (viewPortX < 0 || viewPortX > mScrollableWidth || viewPortY < 0
+					|| viewPortY > mScrollableHeight) {
 				mTouchMode = TOUCH_MODE_OVERFLING;
 			}
-		}
-		else {
-			
+		} else {
+
 			if (viewPortX < -overflingDistance) {
 				viewPortX = -overflingDistance;
 			} else if (viewPortX > mScrollableWidth + overflingDistance) {
