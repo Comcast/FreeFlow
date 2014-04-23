@@ -1324,7 +1324,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		v.setRotation(0);
 		v.setScaleX(1f);
 		v.setScaleY(1f);
-
+		v.setAlpha(1);
 		viewpool.returnViewToPool(v);
 	}
 
