@@ -942,18 +942,32 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
-		if (mTouchMode == TOUCH_MODE_SCROLL) {
+		if (mTouchMode == TOUCH_MODE_SCROLL || mTouchMode == TOUCH_MODE_OVERFLING) {
+			
+			
 			mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+			
+
+			Log.d(TAG, "Velocity: "+Math.abs(mVelocityTracker.getYVelocity())+" / "+minFlingVelocity);
+			
 			if (Math.abs(mVelocityTracker.getXVelocity()) > minFlingVelocity
 					|| Math.abs(mVelocityTracker.getYVelocity()) > minFlingVelocity) {
 
 				int maxX = mLayout.getContentWidth() - getWidth();
 				int maxY = mLayout.getContentHeight() - getHeight();
+				
+				int allowedScrollOffset;
+				if(mTouchMode == TOUCH_MODE_SCROLL){
+					allowedScrollOffset = 0;
+				}
+				else{
+					allowedScrollOffset = overflingDistance;
+				}
 
 				scroller.fling(viewPortX, viewPortY,
 						-(int) mVelocityTracker.getXVelocity(),
 						-(int) mVelocityTracker.getYVelocity(), 0, maxX, 0,
-						maxY, overflingDistance, overflingDistance);
+						maxY, allowedScrollOffset, allowedScrollOffset);
 
 				mTouchMode = TOUCH_MODE_FLING;
 
@@ -1118,8 +1132,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (mScrollableHeight < 0) {
 			mScrollableHeight = 0;
 		}
-
-		if (!isInFlingMode && overflingDistance > 0) {
+		
+		if(isInFlingMode){
+			if(viewPortX < 0 || viewPortX > mScrollableWidth || viewPortY < 0 || viewPortY > mScrollableHeight){
+				mTouchMode = TOUCH_MODE_OVERFLING;
+			}
+		}
+		else {
+			
 			if (viewPortX < -overflingDistance) {
 				viewPortX = -overflingDistance;
 			} else if (viewPortX > mScrollableWidth + overflingDistance) {
