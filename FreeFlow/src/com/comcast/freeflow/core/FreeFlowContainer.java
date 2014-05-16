@@ -218,11 +218,19 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		logLifecycleEvent(this.getClass().getName() + " onMeasure ");
+		logLifecycleEvent(" onMeasure ");
 
+		int beforeWidth = getWidth();
+		int beforeHeight = getHeight();
+		
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
+		
+		// TODO: prepareLayout should at some point take sizeChanged as a param to not
+		// avoidable calculations
+		boolean sizeChanged = (beforeHeight == afterHeight) && (beforeWidth == afterWidth);
+		
 		if (this.mLayout != null) {
 			mLayout.setDimensions(afterWidth, afterHeight);
 		}
@@ -233,9 +241,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		}
 
-		if (markAdapterDirty || markLayoutDirty) {
+		//if (markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
-		}
+		//}
 
 	}
 
