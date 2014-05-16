@@ -22,10 +22,6 @@ import java.util.List;
 
 import org.freeflow.BuildConfig;
 
-import com.comcast.freeflow.core.FreeFlowContainer;
-import com.comcast.freeflow.core.FreeFlowItem;
-import com.comcast.freeflow.core.LayoutChangeset;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
@@ -38,6 +34,10 @@ import android.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
+
+import com.comcast.freeflow.core.FreeFlowContainer;
+import com.comcast.freeflow.core.FreeFlowItem;
+import com.comcast.freeflow.core.LayoutChangeset;
 
 public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	
@@ -100,7 +100,17 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 		if (movingSet != null)
 			movingSet.cancel();
 		
+		for (FreeFlowItem item : changeSet.getAdded()) {
+			item.view.setAlpha(1f);
+		} 
+		for (FreeFlowItem item : changeSet.getRemoved()) {
+			item.view.setAlpha(1f);
+		} 
+		
 		mIsRunning = false;
+		
+		
+		
 
 	}
 	
