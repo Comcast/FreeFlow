@@ -148,9 +148,10 @@ public class VLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 
 	@Override
 	public int getContentHeight() {
-		if (itemsAdapter == null)
+		if (itemsAdapter == null || itemsAdapter.getNumberOfSections() <= 0){
 			return 0;
-
+		}
+			
 		int sectionIndex = itemsAdapter.getNumberOfSections() - 1;
 		Section s = itemsAdapter.getSection(sectionIndex);
 
