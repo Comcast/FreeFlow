@@ -14,7 +14,7 @@ FreeFlow is inspired by UI frameworks like [UICollectionViews on iOS][1] and the
 
 # Building Blocks
 
-At the basic level, FreeFlow consists of 3 parts:
+At the basic level, FreeFlow consists of 4 parts:
 
 * [FreeFlowContainer][3]: The core class that extends ViewGroup and places all Views inside it
 * [FreeFlowLayout][4]: The class thats responsible for defining the [Rect](5)'s that the Container will use to position the Views.
