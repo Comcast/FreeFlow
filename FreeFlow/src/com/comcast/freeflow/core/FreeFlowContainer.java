@@ -241,9 +241,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		}
 
-		//if (markAdapterDirty || markLayoutDirty) {
+		if (markAdapterDirty || markLayoutDirty) {
 			computeLayout(afterWidth, afterHeight);
-		//}
+		}
 
 	}
 
@@ -516,6 +516,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		if (viewPortY > mScrollableHeight)
 			viewPortY = mScrollableHeight;
+		
+		
+		Log.d("debug", "--> viewportY "+viewPortY);
 
 	}
 
