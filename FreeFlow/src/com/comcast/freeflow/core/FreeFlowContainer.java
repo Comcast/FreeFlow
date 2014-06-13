@@ -833,24 +833,16 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				&& mLayout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
-
-		if (!canScroll) {
-			return false;
-		}
-
-		if (mVelocityTracker == null && canScroll) {
-			mVelocityTracker = VelocityTracker.obtain();
-		}
-		if (mVelocityTracker != null) {
-			mVelocityTracker.addMovement(event);
-		}
-
+		
+		
 		switch (event.getAction()) {
 		case (MotionEvent.ACTION_DOWN):
 			touchDown(event);
 			break;
 		case (MotionEvent.ACTION_MOVE):
-			touchMove(event);
+			if(canScroll){
+				touchMove(event);
+			}
 			break;
 		case (MotionEvent.ACTION_UP):
 			touchUp(event);
@@ -860,12 +852,24 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			break;
 		}
 
+		if (!canScroll) {
+			return true;
+		}
+
+		if (mVelocityTracker == null && canScroll) {
+			mVelocityTracker = VelocityTracker.obtain();
+		}
+		if (mVelocityTracker != null) {
+			mVelocityTracker.addMovement(event);
+		}
+
+		
+
 		return true;
 
 	}
 
 	protected void touchDown(MotionEvent event) {
-
 		/*
 		 * Recompute this just to be safe. TODO: We should optimize this to be
 		 * only calculated when a data or layout change happens
@@ -914,6 +918,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchMove(MotionEvent event) {
+		
 		float xDiff = event.getX() - deltaX;
 		float yDiff = event.getY() - deltaY;
 
@@ -999,8 +1004,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
-		if (mTouchMode == TOUCH_MODE_SCROLL
-				|| mTouchMode == TOUCH_MODE_OVERFLING) {
+		if ( (mTouchMode == TOUCH_MODE_SCROLL
+				|| mTouchMode == TOUCH_MODE_OVERFLING) && mVelocityTracker != null ) {
 
 			mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
