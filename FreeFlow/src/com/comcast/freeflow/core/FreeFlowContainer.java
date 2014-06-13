@@ -516,9 +516,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		if (viewPortY > mScrollableHeight)
 			viewPortY = mScrollableHeight;
-		
-		
-		Log.d("debug", "--> viewportY "+viewPortY);
 
 	}
 
