@@ -24,7 +24,7 @@ import com.comcast.freeflow.layouts.FreeFlowLayout;
  */
 public interface FreeFlowEventListener {
 
-	public void animationsStarted();
+	public void layoutChangeAnimationsStarted();
 
 	public void layoutChangeAnimationsComplete();
 
