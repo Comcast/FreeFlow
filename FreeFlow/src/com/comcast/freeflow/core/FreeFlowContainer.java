@@ -592,7 +592,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 		isAnimatingChanges = true;
 
-		dispatchAnimationsStarted();
+		dispatchAnimationsStarting();
 
 		layoutAnimator.animateChanges(changeSet, this);
 

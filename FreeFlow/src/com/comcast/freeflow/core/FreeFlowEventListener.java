@@ -24,7 +24,10 @@ import com.comcast.freeflow.layouts.FreeFlowLayout;
  */
 public interface FreeFlowEventListener {
 
-	public void layoutChangeAnimationsStarted();
+	/**
+	 * Event dispatched when layout change animations are about to begin.
+	 */
+	public void layoutChangeAnimationsStarting();
 
 	public void layoutChangeAnimationsComplete();
 
