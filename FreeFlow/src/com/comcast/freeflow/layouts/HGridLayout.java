@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.comcast.freeflow.layouts;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.comcast.freeflow.core.FreeFlowItem;
@@ -32,7 +32,7 @@ public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	private static final String TAG = "HGridLayout";
 	private int itemHeight = -1;
 	private int itemWidth = -1;
-	private Map<Object, FreeFlowItem> proxies = new HashMap<Object, FreeFlowItem>();
+	private Map<Object, FreeFlowItem> proxies = new LinkedHashMap<Object, FreeFlowItem>();
 	private int headerWidth = -1;
 	private int headerHeight = -1;
 	private int cellBufferSize = 0;
@@ -110,8 +110,8 @@ public class HGridLayout extends FreeFlowLayoutBase implements FreeFlowLayout {
 	 * 
 	 */
 	@Override
-	public HashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
-		HashMap<Object, FreeFlowItem> desc = new HashMap<Object, FreeFlowItem>();
+	public LinkedHashMap<Object, FreeFlowItem> getItemProxies(int viewPortLeft, int viewPortTop) {
+		LinkedHashMap<Object, FreeFlowItem> desc = new LinkedHashMap<Object, FreeFlowItem>();
 
 		for (FreeFlowItem fd : proxies.values()) {
 
