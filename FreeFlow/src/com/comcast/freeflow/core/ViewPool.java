@@ -16,19 +16,19 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import android.view.View;
 
 public class ViewPool {
 
-	private HashMap<Class, ArrayList<View>> viewPool;
+	private LinkedHashMap<Class, ArrayList<View>> viewPool;
 
 	public ViewPool() {
 	}
 
 	public void initializeViewPool(Class[] viewTypes) {
-		viewPool = new HashMap<Class, ArrayList<View>>();
+		viewPool = new LinkedHashMap<Class, ArrayList<View>>();
 		for (int i = 0; i < viewTypes.length; i++) {
 			viewPool.put(viewTypes[i], new ArrayList<View>());
 		}

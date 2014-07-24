@@ -16,7 +16,7 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -200,7 +200,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	protected void init(Context context) {
 
 		viewpool = new ViewPool();
-		frames = new HashMap<Object, FreeFlowItem>();
+		frames = new LinkedHashMap<Object, FreeFlowItem>();
 
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
@@ -278,7 +278,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 		Map<Object, FreeFlowItem> oldFrames = frames;
 
-		frames = new HashMap<Object, FreeFlowItem>();
+		frames = new LinkedHashMap<Object, FreeFlowItem>();
 		copyFrames(mLayout.getItemProxies(viewPortX, viewPortY), frames);
 		// Create a copy of the incoming values because the source
 		// layout may change the map inside its own class
@@ -290,7 +290,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	/**
-	 * Copies the frames from one HashMap into another. The items are cloned
+	 * Copies the frames from one LinkedHashMap into another. The items are cloned
 	 * cause we modify the rectangles of the items as they are moving
 	 */
 	protected void copyFrames(Map<Object, FreeFlowItem> srcFrames,
@@ -1227,9 +1227,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			}
 		}
 
-		HashMap<Object, FreeFlowItem> oldFrames = new HashMap<Object, FreeFlowItem>();
+		LinkedHashMap<Object, FreeFlowItem> oldFrames = new LinkedHashMap<Object, FreeFlowItem>();
 		copyFrames(frames, oldFrames);
-		frames = new HashMap<Object, FreeFlowItem>();
+		frames = new LinkedHashMap<Object, FreeFlowItem>();
 		copyFrames(mLayout.getItemProxies(viewPortX, viewPortY), frames);
 
 		LayoutChangeset changeSet = getViewChanges(oldFrames, frames, true);
