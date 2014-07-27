@@ -18,6 +18,8 @@ package com.comcast.freeflow.examples.freeflowphotogrid;
 import java.util.ArrayList;
 
 import com.comcast.freeflow.animations.DefaultLayoutAnimator;
+import com.comcast.freeflow.core.AbsLayoutContainer;
+import com.comcast.freeflow.core.AbsLayoutContainer.OnItemClickListener;
 import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.FreeFlowItem;
 import com.comcast.freeflow.core.Section;
@@ -134,7 +136,16 @@ public class MainActivity extends Activity {
 
 			}
 		});
-
+		
+		
+		container.setOnItemClickListener( new OnItemClickListener() {
+			
+			@Override
+			public void onItemClick(AbsLayoutContainer parent, FreeFlowItem proxy) {
+				Log.d("Test", "container item: "+proxy.itemSection +" /  "+proxy.itemIndex );
+			}
+		});
+		
 		changeButton.bringToFront();
 		jumpButton.bringToFront();
 		jumpButtonAnim.bringToFront();

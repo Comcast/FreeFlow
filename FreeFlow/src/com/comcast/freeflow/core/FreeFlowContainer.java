@@ -895,7 +895,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		beginTouchAt = ViewUtils.getItemAt(frames,
 				(int) (viewPortX + event.getX()),
 				(int) (viewPortY + event.getY()));
-
+		
 		deltaX = event.getX();
 		deltaY = event.getY();
 
@@ -1048,7 +1048,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			if (mTouchModeReset != null) {
 				removeCallbacks(mTouchModeReset);
 			}
-			if (beginTouchAt != null && beginTouchAt.view != null) {
+			
+			FreeFlowItem endTouchAt = ViewUtils.getItemAt(frames,
+					(int) (viewPortX + event.getX()),
+					(int) (viewPortY + event.getY()));
+			
+			if (beginTouchAt != null && beginTouchAt.view != null && beginTouchAt == endTouchAt) {
+				
+				
 				beginTouchAt.view.setPressed(true);
 
 				mTouchModeReset = new Runnable() {
