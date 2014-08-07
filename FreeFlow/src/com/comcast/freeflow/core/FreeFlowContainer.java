@@ -39,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
@@ -222,15 +223,17 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		int beforeWidth = getWidth();
 		int beforeHeight = getHeight();
-		
+
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
-		
-		// TODO: prepareLayout should at some point take sizeChanged as a param to not
+
+		// TODO: prepareLayout should at some point take sizeChanged as a param
+		// to not
 		// avoidable calculations
-		boolean sizeChanged = (beforeHeight == afterHeight) && (beforeWidth == afterWidth);
-		
+		boolean sizeChanged = (beforeHeight == afterHeight)
+				&& (beforeWidth == afterWidth);
+
 		if (this.mLayout != null) {
 			mLayout.setDimensions(afterWidth, afterHeight);
 		}
@@ -245,6 +248,26 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			computeLayout(afterWidth, afterHeight);
 		}
 
+		if (dataSetChanged) {
+			dataSetChanged = false;
+			for (FreeFlowItem item : frames.values()) {
+				if (item.itemIndex >= 0 && item.itemSection >= 0) {
+					mAdapter.getItemView(item.itemSection, item.itemIndex,
+							item.view, this);
+				}
+			}
+		}
+
+	}
+
+	protected boolean dataSetChanged = false;
+	/**
+	 * Notifies the attached observers that the underlying data has been changed
+	 * and any View reflecting the data set should refresh itself.
+	 */
+	public void notifyDataSetChanged() {
+		dataSetChanged = true;
+		requestLayout();
 	}
 
 	public void dataInvalidated() {
@@ -290,8 +313,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	/**
-	 * Copies the frames from one LinkedHashMap into another. The items are cloned
-	 * cause we modify the rectangles of the items as they are moving
+	 * Copies the frames from one LinkedHashMap into another. The items are
+	 * cloned cause we modify the rectangles of the items as they are moving
 	 */
 	protected void copyFrames(Map<Object, FreeFlowItem> srcFrames,
 			Map<Object, FreeFlowItem> destFrames) {
@@ -833,14 +856,13 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				&& mLayout.getContentHeight() > getHeight()) {
 			canScroll = true;
 		}
-		
-		
+
 		switch (event.getAction()) {
 		case (MotionEvent.ACTION_DOWN):
 			touchDown(event);
 			break;
 		case (MotionEvent.ACTION_MOVE):
-			if(canScroll){
+			if (canScroll) {
 				touchMove(event);
 			}
 			break;
@@ -862,8 +884,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		if (mVelocityTracker != null) {
 			mVelocityTracker.addMovement(event);
 		}
-
-		
 
 		return true;
 
@@ -895,7 +915,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		beginTouchAt = ViewUtils.getItemAt(frames,
 				(int) (viewPortX + event.getX()),
 				(int) (viewPortY + event.getY()));
-		
+
 		deltaX = event.getX();
 		deltaY = event.getY();
 
@@ -918,7 +938,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchMove(MotionEvent event) {
-		
+
 		float xDiff = event.getX() - deltaX;
 		float yDiff = event.getY() - deltaY;
 
@@ -1004,8 +1024,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
-		if ( (mTouchMode == TOUCH_MODE_SCROLL
-				|| mTouchMode == TOUCH_MODE_OVERFLING) && mVelocityTracker != null ) {
+		if ((mTouchMode == TOUCH_MODE_SCROLL || mTouchMode == TOUCH_MODE_OVERFLING)
+				&& mVelocityTracker != null) {
 
 			mVelocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
 
@@ -1048,14 +1068,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			if (mTouchModeReset != null) {
 				removeCallbacks(mTouchModeReset);
 			}
-			
+
 			FreeFlowItem endTouchAt = ViewUtils.getItemAt(frames,
 					(int) (viewPortX + event.getX()),
 					(int) (viewPortY + event.getY()));
-			
-			if (beginTouchAt != null && beginTouchAt.view != null && beginTouchAt == endTouchAt) {
-				
-				
+
+			if (beginTouchAt != null && beginTouchAt.view != null
+					&& beginTouchAt == endTouchAt) {
+
 				beginTouchAt.view.setPressed(true);
 
 				mTouchModeReset = new Runnable() {
