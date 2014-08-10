@@ -907,7 +907,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchDown(MotionEvent event) {
-		Log.d("touch", "touch down");
 		/*
 		 * Recompute this just to be safe. TODO: We should optimize this to be
 		 * only calculated when a data or layout change happens
@@ -956,7 +955,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchMove(MotionEvent event) {
-		Log.d("touch", "touch move");
 		float xDiff = event.getX() - deltaX;
 		float yDiff = event.getY() - deltaY;
 
@@ -1042,7 +1040,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
-		Log.d("touch", "touch up");
 		if ((mTouchMode == TOUCH_MODE_SCROLL || mTouchMode == TOUCH_MODE_OVERFLING)
 				&& mVelocityTracker != null) {
 
