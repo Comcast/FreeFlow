@@ -261,6 +261,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected boolean dataSetChanged = false;
+
 	/**
 	 * Notifies the attached observers that the underlying data has been changed
 	 * and any View reflecting the data set should refresh itself.
@@ -270,12 +271,28 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		requestLayout();
 	}
 
+	/**
+	 * @deprecated Use dataInvalidated(boolean shouldRecalculateScrollPositions)
+	 *             instead
+	 */
 	public void dataInvalidated() {
+		dataInvalidated(false);
+	}
+
+	/**
+	 * Called to inform the Container that the underlying data on the adapter
+	 * has changed (more items added/removed). Note that this won't update the
+	 * views if the adapter's data objects are the same but the values in those
+	 * objects have changed. To update those call {@code notifyDataSetChanged}
+	 * 
+	 * @param shouldRecalculateScrollPositions
+	 */
+	public void dataInvalidated(boolean shouldRecalculateScrollPositions) {
 		logLifecycleEvent("Data Invalidated");
 		if (mLayout == null || mAdapter == null) {
 			return;
 		}
-		shouldRecalculateScrollWhenComputingLayout = false;
+		shouldRecalculateScrollWhenComputingLayout = shouldRecalculateScrollPositions;
 		markAdapterDirty = true;
 		requestLayout();
 	}
@@ -890,6 +907,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchDown(MotionEvent event) {
+		Log.d("touch", "touch down");
 		/*
 		 * Recompute this just to be safe. TODO: We should optimize this to be
 		 * only calculated when a data or layout change happens
@@ -938,7 +956,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchMove(MotionEvent event) {
-
+		Log.d("touch", "touch move");
 		float xDiff = event.getX() - deltaX;
 		float yDiff = event.getY() - deltaY;
 
@@ -1024,6 +1042,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchUp(MotionEvent event) {
+		Log.d("touch", "touch up");
 		if ((mTouchMode == TOUCH_MODE_SCROLL || mTouchMode == TOUCH_MODE_OVERFLING)
 				&& mVelocityTracker != null) {
 
