@@ -39,7 +39,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
@@ -94,7 +93,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	private int maxFlingVelocity;
 	private int minFlingVelocity;
 	private int overflingDistance;
-	private int overscrollDistance;
+	/*private int overscrollDistance;*/
 	private int touchSlop;
 
 	private Runnable mTouchModeReset;
@@ -207,7 +206,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
 		minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
 		overflingDistance = configuration.getScaledOverflingDistance();
-		overscrollDistance = configuration.getScaledOverscrollDistance();
+		/*overscrollDistance = configuration.getScaledOverscrollDistance();*/
 
 		touchSlop = configuration.getScaledTouchSlop();
 
@@ -907,6 +906,11 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	}
 
 	protected void touchDown(MotionEvent event) {
+		if(isAnimatingChanges){
+			layoutAnimator.onContainerTouchDown(event);
+		}
+		
+		
 		/*
 		 * Recompute this just to be safe. TODO: We should optimize this to be
 		 * only calculated when a data or layout change happens

@@ -2,6 +2,7 @@ package com.comcast.freeflow.animations;
 
 import android.graphics.Rect;
 import android.util.Pair;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 
@@ -42,6 +43,11 @@ public class NoAnimationLayoutAnimator implements FreeFlowLayoutAnimator {
 	@Override
 	public boolean isRunning() {
 		return false;
+	}
+
+	@Override
+	public void onContainerTouchDown(MotionEvent event) {
+		cancel();
 	}
 
 }
