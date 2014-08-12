@@ -31,6 +31,7 @@ import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.Pair;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.animation.DecelerateInterpolator;
@@ -341,6 +342,11 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 	@Override
 	public boolean isRunning() {
 		return mIsRunning;
+	}
+
+	@Override
+	public void onContainerTouchDown(MotionEvent event) {
+		cancel();
 	}
 
 }

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.comcast.freeflow.animations;
 
+import android.view.MotionEvent;
+
 import com.comcast.freeflow.core.FreeFlowContainer;
 import com.comcast.freeflow.core.LayoutChangeset;
 
@@ -48,11 +50,21 @@ public interface FreeFlowLayoutAnimator {
 	 *            The Container instance to be informed when your animations are
 	 *            complete
 	 */
-	public void animateChanges(LayoutChangeset changes, FreeFlowContainer callback);
+	public void animateChanges(LayoutChangeset changes,
+			FreeFlowContainer callback);
 
 	/**
 	 * @return Whether the layout animation is currently playing
 	 */
 	public boolean isRunning();
+
+	/**
+	 * Called when a touch down event occurs while the layoutAnimator is
+	 * animating. It gives you the first chance to exit or complete the
+	 * animation since the Container might be about to be scrolled
+	 * 
+	 * @param event The MotionEvent received by the Container
+	 */
+	public void onContainerTouchDown(MotionEvent event);
 
 }
