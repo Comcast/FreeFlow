@@ -16,8 +16,8 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.freeflow.BuildConfig;
@@ -178,7 +178,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	private FreeFlowLayout oldLayout;
 
 	private OnTouchModeChangedListener mOnTouchModeChangedListener;
-
+	
+	
 	public void setOnTouchModeChangedListener(
 			OnTouchModeChangedListener onTouchModeChangedListener) {
 		mOnTouchModeChangedListener = onTouchModeChangedListener;
@@ -216,26 +217,33 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	}
 
+	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		logLifecycleEvent(" onMeasure ");
-
+		
+		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+		int afterWidth = 0;
+		int afterHeight = 0;
+		
+	
 		int beforeWidth = getWidth();
 		int beforeHeight = getHeight();
 
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		int afterWidth = MeasureSpec.getSize(widthMeasureSpec);
-		int afterHeight = MeasureSpec.getSize(heightMeasureSpec);
+		afterWidth = MeasureSpec.getSize(widthMeasureSpec);
+		afterHeight = MeasureSpec.getSize(heightMeasureSpec);
 
+		
 		// TODO: prepareLayout should at some point take sizeChanged as a param
 		// to not
 		// avoidable calculations
-		boolean sizeChanged = (beforeHeight == afterHeight)
-				&& (beforeWidth == afterWidth);
+//		boolean sizeChanged = (beforeHeight == afterHeight)
+//				&& (beforeWidth == afterWidth);
 
 		if (this.mLayout != null) {
 			mLayout.setDimensions(afterWidth, afterHeight);
 		}
+
 
 		if (mLayout == null || mAdapter == null) {
 			logLifecycleEvent("Nothing to do: returning");
@@ -243,9 +251,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		}
 
-		if (markAdapterDirty || markLayoutDirty) {
-			computeLayout(afterWidth, afterHeight);
+		if (widthMode != MeasureSpec.UNSPECIFIED) {
+			markAdapterDirty = false;
+			markLayoutDirty = false;
+			computeLayout(afterWidth, afterHeight);		
 		}
+		
 
 		if (dataSetChanged) {
 			dataSetChanged = false;
@@ -257,6 +268,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			}
 		}
 
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
 
 	protected boolean dataSetChanged = false;
@@ -309,8 +321,8 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 *            margins and padding, this is height of the container.
 	 */
 	protected void computeLayout(int w, int h) {
-		markLayoutDirty = false;
-		markAdapterDirty = false;
+//		markLayoutDirty = false;
+//		markAdapterDirty = false;
 		mLayout.prepareLayout();
 		if (shouldRecalculateScrollWhenComputingLayout) {
 			computeViewPort(mLayout);
