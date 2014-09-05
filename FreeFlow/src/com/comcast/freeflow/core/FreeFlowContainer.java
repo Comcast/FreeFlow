@@ -223,12 +223,12 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		logLifecycleEvent(" onMeasure ");
 		
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		int afterWidth = 0;
 		int afterHeight = 0;
 		
-	
-		int beforeWidth = getWidth();
-		int beforeHeight = getHeight();
+//		int beforeWidth = getWidth();
+//		int beforeHeight = getHeight();
 
 		afterWidth = MeasureSpec.getSize(widthMeasureSpec);
 		afterHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -250,14 +250,13 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			return;
 
 		}
-
-		if (widthMode != MeasureSpec.UNSPECIFIED) {
+		
+		if (widthMode != MeasureSpec.UNSPECIFIED && heightMode != MeasureSpec.UNSPECIFIED) {
 			markAdapterDirty = false;
 			markLayoutDirty = false;
 			computeLayout(afterWidth, afterHeight);		
 		}
 		
-
 		if (dataSetChanged) {
 			dataSetChanged = false;
 			for (FreeFlowItem item : frames.values()) {
