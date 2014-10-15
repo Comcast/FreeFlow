@@ -85,7 +85,6 @@ public class DefaultSectionAdapter implements SectionedAdapter {
 			tv.setBackgroundDrawable(sd);
 			tv.setPadding(20, 0, 0, 0);
 			tv.setGravity(Gravity.CENTER_VERTICAL);
-			
 		}
 		tv.setLayoutParams(new LayoutParams(300, itemHeight));
 		tv.setText("s" + section + " p" + position);

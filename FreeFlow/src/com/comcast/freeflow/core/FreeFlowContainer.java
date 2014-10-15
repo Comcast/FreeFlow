@@ -16,8 +16,8 @@
 package com.comcast.freeflow.core;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.freeflow.BuildConfig;
@@ -179,7 +179,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	private OnTouchModeChangedListener mOnTouchModeChangedListener;
 	
-	
 	public void setOnTouchModeChangedListener(
 			OnTouchModeChangedListener onTouchModeChangedListener) {
 		mOnTouchModeChangedListener = onTouchModeChangedListener;
@@ -217,7 +216,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 	}
 
-	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		logLifecycleEvent(" onMeasure ");
@@ -237,13 +235,10 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		// TODO: prepareLayout should at some point take sizeChanged as a param
 		// to not
 		// avoidable calculations
-//		boolean sizeChanged = (beforeHeight == afterHeight)
-//				&& (beforeWidth == afterWidth);
 
 		if (this.mLayout != null) {
 			mLayout.setDimensions(afterWidth, afterHeight);
 		}
-
 
 		if (mLayout == null || mAdapter == null) {
 			logLifecycleEvent("Nothing to do: returning");
@@ -256,7 +251,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			markLayoutDirty = false;
 			computeLayout(afterWidth, afterHeight);		
 		}
-		
+	
 		if (dataSetChanged) {
 			dataSetChanged = false;
 			for (FreeFlowItem item : frames.values()) {
@@ -320,8 +315,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 *            margins and padding, this is height of the container.
 	 */
 	protected void computeLayout(int w, int h) {
-//		markLayoutDirty = false;
-//		markAdapterDirty = false;
 		mLayout.prepareLayout();
 		if (shouldRecalculateScrollWhenComputingLayout) {
 			computeViewPort(mLayout);
