@@ -178,7 +178,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	private FreeFlowLayout oldLayout;
 
 	private OnTouchModeChangedListener mOnTouchModeChangedListener;
-	
+
 	public void setOnTouchModeChangedListener(
 			OnTouchModeChangedListener onTouchModeChangedListener) {
 		mOnTouchModeChangedListener = onTouchModeChangedListener;
@@ -251,7 +251,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			markLayoutDirty = false;
 			computeLayout(afterWidth, afterHeight);		
 		}
-	
+
 		if (dataSetChanged) {
 			dataSetChanged = false;
 			for (FreeFlowItem item : frames.values()) {
