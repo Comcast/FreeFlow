@@ -1675,6 +1675,14 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				int position, long id, boolean checked);
 	}
 
+	@Override
+	public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+		super.setOnItemLongClickListener(listener);
+		if (mCheckStates==null) {
+			mCheckStates = new SimpleArrayMap<IndexPath, Boolean>(); 
+		}
+	}
+	
 	public void setItemChecked(int sectionIndex, int positionInSection,
 			boolean value) {
 		if (mChoiceMode == CHOICE_MODE_NONE) {
