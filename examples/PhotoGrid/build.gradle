@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.9.+'
+    classpath 'com.android.tools.build:gradle:0.14.4'
   }
 }
 
@@ -28,7 +28,7 @@ android{
 
 android {
   compileSdkVersion 19
-  buildToolsVersion '19.0.3'
+  buildToolsVersion '19.1.0'
 
   lintOptions {
     abortOnError false
