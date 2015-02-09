@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.freeflow.BuildConfig;
+//import org.freeflow.BuildConfig;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -1950,9 +1950,9 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 	 * @param msg
 	 */
 	private void logLifecycleEvent(String msg) {
-		if (logDebugEvents && BuildConfig.DEBUG) {
-			Log.d("ContainerLifecycleEvent", msg);
-		}
+		// if (logDebugEvents && BuildConfig.DEBUG) {
+		// 	Log.d("ContainerLifecycleEvent", msg);
+		// }
 	}
 
 }

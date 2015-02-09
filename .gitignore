@@ -24,7 +24,7 @@ gen
 # Gradle files
 .gradle/
 build/
-
+*/reports/*
 # Local configuration file (sdk path, etc)
 local.properties
 

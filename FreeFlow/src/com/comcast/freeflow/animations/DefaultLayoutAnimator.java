@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.freeflow.BuildConfig;
+//import org.freeflow.BuildConfig;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -316,9 +316,9 @@ public class DefaultLayoutAnimator implements FreeFlowLayoutAnimator {
 					// v.setAlpha((1 - alpha) * animation.getAnimatedFraction()
 					// + alpha);
 				} catch (NullPointerException e) {
-					if(BuildConfig.DEBUG){
-						Log.e(TAG, "Nullpointer exception");
-					}
+					// if(BuildConfig.DEBUG){
+					// 	Log.e(TAG, "Nullpointer exception");
+					// }
 					e.printStackTrace();
 					animation.cancel();
 				}
