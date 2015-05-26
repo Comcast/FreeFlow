@@ -1261,7 +1261,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 				viewPortY = (int) (mScrollableHeight + overflingDistance);
 			}
 
-			if (mEdgeEffectsEnabled) {
+			if (mEdgeEffectsEnabled && overflingDistance > 0) {
 				if (viewPortX <= 0) {
 					mLeftEdge.onPull(viewPortX / (-overflingDistance));
 				} else if (viewPortX >= mScrollableWidth) {
