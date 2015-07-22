@@ -1025,7 +1025,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 
 		if (mTouchMode == TOUCH_MODE_SCROLL) {
 			moveViewportBy(event.getX() - deltaX, event.getY() - deltaY, false);
-			invokeOnItemScrollListeners();
 			deltaX = event.getX();
 			deltaY = event.getY();
 		}
@@ -1300,7 +1299,7 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 		}
 
 		invalidate();
-
+		invokeOnItemScrollListeners();
 	}
 
 	protected boolean mEdgeEffectsEnabled = true;
@@ -1883,7 +1882,6 @@ public class FreeFlowContainer extends AbsLayoutContainer {
 			post(flingRunnable);
 		} else {
 			moveViewportBy((viewPortX - newVPX), (viewPortY - newVPY), false);
-			invokeOnItemScrollListeners();
 		}
 	}
 
