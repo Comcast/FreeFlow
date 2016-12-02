@@ -1,5 +1,8 @@
-== FreeFlow is no longer under development ==
-We are no longer working on FreeFlow and have moved to RecyclerViews for similar functionality. Thanks for all your support and interest.
+FreeFlow is no longer under development
+=======================================
+
+We are no longer working on FreeFlow and have moved to RecyclerViews for similar functionality. 
+Thanks for all your support and interest
 -Arpit Mathur
 
 
